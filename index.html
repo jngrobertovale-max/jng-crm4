@@ -4461,6 +4461,269 @@ setTimeout(iniciarAutoRefreshCRM, 500);
   }
 })();
 
+
+
+/* ===== PATCH FINAL ESTÁVEL - Config limpa sem travamento ===== */
+(function(){
+  const MAX_STATUS_RENDER = 300;
+
+  function abaStatusAberta(){
+    const painel = document.getElementById("painelStatus");
+    return !!(painel && !painel.classList.contains("hidden"));
+  }
+
+  window.carregarLiberacoes = async function(){
+    if(!crmConfigCompleta()){
+      dadosOriginais = [];
+      return;
+    }
+
+    const url = getUrlLiberacoes();
+    if(!url){
+      dadosOriginais = [];
+      return;
+    }
+
+    const response = await fetch(url + "&t=" + Date.now(), {cache:"no-store"});
+    const text = await response.text();
+    const inicio = text.indexOf("{");
+    const fim = text.lastIndexOf("}");
+
+    if(inicio < 0 || fim < 0){
+      throw new Error("Resposta inválida da planilha");
+    }
+
+    const json = JSON.parse(text.substring(inicio, fim + 1));
+    dadosOriginais = Array.isArray(json?.table?.rows) ? json.table.rows : [];
+  };
+
+  window.carregar = async function(){
+    if(!crmConfigCompleta()){
+      dadosOriginais = [];
+      mostrarPrimeiroAcessoConfig();
+      if(typeof iniciarAutoRefreshCRM === "function") iniciarAutoRefreshCRM();
+      return;
+    }
+
+    await carregarLiberacoes();
+
+    if(typeof popularFiltros === "function") popularFiltros();
+    if(typeof popularPeriodoPerformance === "function") popularPeriodoPerformance();
+    if(typeof popularSemanasPerformance === "function") popularSemanasPerformance();
+    if(typeof popularDiasPerformance === "function") popularDiasPerformance();
+    if(typeof popularFiltroHistoricoCliente === "function") popularFiltroHistoricoCliente();
+    if(typeof carregarFiltrosRisco === "function") carregarFiltrosRisco();
+    if(typeof aplicarFiltros === "function") aplicarFiltros();
+    if(typeof gerarHistoricoCliente === "function") gerarHistoricoCliente();
+    if(typeof gerarClientesEmRisco === "function") gerarClientesEmRisco();
+    if(typeof gerarPainelMetas === "function") gerarPainelMetas();
+    if(typeof gerarPerformance === "function") gerarPerformance();
+    if(typeof inicializarAtividades === "function") inicializarAtividades();
+
+    if(abaStatusAberta()){
+      statusFiltrosPopulados = false;
+      if(typeof popularFiltrosStatus === "function") popularFiltrosStatus(true);
+      if(typeof renderStatusPedidos === "function") renderStatusPedidos();
+    }
+
+    if(typeof iniciarAutoRefreshCRM === "function") iniciarAutoRefreshCRM();
+  };
+
+  window.salvarConfigCRM = async function(){
+    const sheetUrl = document.getElementById("configSheetUrl")?.value.trim() || "";
+    const sheetIdManual = document.getElementById("configSheetId")?.value.trim() || "";
+    const sheetId = sheetIdManual || extrairSheetId(sheetUrl);
+    const gid = document.getElementById("configGid")?.value.trim() || "";
+    const colunaCliente = document.getElementById("configColCliente")?.value.trim().toUpperCase() || "";
+    const colunaData = document.getElementById("configColData")?.value.trim().toUpperCase() || "";
+    const colunaValor = document.getElementById("configColValor")?.value.trim().toUpperCase() || "";
+
+    if(!sheetId || !gid || !colunaCliente || !colunaData || !colunaValor){
+      alert("Preencha URL/SHEET ID, GID e as colunas obrigatórias para liberar o CRM.");
+      return;
+    }
+
+    configCRM = {sheetUrl, sheetId, gid, colunaCliente, colunaData, colunaValor};
+    localStorage.setItem("jng_crm_config", JSON.stringify(configCRM));
+    preencherTelaConfig();
+
+    const aviso = document.getElementById("primeiroAcessoConfigAviso");
+    if(aviso) aviso.remove();
+
+    try{
+      await carregar();
+      abrirDashboard();
+      alert("Configuração salva. O CRM foi atualizado com a nova base.");
+    }catch(erro){
+      console.error("Erro ao carregar a planilha configurada:", erro);
+      alert("Configuração salva, mas não foi possível carregar a planilha. Confira se ela está compartilhada/publicada e se o GID está correto.");
+    }
+  };
+
+  window.atualizarTelaComDadosAtuaisCRM = function(){
+    try{
+      if(typeof popularFiltros === "function") popularFiltros();
+      if(typeof popularPeriodoPerformance === "function") popularPeriodoPerformance();
+      if(typeof popularSemanasPerformance === "function") popularSemanasPerformance();
+      if(typeof popularDiasPerformance === "function") popularDiasPerformance();
+      if(typeof popularFiltroHistoricoCliente === "function") popularFiltroHistoricoCliente();
+      if(typeof aplicarFiltros === "function") aplicarFiltros();
+      if(typeof gerarHistoricoCliente === "function") gerarHistoricoCliente();
+      if(typeof gerarClientesEmRisco === "function") gerarClientesEmRisco();
+      if(typeof gerarPainelMetas === "function") gerarPainelMetas();
+      if(typeof gerarPerformance === "function") gerarPerformance();
+
+      if(abaStatusAberta()){
+        statusFiltrosPopulados = false;
+        popularFiltrosStatus(true);
+        renderStatusPedidos();
+      }
+    }catch(erro){
+      console.error("Erro ao atualizar tela:", erro);
+    }
+  };
+
+  window.obterListaStatusPedidos = function(){
+    if(!Array.isArray(dadosOriginais)) return [];
+    return dadosOriginais
+      .map(getStatusPedidoRow)
+      .filter(item => item.integrador || item.clienteFinal || item.numeroPedido || item.statusManual || item.statusLogistica);
+  };
+
+  window.popularFiltrosStatus = function(forcar=false){
+    const selectStatus = document.getElementById("statusFiltroStatus");
+    const selectIntegrador = document.getElementById("statusFiltroIntegrador");
+    if(!selectStatus || !selectIntegrador) return;
+    if(statusFiltrosPopulados && !forcar) return;
+
+    const statusAtual = selectStatus.value || "Todos";
+    const integradorAtual = selectIntegrador.value || "Todos";
+    const lista = obterListaStatusPedidos();
+    const statusSet = new Set();
+    const integradorSet = new Set();
+
+    for(const item of lista){
+      if(item.statusManual) statusSet.add(item.statusManual);
+      if(item.integrador) integradorSet.add(item.integrador);
+    }
+
+    selectStatus.innerHTML = "";
+    ["Todos", "Aguardando pagamento"].forEach(v=>{
+      const opt = document.createElement("option");
+      opt.value = v;
+      opt.textContent = v;
+      selectStatus.appendChild(opt);
+    });
+
+    [...statusSet].sort((a,b)=>a.localeCompare(b,"pt-BR")).forEach(st=>{
+      if(normalizar(st) === normalizar("Aguardando pagamento")) return;
+      const opt = document.createElement("option");
+      opt.value = st;
+      opt.textContent = st;
+      selectStatus.appendChild(opt);
+    });
+
+    selectIntegrador.innerHTML = `<option value="Todos">Todos</option>`;
+    [...integradorSet].sort((a,b)=>a.localeCompare(b,"pt-BR")).forEach(nome=>{
+      const opt = document.createElement("option");
+      opt.value = nome;
+      opt.textContent = nome;
+      selectIntegrador.appendChild(opt);
+    });
+
+    if([...selectStatus.options].some(o=>o.value === statusAtual)) selectStatus.value = statusAtual;
+    if([...selectIntegrador.options].some(o=>o.value === integradorAtual)) selectIntegrador.value = integradorAtual;
+    statusFiltrosPopulados = true;
+  };
+
+  window.renderStatusPedidos = function(){
+    const tabela = document.getElementById("statusPedidosTabela");
+    if(!tabela) return;
+
+    popularFiltrosStatus();
+
+    const busca = normalizar(document.getElementById("statusBusca")?.value || "");
+    const statusFiltro = document.getElementById("statusFiltroStatus")?.value || "Todos";
+    const integradorFiltro = document.getElementById("statusFiltroIntegrador")?.value || "Todos";
+    const todos = obterListaStatusPedidos();
+
+    let lista = todos.filter(item=>{
+      const textoBusca = normalizar(`${item.integrador} ${item.clienteFinal} ${item.numeroPedido} ${item.statusManual} ${item.statusLogistica}`);
+      if(busca && !textoBusca.includes(busca)) return false;
+      if(statusFiltro !== "Todos"){
+        const stNorm = normalizar(item.statusManual);
+        const filtroNorm = normalizar(statusFiltro);
+        if(filtroNorm === normalizar("Aguardando pagamento")){
+          if(!stNorm.includes(filtroNorm)) return false;
+        }else if(stNorm !== filtroNorm){
+          return false;
+        }
+      }
+      if(integradorFiltro !== "Todos" && item.integrador !== integradorFiltro) return false;
+      return true;
+    });
+
+    if(window.statusSort && window.statusSort.campo){
+      const {campo, dir} = window.statusSort;
+      lista.sort((a,b)=> dir * String(a[campo] || "").localeCompare(String(b[campo] || ""), "pt-BR", {numeric:true}));
+    }
+
+    const statusDiferentes = new Set(todos.map(i=>i.statusManual).filter(Boolean));
+    const integradores = new Set(todos.map(i=>i.integrador).filter(Boolean));
+    const semStatus = todos.filter(i=>normalizar(i.statusManual).includes("sem status")).length;
+    const aguardando = todos.filter(i=>normalizar(i.statusManual).includes("aguardando pagamento")).length;
+
+    const setText = (id, valor) => { const el = document.getElementById(id); if(el) el.innerText = valor; };
+    setText("statusTotalPedidos", lista.length);
+    setText("statusQtdStatus", statusDiferentes.size);
+    setText("statusSemStatus", semStatus);
+    setText("statusQtdIntegradores", integradores.size);
+    setText("statusAguardandoPagamento", aguardando);
+
+    tabela.innerHTML = "";
+    if(lista.length === 0){
+      tabela.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-gray-400">Nenhum pedido encontrado.</td></tr>`;
+      return;
+    }
+
+    const renderLista = lista.slice(0, MAX_STATUS_RENDER);
+    if(lista.length > MAX_STATUS_RENDER){
+      tabela.innerHTML += `<tr><td colspan="5" class="py-4 text-center text-orange-600 font-bold bg-orange-50 rounded-xl">Exibindo ${MAX_STATUS_RENDER} de ${lista.length} pedidos. Use os filtros para refinar a busca.</td></tr>`;
+    }
+
+    tabela.innerHTML += renderLista.map(item=>`
+      <tr class="border-b table-hover">
+        <td class="py-4 font-semibold">${escapeHTML(item.integrador || "-")}</td>
+        <td class="py-4">${escapeHTML(item.clienteFinal || "-")}</td>
+        <td class="py-4 font-bold text-blue-600">${escapeHTML(item.numeroPedido || "-")}</td>
+        <td class="py-4"><span class="${getStatusClass(item.statusManual)} px-3 py-1 rounded-full font-bold text-xs">${escapeHTML(item.statusManual || "-")}</span></td>
+        <td class="py-4"><span class="bg-slate-100 text-slate-700 px-3 py-1 rounded-full font-bold text-xs">${escapeHTML(item.statusLogistica || "-")}</span></td>
+      </tr>
+    `).join("");
+  };
+
+  window.abrirStatus = function(){
+    if(!crmConfigCompleta()){
+      mostrarPrimeiroAcessoConfig();
+      return;
+    }
+    const ids = ["dashboardCRM","painelMetas","painelPerformance","painelConfig","painelRisco","painelAtividades","painelStatus"];
+    ids.forEach(id => { const el = document.getElementById(id); if(el) el.classList.add("hidden"); });
+    const painel = document.getElementById("painelStatus");
+    if(painel) painel.classList.remove("hidden");
+    ["navCRM","navMetas","navPerf","navConfig","navRisco","navAtiv","navStatus"].forEach(id=>{ const el = document.getElementById(id); if(el) el.classList.remove("active"); });
+    const nav = document.getElementById("navStatus");
+    if(nav) nav.classList.add("active");
+
+    preencherTelaConfigStatusPedidos();
+    if(statusConfigFoiSalva()) mostrarConteudoStatus();
+    else editarConfigStatusPedidos();
+
+    statusFiltrosPopulados = false;
+    popularFiltrosStatus(true);
+    renderStatusPedidos();
+  };
+})();
 </script>
 
 </body>
