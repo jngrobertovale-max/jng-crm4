@@ -1,0 +1,4467 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JNG CRM</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    body{background:#f4f7fb;font-family:Arial,sans-serif;}
+    .card{background:white;border-radius:20px;padding:24px;box-shadow:0 4px 18px rgba(0,0,0,0.06);}
+    .table-hover:hover{background:#f3f6ff;transition:0.2s;}
+    .sidebar{position:fixed;left:0;top:0;width:250px;height:100vh;background:linear-gradient(180deg,#0f172a 0%,#111827 55%,#020617 100%);display:flex;flex-direction:column;padding:20px 14px;gap:12px;z-index:999;box-shadow:12px 0 32px rgba(15,23,42,.18);transition:width .25s ease,padding .25s ease;}
+    .sidebar.collapsed{width:88px;padding:20px 12px;align-items:center;}
+    .sidebar-brand{width:100%;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.06);border-radius:22px;padding:16px 14px;color:white;display:flex;align-items:center;gap:12px;margin-bottom:8px;overflow:hidden;}
+    .brand-icon{width:42px;height:42px;border-radius:16px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;flex:none;box-shadow:0 10px 24px rgba(37,99,235,.28);}
+    .brand-text{line-height:1.15;white-space:nowrap;transition:opacity .2s ease;}
+    .brand-text strong{display:block;font-size:13px;letter-spacing:.06em;}
+    .brand-text span{font-size:11px;color:#cbd5e1;}
+    .sidebar.collapsed .brand-text{opacity:0;width:0;overflow:hidden;}
+    .sidebar-toggle{width:100%;height:36px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.08);color:#e5e7eb;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:.2s;}
+    .sidebar-toggle:hover{background:rgba(255,255,255,.14);transform:translateY(-1px);}
+    .sidebar-nav{display:flex;flex-direction:column;gap:10px;width:100%;margin-top:8px;}
+    .sidebar-main-nav{flex:1;}
+    .sidebar-config-area{width:100%;margin-top:auto;padding-top:12px;border-top:1px solid rgba(255,255,255,.08);}
+    .side-btn{width:100%;height:52px;border-radius:17px;border:1px solid transparent;color:#cbd5e1;font-weight:800;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:12px;padding:0 14px;background:transparent;transition:.2s;position:relative;overflow:hidden;}
+    .side-btn:hover{background:rgba(255,255,255,.08);color:white;transform:translateX(2px);}
+    .side-btn.active{background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;box-shadow:0 12px 28px rgba(79,70,229,.34);}
+    .side-ico{font-size:20px;width:26px;text-align:center;flex:none;}
+    .side-label{white-space:nowrap;transition:opacity .2s ease;}
+    .sidebar.collapsed .side-btn{width:58px;padding:0;justify-content:center;}
+    .sidebar.collapsed .side-label{opacity:0;width:0;overflow:hidden;}
+    .sidebar.collapsed .sidebar-toggle .toggle-text,.sidebar.collapsed .sidebar-toggle .toggle-menu-icon{display:none;}
+    .content{margin-left:280px;transition:margin-left .25s ease;}
+    body.sidebar-collapsed .content{margin-left:112px;}
+    .editable-title{cursor:text;border-radius:12px;padding:2px 8px;margin-left:-8px;transition:.2s;}
+    .editable-title:hover,.editable-title:focus{background:#eef2ff;outline:none;box-shadow:0 0 0 2px rgba(37,99,235,.12);}
+    .seller-name-input{border:none;background:transparent;color:#6b7280;border-radius:10px;padding:2px 6px;min-width:160px;}
+    .seller-name-input:hover,.seller-name-input:focus{background:#eef2ff;outline:none;box-shadow:0 0 0 2px rgba(37,99,235,.12);}
+    .meta-card{border-left:6px solid #2563eb;}
+    input,select,textarea{outline:none;}
+    .progress-bg{background:#e5e7eb;border-radius:999px;height:12px;overflow:hidden;}
+    .progress-bar{height:12px;border-radius:999px;}
+    .filter-panel{background:white;border-radius:24px;padding:18px;box-shadow:0 4px 18px rgba(0,0,0,0.06);border:1px solid #e5e7eb;}
+    .filter-field{display:flex;flex-direction:column;gap:6px;}
+    .filter-field label{font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;}
+    .alert-card{border-left:6px solid #f59e0b;}
+    .alert-danger{border-left-color:#ef4444;background:#fff7f7;}
+    .alert-success{border-left-color:#22c55e;background:#f0fdf4;}
+    .alert-info{border-left-color:#3b82f6;background:#eff6ff;}
+    .action-card{border:1px solid #e5e7eb;border-radius:18px;padding:18px;background:#ffffff;}
+
+    .version-badge{background:#111827;color:white;border-radius:16px;padding:10px 16px;box-shadow:0 10px 30px rgba(0,0,0,.18);font-size:12px;line-height:1.35;border:1px solid rgba(255,255,255,.12);cursor:pointer;transition:.2s;text-align:left;min-width:150px;}
+    .version-badge:hover{transform:translateY(-2px);box-shadow:0 14px 35px rgba(0,0,0,.28);}
+    .version-badge strong{display:block;font-size:13px;color:#ffffff;}
+    .version-badge span{color:#cbd5e1;}
+    .version-modal{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:2000;display:none;align-items:center;justify-content:center;padding:24px;}
+    .version-modal.open{display:flex;}
+    .version-box{background:white;border-radius:24px;max-width:560px;width:100%;padding:28px;box-shadow:0 25px 80px rgba(0,0,0,.30);}
+    .version-item{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #eef2f7;color:#374151;}
+    .version-item:last-child{border-bottom:none;}
+    .version-dot{width:22px;height:22px;border-radius:999px;background:#ede9fe;color:#7c3aed;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex:none;}
+    .auto-refresh-box{
+      position:fixed;
+      right:28px;
+      top:112px;
+      z-index:5000;
+      color:#0f172a;
+      background:rgba(255,255,255,.94);
+      border:1px solid rgba(148,163,184,.32);
+      border-radius:999px;
+      padding:8px 14px 8px 8px;
+      box-shadow:0 14px 34px rgba(15,23,42,.14);
+      backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px);
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-height:50px;
+      overflow:hidden;
+      opacity:.92;
+      transition:opacity .2s ease,box-shadow .2s ease,transform .2s ease;
+    }
+    .auto-refresh-box:hover,
+    .auto-refresh-box:focus-within{
+      opacity:1;
+      box-shadow:0 20px 48px rgba(15,23,42,.20);
+      transform:translateY(-1px);
+    }
+    .auto-refresh-icon{
+      width:34px;
+      height:34px;
+      border-radius:999px;
+      background:linear-gradient(135deg,#2563eb,#7c3aed);
+      color:white;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:17px;
+      font-weight:900;
+      flex:none;
+      box-shadow:0 10px 22px rgba(37,99,235,.28);
+    }
+    .auto-refresh-dot{
+      width:9px;
+      height:9px;
+      border-radius:999px;
+      background:#22c55e;
+      box-shadow:0 0 0 5px rgba(34,197,94,.13);
+      flex:none;
+    }
+    .auto-refresh-dot.paused{background:#94a3b8;box-shadow:0 0 0 5px rgba(148,163,184,.14);}
+    .auto-refresh-dot.loading{background:#f59e0b;box-shadow:0 0 0 5px rgba(245,158,11,.16);animation:pulseRefresh 1s infinite;}
+    @keyframes pulseRefresh{0%,100%{transform:scale(1);}50%{transform:scale(1.22);}}
+    .auto-refresh-text{
+      font-size:12px;
+      color:#334155;
+      font-weight:900;
+      line-height:1.25;
+      white-space:nowrap;
+    }
+    @media(max-width:760px){
+      .auto-refresh-box{top:84px;right:12px;max-width:calc(100vw - 24px);}
+      .auto-refresh-text{font-size:11px;}
+    }
+
+
+    @media print{.sidebar,.filter-panel button,#btnExportarPdfPerf{display:none!important}.content{margin-left:0}.card{box-shadow:none;border:1px solid #e5e7eb}}
+  </style>
+</head>
+
+<body>
+
+<div id="sidebar" class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon" style="background:rgba(255,255,255,.10);box-shadow:none;">👤</div>
+    <div class="brand-text">
+      <strong id="sidebarUserName">Vendedor</strong>
+      <span>CRM COMERCIAL • v1.9.3</span>
+    </div>
+  </div>
+
+  <button id="btnToggleSidebar" onclick="toggleSidebar()" class="sidebar-toggle" title="Recolher/expandir menu">
+    <span class="toggle-menu-icon">☰</span><span class="toggle-text">Menu</span><span id="toggleArrow">◀</span>
+  </button>
+
+  <div class="sidebar-nav sidebar-main-nav">
+    <button id="navCRM" onclick="abrirDashboard()" class="side-btn active"><span class="side-ico">📊</span><span class="side-label">CRM</span></button>
+    <button id="navMetas" onclick="abrirMetas()" class="side-btn"><span class="side-ico">🎯</span><span class="side-label">Metas</span></button>
+    <button id="navPerf" onclick="abrirPerformance()" class="side-btn"><span class="side-ico">📈</span><span class="side-label">Performance</span></button>
+    <button id="navRisco" onclick="abrirRisco()" class="side-btn"><span class="side-ico">🚨</span><span class="side-label">Risco</span></button>
+    <button id="navAtiv" onclick="abrirAtividades()" class="side-btn"><span class="side-ico">📋</span><span class="side-label">Atividades</span></button>
+    <button id="navStatus" onclick="abrirStatus()" class="side-btn"><span class="side-ico">📦</span><span class="side-label">Status</span></button>
+  </div>
+
+  <div class="sidebar-config-area">
+    <button id="navConfig" onclick="abrirConfig()" class="side-btn"><span class="side-ico">⚙️</span><span class="side-label">Config</span></button>
+  </div>
+</div>
+
+<div id="modalVersao" class="version-modal">
+  <div class="version-box">
+    <div class="flex justify-between items-start gap-4 mb-5">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-800">Novidades da versão</h2>
+        <p class="text-gray-500 mt-1">JNG CRM • v1.9.3 • Build 2026.06.15</p>
+      </div>
+      <button onclick="fecharModalVersao()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl font-bold">X</button>
+    </div>
+
+    <div class="version-item">
+      <div class="version-dot">✓</div>
+      <div><strong>Aba ATIV. adicionada</strong><br><span class="text-sm text-gray-500">Agora é possível registrar atividades diárias, histórico, cliente, tipo e feedback.</span></div>
+    </div>
+
+    <div class="version-item">
+      <div class="version-dot">✓</div>
+      <div><strong>Filtros de atividades</strong><br><span class="text-sm text-gray-500">Filtro por data, cliente e tipo: Orçamento, Pedido, Ligação, Reunião, Follow-up e Outros.</span></div>
+    </div>
+    <div class="version-item">
+      <div class="version-dot">✓</div>
+      <div><strong>Status Sem Volta</strong><br><span class="text-sm text-gray-500">Clientes há 120+ dias sem comprar são classificados como Sem Volta para facilitar a limpeza da carteira.</span></div>
+    </div>
+    <div class="version-item">
+      <div class="version-dot">✓</div>
+      <div><strong>Modal de novidades</strong><br><span class="text-sm text-gray-500">Ao clicar na versão, você vê as principais alterações da atualização.</span></div>
+    </div>
+    <div class="version-item">
+      <div class="version-dot">✓</div>
+      <div><strong>Metas individuais por vendedor</strong><br><span class="text-sm text-gray-500">Cada usuário pode definir sua própria meta no navegador.</span></div>
+    </div>
+    <div class="version-item">
+      <div class="version-dot">✓</div>
+      <div><strong>Configuração simplificada</strong><br><span class="text-sm text-gray-500">A configuração não exige mais coluna de Pedido.</span></div>
+    </div>
+  </div>
+</div>
+
+
+<div class="content p-8">
+
+
+
+<div id="dashboardCRM">
+  <div id="autoRefreshBox" class="auto-refresh-box" title="Atualização automática da aba CRM a cada 15 segundos">
+    <span class="auto-refresh-icon">↻</span>
+    <span id="autoRefreshDot" class="auto-refresh-dot"></span>
+    <span id="autoRefreshStatus" class="auto-refresh-text">Atualização automática • 15s</span>
+  </div>
+
+  <div class="flex justify-between items-center mb-10">
+    <div>
+      <h1 id="tituloCRM" contenteditable="true" onblur="salvarIdentidadeCRM()" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" class="text-4xl font-bold text-gray-800 editable-title" title="Clique para editar o nome do CRM">JNG CRM</h1>
+      <p class="text-gray-500 mt-2">Dashboard Comercial <span id="separadorVendedor" class="hidden">•</span> <input id="nomeVendedorCRM" oninput="salvarIdentidadeCRM()" class="seller-name-input" placeholder="Nome do vendedor" title="Digite o nome do vendedor"></p>
+    </div>
+    <button onclick="abrirModalVersao()" class="version-badge" title="Ver novidades da versão">
+      <strong>📋 Versão 1.9.3</strong>
+      <span>Build 2026.06.15</span>
+    </button>
+  </div>
+
+  <div class="flex gap-4 mb-8 flex-wrap">
+    <select id="filtroDia" class="border border-gray-300 rounded-xl px-4 py-3 bg-white">
+      <option value="Todos">Todos os Dias</option>
+    </select>
+
+    <select id="filtroAno" class="border border-gray-300 rounded-xl px-4 py-3 bg-white">
+      <option value="Todos">Todos os Anos</option>
+    </select>
+
+    <select id="filtroMes" class="border border-gray-300 rounded-xl px-4 py-3 bg-white">
+      <option value="Todos">Todos os Meses</option>
+      <option value="0">Janeiro</option>
+      <option value="1">Fevereiro</option>
+      <option value="2">Março</option>
+      <option value="3">Abril</option>
+      <option value="4">Maio</option>
+      <option value="5">Junho</option>
+      <option value="6">Julho</option>
+      <option value="7">Agosto</option>
+      <option value="8">Setembro</option>
+      <option value="9">Outubro</option>
+      <option value="10">Novembro</option>
+      <option value="11">Dezembro</option>
+    </select>
+
+    <button id="btnClientesPerdidos" class="bg-red-500 hover:bg-red-600 text-white px-5 py-3 rounded-xl font-semibold shadow">
+      Clientes Perdidos
+    </button>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+    <div class="card">
+      <p class="text-gray-500 mb-2">Faturamento</p>
+      <h2 id="faturamento" class="text-3xl font-bold text-green-600">R$ 0</h2>
+    </div>
+
+    <div class="card">
+      <p class="text-gray-500 mb-2">Pedidos</p>
+      <h2 id="pedidos" class="text-3xl font-bold text-blue-600">0</h2>
+    </div>
+
+    <div class="card">
+      <p class="text-gray-500 mb-2">Ticket Médio</p>
+      <h2 id="ticket" class="text-3xl font-bold text-orange-500">R$ 0</h2>
+    </div>
+
+    <div class="card">
+      <p class="text-gray-500 mb-2">Clientes Únicos</p>
+      <h2 id="clientes" class="text-3xl font-bold text-purple-600">0</h2>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+    <div class="card">
+      <h2 class="text-xl font-bold text-gray-700 mb-6">Faturamento Mensal</h2>
+      <div style="height:450px;"><canvas id="mensalChart"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h2 class="text-xl font-bold text-gray-700 mb-6">Top Integradores</h2>
+      <div style="height:450px;"><canvas id="rankingChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card mb-10">
+    <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
+      <h2 class="text-2xl font-bold text-gray-700">Histórico por Cliente</h2>
+
+      <div class="flex gap-3 flex-wrap">
+        <select id="filtroClienteHistorico" onchange="gerarHistoricoCliente()" class="border border-gray-300 rounded-xl px-4 py-3 bg-white min-w-[280px]">
+          <option value="">Selecione um cliente</option>
+        </select>
+
+        <select id="filtroAnoHistorico" onchange="gerarHistoricoCliente()" class="border border-gray-300 rounded-xl px-4 py-3 bg-white">
+          <option value="Todos">Todos os Anos</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+      <div class="bg-gray-50 rounded-2xl p-5">
+        <p class="text-gray-500 mb-2">Total Comprado</p>
+        <h2 id="histTotalComprado" class="text-2xl font-bold text-green-600">R$ 0</h2>
+      </div>
+
+      <div class="bg-gray-50 rounded-2xl p-5">
+        <p class="text-gray-500 mb-2">Pedidos</p>
+        <h2 id="histPedidos" class="text-2xl font-bold text-blue-600">0</h2>
+      </div>
+
+      <div class="bg-gray-50 rounded-2xl p-5">
+        <p class="text-gray-500 mb-2">Ticket Médio</p>
+        <h2 id="histTicket" class="text-2xl font-bold text-orange-500">R$ 0</h2>
+      </div>
+
+      <div class="bg-gray-50 rounded-2xl p-5">
+        <p class="text-gray-500 mb-2">Melhor Mês</p>
+        <h2 id="histMelhorMes" class="text-2xl font-bold text-purple-600">-</h2>
+      </div>
+    </div>
+
+    <div>
+      <h3 class="font-bold text-gray-700 mb-4">Compras por Mês</h3>
+      <div style="height:360px;">
+        <canvas id="historicoClienteChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="card">
+    <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
+      <h2 class="text-2xl font-bold text-gray-700">Ranking Integradores</h2>
+      <input type="text" id="pesquisa" placeholder="Pesquisar integrador..." class="border border-gray-300 rounded-xl px-4 py-2 w-72">
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b text-left text-gray-500">
+            <th class="pb-4">#</th>
+            <th class="pb-4">Integrador</th>
+            <th class="pb-4">Pedidos</th>
+            <th class="pb-4">Total Comprado</th>
+          </tr>
+        </thead>
+        <tbody id="rankingTabela"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="painelRisco" class="hidden">
+  <div class="flex justify-between items-center mb-10 flex-wrap gap-4">
+    <div>
+      <h1 class="text-4xl font-bold text-gray-800">Clientes em Risco</h1>
+      <p class="text-gray-500 mt-2">Acompanhamento de clientes com histórico relevante sem compra recente</p>
+    </div>
+  </div>
+
+  <div class="card mb-10">
+    <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-700">🚨 Clientes em Risco</h2>
+        <p class="text-gray-500 mt-1">Clientes com histórico relevante que estão há muitos dias sem comprar.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-3 w-full lg:w-auto items-end">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 mb-1">Buscar cliente</label>
+          <input id="riscoBuscaCliente" type="text" placeholder="Nome do cliente" oninput="salvarFiltrosRisco(); gerarClientesEmRisco();" class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-500 mb-1">Status</label>
+          <select id="riscoFiltroStatus" onchange="salvarFiltrosRisco(); gerarClientesEmRisco();" class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full">
+            <option value="Todos">Todos</option>
+            <option value="Atencao">Atenção</option>
+            <option value="Risco Alto">Risco Alto</option>
+            <option value="Sem Volta">Sem Volta</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-500 mb-1">Mín. pedidos</label>
+          <input id="riscoMinPedidos" type="number" min="1" value="2" onchange="salvarFiltrosRisco(); gerarClientesEmRisco();" class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-500 mb-1">Dias sem compra</label>
+          <input id="riscoDiasSemCompra" type="number" min="1" value="30" onchange="salvarFiltrosRisco(); gerarClientesEmRisco();" class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-500 mb-1">Histórico mínimo</label>
+          <input id="riscoTotalMinimo" type="text" placeholder="R$ 0" onblur="formatarCampoMoeda(this); salvarFiltrosRisco(); gerarClientesEmRisco();" oninput="salvarFiltrosRisco(); gerarClientesEmRisco();" class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full" />
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+      <div class="bg-red-50 rounded-2xl p-5 border border-red-100">
+        <p class="text-gray-500 mb-2">Clientes em Risco</p>
+        <h2 id="riscoTotalClientes" class="text-3xl font-bold text-red-600">0</h2>
+      </div>
+
+      <div class="bg-orange-50 rounded-2xl p-5 border border-orange-100">
+        <p class="text-gray-500 mb-2">Maior tempo sem compra</p>
+        <h2 id="riscoMaiorDias" class="text-3xl font-bold text-orange-600">0 dias</h2>
+      </div>
+
+      <div class="bg-purple-50 rounded-2xl p-5 border border-purple-100">
+        <p class="text-gray-500 mb-2">Valor histórico desses clientes</p>
+        <h2 id="riscoValorHistorico" class="text-3xl font-bold text-purple-600">R$ 0</h2>
+      </div>
+
+      <div class="bg-gray-50 rounded-2xl p-5 border border-gray-200">
+        <p class="text-gray-500 mb-2">Clientes sem volta</p>
+        <h2 id="riscoSemVolta" class="text-3xl font-bold text-gray-700">0</h2>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b text-left text-gray-500">
+            <th class="pb-4 cursor-pointer select-none hover:text-blue-600" onclick="ordenarRisco('nome')">Cliente <span id="sortRisco_nome">↕</span></th>
+            <th class="pb-4 cursor-pointer select-none hover:text-blue-600" onclick="ordenarRisco('pedidos')">Pedidos <span id="sortRisco_pedidos">↕</span></th>
+            <th class="pb-4 cursor-pointer select-none hover:text-blue-600" onclick="ordenarRisco('ultimaCompra')">Última Compra <span id="sortRisco_ultimaCompra">↕</span></th>
+            <th class="pb-4 cursor-pointer select-none hover:text-blue-600" onclick="ordenarRisco('diasSemComprar')">Dias Sem Comprar <span id="sortRisco_diasSemComprar">↕</span></th>
+            <th class="pb-4 cursor-pointer select-none hover:text-blue-600" onclick="ordenarRisco('total')">Total Histórico <span id="sortRisco_total">↕</span></th>
+            <th class="pb-4 cursor-pointer select-none hover:text-blue-600" onclick="ordenarRisco('statusTexto')">Status <span id="sortRisco_statusTexto">↕</span></th>
+          </tr>
+        </thead>
+        <tbody id="clientesEmRiscoTabela"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+
+<div id="painelAtividades" class="hidden">
+  <div class="flex justify-between items-center mb-10 flex-wrap gap-4">
+    <div>
+      <h1 class="text-4xl font-bold text-gray-800">Atividades Comerciais</h1>
+      <p class="text-gray-500 mt-2">Registre sua rotina diária e acompanhe o histórico comercial.</p>
+    </div>
+    <button onclick="abrirFormularioAtividade()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-3 rounded-xl font-semibold shadow">Preencher Atividade</button>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+    <div id="formularioAtividadeCard" class="card lg:col-span-1 hidden">
+      <div class="flex justify-between items-center mb-5 gap-3">
+        <h2 id="atividadeTituloFormulario" class="text-2xl font-bold text-gray-700">Registrar Atividade</h2>
+        <button onclick="fecharFormularioAtividade()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-xl font-bold">X</button>
+      </div>
+
+      <input id="atividadeIdEdicao" type="hidden">
+
+      <div class="mb-4">
+        <label class="block text-xs font-bold text-gray-500 mb-1">Data da atividade</label>
+        <input id="atividadeData" type="date" class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full">
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-xs font-bold text-gray-500 mb-1">Tipo de atividade</label>
+        <select id="atividadeTipo" class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full">
+          <option value="Orçamento">Orçamento</option>
+          <option value="Pedido">Pedido</option>
+          <option value="Ligação">Ligação</option>
+          <option value="Reunião">Reunião</option>
+          <option value="Follow-up">Follow-up</option>
+          <option value="Outros">Outros</option>
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-xs font-bold text-gray-500 mb-1">Nome do cliente</label>
+        <input id="atividadeCliente" type="text" placeholder="Ex: AGAPE" class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full">
+      </div>
+
+      <div class="mb-5">
+        <label class="block text-xs font-bold text-gray-500 mb-1">Feedback</label>
+        <textarea id="atividadeFeedback" rows="5" placeholder="Descreva o retorno, próximos passos ou observações..." class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full resize-none"></textarea>
+      </div>
+
+      <button onclick="salvarAtividadeComercial()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-3 rounded-xl font-semibold shadow w-full">Salvar Atividade</button>
+      <p id="atividadeMensagem" class="text-sm mt-3 text-gray-500"></p>
+    </div>
+
+    <div class="lg:col-span-2">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div class="card">
+          <p class="text-gray-500 mb-2">Atividades</p>
+          <h2 id="ativTotal" class="text-3xl font-bold text-yellow-600">0</h2>
+        </div>
+        <div class="card">
+          <p class="text-gray-500 mb-2">Hoje</p>
+          <h2 id="ativHoje" class="text-3xl font-bold text-blue-600">0</h2>
+        </div>
+        <div class="card">
+          <p class="text-gray-500 mb-2">Clientes</p>
+          <h2 id="ativClientes" class="text-3xl font-bold text-purple-600">0</h2>
+        </div>
+        <div class="card">
+          <p class="text-gray-500 mb-2">Tipo destaque</p>
+          <h2 id="ativTipoTop" class="text-2xl font-bold text-green-600">-</h2>
+        </div>
+      </div>
+
+      <div class="card mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+          <div>
+            <label class="block text-xs font-bold text-gray-500 mb-1">Tipo</label>
+            <select id="filtroAtividadeTipo" onchange="renderAtividadesComerciais()" class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full">
+              <option value="Todos">Todos</option>
+              <option value="Orçamento">Orçamento</option>
+              <option value="Pedido">Pedido</option>
+              <option value="Ligação">Ligação</option>
+              <option value="Reunião">Reunião</option>
+              <option value="Follow-up">Follow-up</option>
+              <option value="Outros">Outros</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-gray-500 mb-1">Data inicial</label>
+            <input id="filtroAtividadeDataInicio" type="date" onchange="renderAtividadesComerciais()" class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-gray-500 mb-1">Data final</label>
+            <input id="filtroAtividadeDataFim" type="date" onchange="renderAtividadesComerciais()" class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-gray-500 mb-1">Buscar cliente</label>
+            <input id="filtroAtividadeCliente" type="text" oninput="renderAtividadesComerciais()" placeholder="Nome do cliente" class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
+          <h2 class="text-2xl font-bold text-gray-700">Histórico de Atividades</h2>
+          <div class="flex gap-2 flex-wrap"><button onclick="limparFiltrosAtividades()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl font-semibold">Limpar filtros</button><button onclick="restaurarAtividadesOcultas()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl font-semibold">Mostrar ocultas</button></div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b text-left text-gray-500">
+                <th class="pb-4 text-center">Data</th>
+                <th class="pb-4 text-center">Hora</th>
+                <th class="pb-4 text-center">Tipo</th>
+                <th class="pb-4 text-center">Cliente</th>
+                <th class="pb-4 text-center">Feedback</th>
+                <th class="pb-4 text-center">Editado em</th>
+                <th class="pb-4 text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="atividadesTabela"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<div id="painelStatus" class="hidden">
+  <div class="flex justify-between items-center mb-10 flex-wrap gap-4">
+    <div>
+      <h1 class="text-4xl font-bold text-gray-800">Status dos Pedidos</h1>
+      <p class="text-gray-500 mt-2">Consulta rápida usando a mesma planilha configurada na aba CONFIG.</p>
+    </div>
+  </div>
+
+  <div id="statusPrimeiroAcesso" class="card mb-8 border-l-4 border-blue-600">
+    <div class="flex justify-between items-start gap-4 flex-wrap mb-6">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-800">Configuração da aba Status</h2>
+        <p class="text-gray-500 mt-1">Configure quais colunas da sua planilha representam cada informação do pedido.</p>
+      </div>
+      <span class="bg-blue-100 text-blue-700 px-4 py-2 rounded-full font-bold text-sm">Individual por vendedor</span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
+      <div class="filter-field">
+        <label>Coluna Integrador</label>
+        <input id="statusConfigColIntegrador" class="border border-gray-300 rounded-xl px-4 py-3 bg-white uppercase" placeholder="A">
+      </div>
+      <div class="filter-field">
+        <label>Coluna Cliente Final</label>
+        <input id="statusConfigColClienteFinal" class="border border-gray-300 rounded-xl px-4 py-3 bg-white uppercase" placeholder="C">
+      </div>
+      <div class="filter-field">
+        <label>Coluna Número do Pedido</label>
+        <input id="statusConfigColNumeroPedido" class="border border-gray-300 rounded-xl px-4 py-3 bg-white uppercase" placeholder="D">
+      </div>
+      <div class="filter-field">
+        <label>Coluna Status Manual (J)</label>
+        <input id="statusConfigColStatus" class="border border-gray-300 rounded-xl px-4 py-3 bg-white uppercase" placeholder="J">
+      </div>
+      <div class="filter-field">
+        <label>Coluna Status Logística (K)</label>
+        <input id="statusConfigColLogistica" class="border border-gray-300 rounded-xl px-4 py-3 bg-white uppercase" placeholder="K">
+      </div>
+    </div>
+
+    <div class="bg-gray-50 rounded-2xl p-5 mb-6">
+      <p class="text-gray-600 text-sm">
+        Padrão sugerido: <b>A</b> Integrador • <b>C</b> Cliente Final • <b>D</b> Número do Pedido • <b>J</b> Status Manual • <b>K</b> Status Logística.
+        Se o Status estiver vazio, o CRM exibirá <b>Sem status informado</b>.
+      </p>
+    </div>
+
+    <div class="flex gap-3 flex-wrap">
+      <button type="button" onclick="salvarConfigStatusPedidos()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold shadow">
+        Salvar e Carregar Status
+      </button>
+      <button type="button" onclick="preencherPadraoStatusPedidos()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold">
+        Usar padrão A/C/D/J/K
+      </button>
+    </div>
+  </div>
+
+  <div id="statusConteudo" class="hidden">
+    <div class="card mb-8">
+      <div class="flex justify-between items-center mb-5 flex-wrap gap-3">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-700">Filtros de Status</h2>
+          <p id="statusMapeamentoAtual" class="text-gray-500 mt-1 text-sm">Mapeamento atual: -</p>
+        </div>
+        <button type="button" onclick="editarConfigStatusPedidos()" class="bg-gray-900 hover:bg-black text-white px-5 py-3 rounded-xl font-semibold">
+          Editar colunas
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 mb-1">Buscar</label>
+          <input id="statusBusca" oninput="renderStatusPedidos()" type="text" placeholder="Integrador, cliente ou pedido" class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-500 mb-1">Status</label>
+          <select id="statusFiltroStatus" onchange="renderStatusPedidos()" class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full">
+            <option value="Todos">Todos</option>
+            <option value="Aguardando pagamento">Aguardando pagamento</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-500 mb-1">Integrador</label>
+          <select id="statusFiltroIntegrador" onchange="renderStatusPedidos()" class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full">
+            <option value="Todos">Todos</option>
+          </select>
+        </div>
+
+        <button type="button" onclick="limparFiltrosStatus()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-3 rounded-xl font-semibold">
+          Limpar filtros
+        </button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div class="card">
+        <p class="text-gray-500 mb-2">Total de Pedidos</p>
+        <h2 id="statusTotalPedidos" class="text-3xl font-bold text-blue-600">0</h2>
+      </div>
+      <div class="card">
+        <p class="text-gray-500 mb-2">Status Diferentes</p>
+        <h2 id="statusQtdStatus" class="text-3xl font-bold text-purple-600">0</h2>
+      </div>
+      <div class="card">
+        <p class="text-gray-500 mb-2">Sem Status</p>
+        <h2 id="statusSemStatus" class="text-3xl font-bold text-orange-500">0</h2>
+      </div>
+      <div class="card">
+        <p class="text-gray-500 mb-2">Aguard. Pagamento</p>
+        <h2 id="statusAguardandoPagamento" class="text-3xl font-bold text-red-500">0</h2>
+      </div>
+      <div class="card">
+        <p class="text-gray-500 mb-2">Integradores</p>
+        <h2 id="statusQtdIntegradores" class="text-3xl font-bold text-green-600">0</h2>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
+        <h2 class="text-2xl font-bold text-gray-700">Lista de Pedidos</h2>
+        <p class="text-sm text-gray-500">Os dados vêm da planilha configurada na aba CONFIG.</p>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="border-b text-left text-gray-500">
+              <th class="pb-4 cursor-pointer select-none hover:text-blue-600" onclick="ordenarStatus('integrador')">Integrador <span id="sortStatus_integrador">↕</span></th>
+              <th class="pb-4 cursor-pointer select-none hover:text-blue-600" onclick="ordenarStatus('clienteFinal')">Cliente Final <span id="sortStatus_clienteFinal">↕</span></th>
+              <th class="pb-4 cursor-pointer select-none hover:text-blue-600" onclick="ordenarStatus('numeroPedido')">Número do Pedido <span id="sortStatus_numeroPedido">↕</span></th>
+              <th class="pb-4 cursor-pointer select-none hover:text-blue-600" onclick="ordenarStatus('statusManual')">Status Manual <span id="sortStatus_statusManual">↕</span></th>
+              <th class="pb-4 cursor-pointer select-none hover:text-blue-600" onclick="ordenarStatus('statusLogistica')">Retorno Logística <span id="sortStatus_statusLogistica">↕</span></th>
+            </tr>
+          </thead>
+          <tbody id="statusPedidosTabela"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="modalPerdidos" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+  <div class="bg-white rounded-2xl p-8 w-[1000px] max-h-[80vh] overflow-auto">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-bold text-gray-800">Clientes Perdidos</h2>
+      <button onclick="fecharModal()" class="text-red-500 font-bold text-xl">X</button>
+    </div>
+
+    <table class="w-full">
+      <thead>
+        <tr class="border-b text-left text-gray-500">
+          <th class="pb-4">Cliente</th>
+          <th class="pb-4">Último Mês</th>
+          <th class="pb-4">Valor</th>
+        </tr>
+      </thead>
+      <tbody id="clientesPerdidosTabela"></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="painelMetas" class="hidden">
+  <div class="flex justify-between items-center mb-10">
+    <div>
+      <h1 class="text-4xl font-bold text-gray-800">Painel de Metas</h1>
+      <p class="text-gray-500 mt-2">Metas Mensais</p>
+    </div>
+
+    <div class="flex gap-3 flex-wrap items-end justify-end">
+      <div class="filter-field">
+        <label for="filtroMetaAno">Ano</label>
+        <select id="filtroMetaAno" onchange="gerarPainelMetas()" class="border border-gray-300 rounded-xl px-4 py-3 bg-white">
+          <option value="2024">2024</option>
+          <option value="2025">2025</option>
+          <option value="2026">2026</option>
+        </select>
+      </div>
+      <div class="filter-field">
+        <label for="metaMensalEditavelInput">Meta mensal individual</label>
+        <input id="metaMensalEditavelInput" type="text" inputmode="decimal" class="border border-green-300 rounded-xl px-4 py-3 bg-white font-semibold text-green-700 w-56" placeholder="R$ 0,00" onblur="formatarCampoMoeda(this)">
+      </div>
+      <button onclick="salvarMetaMensalAno()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold shadow">
+        Salvar Meta
+      </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+    <div class="card meta-card">
+      <p class="text-gray-500 mb-2">Meta Mensal</p>
+      <h2 id="metaMensal" class="text-3xl font-bold text-blue-600">R$ 0</h2>
+    </div>
+
+    <div class="card meta-card">
+      <p class="text-gray-500 mb-2">Média Mensal</p>
+      <h2 id="mediaMensal" class="text-3xl font-bold text-green-600">R$ 0</h2>
+    </div>
+
+    <div class="card meta-card">
+      <p class="text-gray-500 mb-2">Crescimento</p>
+      <h2 id="crescimentoMeta" class="text-3xl font-bold text-purple-600">0%</h2>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="card">
+      <h2 class="text-xl font-bold text-gray-700 mb-6">Meta x Resultado</h2>
+      <div style="height:450px;"><canvas id="metaChart"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h2 class="text-xl font-bold text-gray-700 mb-6">Crescimento Mensal</h2>
+      <div style="height:450px;"><canvas id="crescimentoChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<div id="painelPerformance" class="hidden">
+  <div class="flex justify-between items-center mb-10 flex-wrap gap-4">
+    <div>
+      <h1 class="text-4xl font-bold text-gray-800">Painel de Performance</h1>
+      <p class="text-gray-500 mt-2">Somente dias úteis: segunda a sexta</p>
+    </div>
+
+    <div class="filter-panel w-full">
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-8 gap-4 items-end">
+        <div class="filter-field">
+          <label for="filtroAnoPerformance">Ano</label>
+          <select id="filtroAnoPerformance" onchange="atualizarPeriodoPerformance()" class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full"></select>
+        </div>
+
+        <div class="filter-field">
+          <label for="filtroMesPerformance">Mês</label>
+          <select id="filtroMesPerformance" onchange="atualizarPeriodoPerformance()" class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full">
+            <option value="0">Janeiro</option>
+            <option value="1">Fevereiro</option>
+            <option value="2">Março</option>
+            <option value="3">Abril</option>
+            <option value="4">Maio</option>
+            <option value="5">Junho</option>
+            <option value="6">Julho</option>
+            <option value="7">Agosto</option>
+            <option value="8">Setembro</option>
+            <option value="9">Outubro</option>
+            <option value="10">Novembro</option>
+            <option value="11">Dezembro</option>
+          </select>
+        </div>
+
+        <div class="filter-field xl:col-span-2">
+          <label for="filtroSemanaPerformance">Filtrar semana</label>
+          <select id="filtroSemanaPerformance" onchange="gerarPerformance()" class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full">
+            <option value="atual">Semana atual</option>
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label for="filtroDiaPerformance">Filtrar dia</label>
+          <select id="filtroDiaPerformance" onchange="gerarPerformance()" class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full">
+            <option value="hoje">Hoje</option>
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label for="metaMensalPerformanceInput">Meta mensal</label>
+          <input id="metaMensalPerformanceInput" type="text" inputmode="decimal" class="border border-purple-300 rounded-xl px-4 py-3 bg-white w-full font-semibold text-purple-700" placeholder="R$ 0,00" onblur="formatarCampoMoeda(this); salvarMetasPerformance()">
+        </div>
+
+        <div class="filter-field">
+          <label for="metaDiariaInput">Meta diária automática</label>
+          <input id="metaDiariaInput" type="text" readonly class="border border-gray-300 rounded-xl px-4 py-3 bg-gray-100 w-full font-semibold text-gray-700" placeholder="R$ 0,00">
+        </div>
+
+        <div class="filter-field">
+          <label for="metaSemanalInput">Meta semanal automática</label>
+          <input id="metaSemanalInput" type="text" readonly class="border border-gray-300 rounded-xl px-4 py-3 bg-gray-100 w-full font-semibold text-gray-700" placeholder="R$ 0,00">
+        </div>
+
+        <div class="md:col-span-2 xl:col-span-8 flex justify-end gap-3 flex-wrap">
+          <button onclick="salvarMetasPerformance()" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-semibold shadow">
+            Salvar Meta Mensal
+          </button>
+          <button id="btnExportarPdfPerf" onclick="exportarPdfPerformance()" class="bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-xl font-semibold shadow">
+            Exportar PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="card">
+      <p id="perfDiaTitulo" class="text-gray-500 mb-2">Faturamento Dia Selecionado</p>
+      <h2 id="perfHojeFat" class="text-3xl font-bold text-green-600">R$ 0</h2>
+      <p id="perfHojePedidos" class="text-gray-500 mt-2">0 pedidos</p>
+    </div>
+
+    <div class="card">
+      <p class="text-gray-500 mb-2">Semana Selecionada</p>
+      <h2 id="perfSemanaFat" class="text-3xl font-bold text-blue-600">R$ 0</h2>
+      <p id="perfSemanaPedidos" class="text-gray-500 mt-2">0 pedidos</p>
+    </div>
+
+    <div class="card">
+      <p class="text-gray-500 mb-2">Projeção do Mês</p>
+      <h2 id="perfProjecaoMes" class="text-3xl font-bold text-purple-600">R$ 0</h2>
+      <p id="perfMediaDiaria" class="text-gray-500 mt-2">Média útil: R$ 0</p>
+    </div>
+
+    <div class="card">
+      <div class="flex justify-between items-start gap-3 mb-3">
+        <div>
+          <p class="text-gray-500 mb-1">Meta Mensal</p>
+          <h2 id="perfMetaPeriodo" class="text-3xl font-bold text-orange-500">R$ 0</h2>
+        </div>
+        <span id="perfPctPeriodo" class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full font-bold text-sm">0%</span>
+      </div>
+
+      <div class="progress-bg mb-3">
+        <div id="perfMetaPeriodoBar" class="progress-bar bg-orange-500" style="width:0%;"></div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 text-sm">
+        <div class="bg-green-50 rounded-xl p-3">
+          <p class="text-gray-500">Total vendido</p>
+          <p id="perfTotalVendidoPeriodo" class="font-bold text-green-600">R$ 0</p>
+        </div>
+        <div class="bg-red-50 rounded-xl p-3">
+          <p class="text-gray-500">Faltante</p>
+          <p id="perfFaltantePeriodo" class="font-bold text-red-500">R$ 0</p>
+        </div>
+      </div>
+
+      <p id="perfPeriodoDescricao" class="text-gray-500 mt-3 text-sm">Baseado na meta mensal cadastrada.</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="card">
+      <p class="text-gray-500 mb-2">Dias Úteis Corridos</p>
+      <h2 id="perfDiasUteisCorridos" class="text-3xl font-bold text-blue-600">0</h2>
+    </div>
+
+    <div class="card">
+      <p class="text-gray-500 mb-2">Dias Úteis Restantes</p>
+      <h2 id="perfDiasUteisRestantes" class="text-3xl font-bold text-orange-500">0</h2>
+    </div>
+
+    <div class="card">
+      <p class="text-gray-500 mb-2">Necessário por Dia Útil</p>
+      <h2 id="perfNecessarioDiaUtil" class="text-3xl font-bold text-red-500">R$ 0</h2>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="card">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-xl font-bold text-gray-700">Meta Diária</h2>
+        <span id="perfMetaDiariaPct" class="font-bold text-purple-600">0%</span>
+      </div>
+      <div class="progress-bg">
+        <div id="perfMetaDiariaBar" class="progress-bar bg-purple-600" style="width:0%;"></div>
+      </div>
+      <p id="perfMetaDiariaTexto" class="text-gray-500 mt-3">Falta R$ 0 para bater a meta diária.</p>
+    </div>
+
+    <div class="card">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-xl font-bold text-gray-700">Meta Semanal</h2>
+        <span id="perfMetaSemanalPct" class="font-bold text-blue-600">0%</span>
+      </div>
+      <div class="progress-bg">
+        <div id="perfMetaSemanalBar" class="progress-bar bg-blue-600" style="width:0%;"></div>
+      </div>
+      <p id="perfMetaSemanalTexto" class="text-gray-500 mt-3">Falta R$ 0 para bater a meta semanal.</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <div class="card">
+      <h2 class="text-xl font-bold text-gray-700 mb-6">Faturamento por Dia Útil do Mês</h2>
+      <div style="height:450px;"><canvas id="performanceDiaChart"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h2 class="text-xl font-bold text-gray-700 mb-6">Semana Selecionada vs Semana Anterior</h2>
+      <div style="height:450px;"><canvas id="performanceSemanaChart"></canvas></div>
+    </div>
+  </div>
+
+  <div id="blocoInteligenciaPerformance" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <div class="card">
+      <div class="flex justify-between items-center mb-5 gap-3 flex-wrap">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">Alertas Automáticos</h2>
+          <p class="text-gray-500 mt-1">Análise automática do período selecionado.</p>
+        </div>
+        <span id="resumoAlertasPerformance" class="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-full font-bold text-sm">0 alertas</span>
+      </div>
+      <div id="listaAlertasPerformance" class="space-y-4"></div>
+    </div>
+
+    <div class="card">
+      <div class="flex justify-between items-center mb-5 gap-3 flex-wrap">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">IA Comercial</h2>
+          <p class="text-gray-500 mt-1">Sugestões práticas com base nos números do CRM.</p>
+        </div>
+        <span class="bg-purple-100 text-purple-700 px-4 py-2 rounded-full font-bold text-sm">Ações sugeridas</span>
+      </div>
+      <div id="listaSugestoesPerformance" class="space-y-4"></div>
+    </div>
+  </div>
+</div>
+
+<div id="painelConfig" class="hidden">
+  <div class="flex justify-between items-center mb-10 flex-wrap gap-4">
+    <div>
+      <h1 class="text-4xl font-bold text-gray-800">Configuração da Base</h1>
+      <p class="text-gray-500 mt-2">Cada vendedor conecta a própria planilha. Sem configuração, o CRM abre limpo.</p>
+    </div>
+    <div class="bg-gray-800 text-white px-6 py-3 rounded-2xl font-semibold shadow-lg">
+      Base limpa por vendedor
+    </div>
+  </div>
+
+  <div class="card mb-8">
+    <h2 class="text-2xl font-bold text-gray-800 mb-2">Origem dos Dados</h2>
+    <p class="text-gray-500 mb-6">Cole a URL da planilha publicada/compartilhada ou informe diretamente o SHEET ID e o GID da aba.</p>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+      <div class="filter-field">
+        <label>URL da Planilha</label>
+        <input id="configSheetUrl" class="border border-gray-300 rounded-xl px-4 py-3 bg-white" placeholder="https://docs.google.com/spreadsheets/d/.../edit">
+      </div>
+
+      <div class="filter-field">
+        <label>SHEET ID</label>
+        <input id="configSheetId" class="border border-gray-300 rounded-xl px-4 py-3 bg-white" placeholder="Preenchido automaticamente pela URL ou manualmente">
+      </div>
+
+      <div class="filter-field">
+        <label>GID da Aba</label>
+        <input id="configGid" class="border border-gray-300 rounded-xl px-4 py-3 bg-white" placeholder="Ex: ">
+      </div>
+    </div>
+
+    <h2 class="text-2xl font-bold text-gray-800 mb-2">Mapeamento das Colunas</h2>
+    <p class="text-gray-500 mb-6">Informe apenas a letra da coluna onde está cada informação na base do vendedor.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+      <div class="filter-field">
+        <label>Coluna Integrador / Cliente</label>
+        <input id="configColCliente" class="border border-gray-300 rounded-xl px-4 py-3 bg-white uppercase" placeholder="A">
+      </div>
+
+      <div class="filter-field">
+        <label>Coluna Data Pagamento</label>
+        <input id="configColData" class="border border-gray-300 rounded-xl px-4 py-3 bg-white uppercase" placeholder="B">
+      </div>
+
+      <div class="filter-field">
+        <label>Coluna Valor</label>
+        <input id="configColValor" class="border border-gray-300 rounded-xl px-4 py-3 bg-white uppercase" placeholder="I">
+      </div>
+
+    </div>
+
+    <div class="flex gap-3 flex-wrap">
+      <button onclick="salvarConfigCRM()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold shadow">
+        Salvar Configuração
+      </button>
+      <button onclick="restaurarConfigPadrao()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-xl font-semibold">
+        Limpar Configuração
+      </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="card border-l-4 border-blue-600">
+      <h3 class="font-bold text-gray-800 mb-2">Como pegar o GID?</h3>
+      <p class="text-gray-500">Abra a aba da planilha e copie o número que aparece após <b>gid=</b> no link.</p>
+    </div>
+    <div class="card border-l-4 border-green-600">
+      <h3 class="font-bold text-gray-800 mb-2">Cada vendedor configura uma vez</h3>
+      <p class="text-gray-500">A configuração fica salva no navegador de quem estiver usando.</p>
+    </div>
+    <div class="card border-l-4 border-purple-600">
+      <h3 class="font-bold text-gray-800 mb-2">Mesmo HTML para todos</h3>
+      <p class="text-gray-500">Você compartilha um único arquivo, e cada pessoa aponta para a própria base.</p>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const CONFIG_PADRAO = {
+  sheetId:"",
+  sheetUrl:"",
+  gid:"",
+  colunaCliente:"",
+  colunaData:"",
+  colunaValor:""
+};
+
+let configCRM = carregarConfigCRM();
+
+function getUrlLiberacoes(){
+  if(!crmConfigCompleta()) return "";
+  return `https://docs.google.com/spreadsheets/d/${configCRM.sheetId}/gviz/tq?tqx=out:json&gid=${configCRM.gid}`;
+}
+
+function crmConfigCompleta(){
+  return !!(configCRM && configCRM.sheetId && configCRM.gid && configCRM.colunaCliente && configCRM.colunaData && configCRM.colunaValor);
+}
+
+function mostrarPrimeiroAcessoConfig(){
+  try{
+    const avisoId = "primeiroAcessoConfigAviso";
+    const painel = document.getElementById("painelConfig");
+    if(painel && !document.getElementById(avisoId)){
+      const aviso = document.createElement("div");
+      aviso.id = avisoId;
+      aviso.className = "card mb-8 border-l-4 border-orange-500 bg-orange-50";
+      aviso.innerHTML = `<h2 class="text-2xl font-bold text-gray-800 mb-2">Primeiro acesso</h2><p class="text-gray-600">Configure sua planilha para liberar o CRM neste navegador. O link compartilhado abre limpo para cada vendedor.</p>`;
+      painel.insertBefore(aviso, painel.firstElementChild?.nextSibling || painel.firstChild);
+    }
+    abrirConfig();
+  }catch(e){console.warn(e);}
+}
+
+const METAS_MENSAIS_PADRAO = {
+  2024:1000000,
+  2025:1800000,
+  2026:2000000
+};
+
+let metasMensais = carregarMetasMensais();
+
+function carregarMetasMensais(){
+  try{
+    const salvo = JSON.parse(localStorage.getItem("jng_crm_metas_mensais") || "{}");
+    return {...METAS_MENSAIS_PADRAO,...salvo};
+  }catch(e){
+    return {...METAS_MENSAIS_PADRAO};
+  }
+}
+
+function getMetaMensalAno(ano){
+  return parseFloat(metasMensais[String(ano)] || metasMensais[ano] || 0);
+}
+
+function salvarMetaMensalAno(){
+  const anoSelecionado = document.getElementById("filtroMetaAno").value;
+  const campo = document.getElementById("metaMensalEditavelInput");
+  const valor = parseMoedaBR(campo?.value || 0);
+
+  metasMensais[String(anoSelecionado)] = valor;
+  localStorage.setItem("jng_crm_metas_mensais", JSON.stringify(metasMensais));
+
+  if(campo){
+    campo.value = valor > 0 ? dinheiro(valor) : "";
+  }
+
+  const anoPerf = document.getElementById("filtroAnoPerformance")?.value;
+  if(String(anoPerf) === String(anoSelecionado)){
+    const campoPerf = document.getElementById("metaMensalPerformanceInput");
+    if(campoPerf){
+      campoPerf.value = valor > 0 ? dinheiro(valor) : "";
+    }
+  }
+
+  gerarPainelMetas();
+  gerarPerformance();
+  alert("Meta mensal salva para este ano.");
+}
+
+function sincronizarMetaPerformanceComAno(){
+  const ano = document.getElementById("filtroAnoPerformance")?.value || new Date().getFullYear();
+  const campoPerf = document.getElementById("metaMensalPerformanceInput");
+  const valor = getMetaMensalAno(ano);
+  if(campoPerf){
+    campoPerf.value = valor > 0 ? dinheiro(valor) : "";
+  }
+  return valor;
+}
+
+let dadosOriginais = [];
+let rankingGlobal = [];
+
+let mensalChart;
+let rankingChart;
+let metaChart;
+let crescimentoChart;
+let performanceDiaChart;
+let performanceSemanaChart;
+let historicoClienteChart;
+
+function dinheiro(valor){
+  return Number(valor || 0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+}
+
+function parseMoedaBR(valor){
+  if(typeof valor === "number") return valor;
+  const limpo = String(valor || "")
+    .replace(/R\$/g,"")
+    .replace(/\s/g,"")
+    .replace(/\./g,"")
+    .replace(",",".");
+
+  return parseFloat(limpo) || 0;
+}
+
+function formatarCampoMoeda(campo){
+  campo.value = dinheiro(parseMoedaBR(campo.value));
+}
+
+function normalizar(texto){
+  return String(texto || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"");
+}
+
+function converterDataBR(dataTexto){
+  const p = String(dataTexto).split("/");
+  return new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0]));
+}
+
+function getCelula(row,index){
+  return row.c?.[index]?.f || row.c?.[index]?.v || "";
+}
+
+function colunaParaIndice(coluna){
+  const letras = String(coluna || "A").toUpperCase().replace(/[^A-Z]/g,"");
+  let indice = 0;
+
+  for(let i=0;i<letras.length;i++){
+    indice = indice * 26 + (letras.charCodeAt(i) - 64);
+  }
+
+  return Math.max(indice - 1,0);
+}
+
+function extrairSheetId(texto){
+  const valor = String(texto || "").trim();
+  const match = valor.match(/\/d\/([a-zA-Z0-9-_]+)/);
+  return match ? match[1] : valor;
+}
+
+function carregarConfigCRM(){
+  try{
+    const bruto = localStorage.getItem("jng_crm_config");
+    if(!bruto) return {...CONFIG_PADRAO};
+    const salvo = JSON.parse(bruto || "{}");
+    return {...CONFIG_PADRAO,...salvo};
+  }catch(e){
+    return {...CONFIG_PADRAO};
+  }
+}
+
+function preencherTelaConfig(){
+  document.getElementById("configSheetUrl").value = configCRM.sheetUrl || "";
+  document.getElementById("configSheetId").value = configCRM.sheetId || "";
+  document.getElementById("configGid").value = configCRM.gid || "";
+  document.getElementById("configColCliente").value = configCRM.colunaCliente || "";
+  document.getElementById("configColData").value = configCRM.colunaData || "";
+  document.getElementById("configColValor").value = configCRM.colunaValor || "";
+}
+
+function salvarConfigCRM(){
+  const sheetUrl = document.getElementById("configSheetUrl").value.trim();
+  const sheetIdManual = document.getElementById("configSheetId").value.trim();
+  const sheetId = sheetIdManual || extrairSheetId(sheetUrl);
+  const gid = document.getElementById("configGid").value.trim();
+  const colunaCliente = document.getElementById("configColCliente").value.trim().toUpperCase();
+  const colunaData = document.getElementById("configColData").value.trim().toUpperCase();
+  const colunaValor = document.getElementById("configColValor").value.trim().toUpperCase();
+
+  if(!sheetId || !gid || !colunaCliente || !colunaData || !colunaValor){
+    alert("Preencha URL/SHEET ID, GID e as colunas obrigatórias para liberar o CRM.");
+    return;
+  }
+
+  configCRM = {sheetUrl,sheetId,gid,colunaCliente,colunaData,colunaValor};
+
+  localStorage.setItem("jng_crm_config", JSON.stringify(configCRM));
+  preencherTelaConfig();
+  const aviso = document.getElementById("primeiroAcessoConfigAviso");
+  if(aviso) aviso.remove();
+  carregar();
+  alert("Configuração salva. O CRM foi atualizado com a nova base.");
+}
+
+function restaurarConfigPadrao(){
+  if(!confirm("Deseja limpar a configuração deste navegador?")) return;
+  localStorage.removeItem("jng_crm_config");
+  configCRM = {...CONFIG_PADRAO};
+  dadosOriginais = [];
+  preencherTelaConfig();
+  mostrarPrimeiroAcessoConfig();
+}
+
+function getCliente(row){
+  return getCelula(row, colunaParaIndice(configCRM.colunaCliente));
+}
+
+function getDataTexto(row){
+  return getCelula(row, colunaParaIndice(configCRM.colunaData));
+}
+
+function getValor(row){
+  const indice = colunaParaIndice(configCRM.colunaValor);
+  return parseMoedaBR(row.c?.[indice]?.v ?? row.c?.[indice]?.f ?? 0);
+}
+
+function ehDiaUtil(data){
+  const dia = data.getDay();
+  return dia !== 0 && dia !== 6;
+}
+
+function mesmaData(a,b){
+  return a.getFullYear() === b.getFullYear() &&
+         a.getMonth() === b.getMonth() &&
+         a.getDate() === b.getDate();
+}
+
+function inicioSemana(data){
+  const d = new Date(data);
+  const dia = d.getDay();
+  const diff = dia === 0 ? -6 : 1 - dia;
+  d.setDate(d.getDate() + diff);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function fimSemana(data){
+  const d = inicioSemana(data);
+  d.setDate(d.getDate() + 6);
+  d.setHours(23,59,59,999);
+  return d;
+}
+
+function contarDiasUteis(inicio,fim){
+  let total = 0;
+  const d = new Date(inicio);
+  d.setHours(0,0,0,0);
+
+  const fimRef = new Date(fim);
+  fimRef.setHours(0,0,0,0);
+
+  while(d <= fimRef){
+    if(ehDiaUtil(d)) total++;
+    d.setDate(d.getDate() + 1);
+  }
+
+  return total;
+}
+
+function listarDiasUteisDoMes(ano,mes){
+  const dias = [];
+  const ultimoDia = new Date(ano, mes + 1, 0).getDate();
+
+  for(let dia = 1; dia <= ultimoDia; dia++){
+    const data = new Date(ano, mes, dia);
+
+    if(ehDiaUtil(data)){
+      dias.push(data);
+    }
+  }
+
+  return dias;
+}
+
+function gerarSemanasDoMes(base){
+  const ano = base.getFullYear();
+  const mes = base.getMonth();
+  const primeiroDia = new Date(ano, mes, 1);
+  const ultimoDia = new Date(ano, mes + 1, 0);
+
+  let semanas = [];
+  let cursor = inicioSemana(primeiroDia);
+  let contador = 1;
+
+  while(cursor <= ultimoDia){
+    let inicio = new Date(cursor);
+    let fim = fimSemana(cursor);
+
+    if(fim < primeiroDia){
+      cursor.setDate(cursor.getDate() + 7);
+      continue;
+    }
+
+    const inicioReal = inicio < primeiroDia ? new Date(primeiroDia) : new Date(inicio);
+    const fimReal = fim > ultimoDia ? new Date(ultimoDia) : new Date(fim);
+
+    const diasUteisSemana = contarDiasUteis(inicioReal,fimReal);
+
+    if(diasUteisSemana > 0){
+      semanas.push({
+        id:String(contador),
+        label:`Semana ${contador} - ${String(inicioReal.getDate()).padStart(2,"0")}/${String(inicioReal.getMonth()+1).padStart(2,"0")} a ${String(fimReal.getDate()).padStart(2,"0")}/${String(fimReal.getMonth()+1).padStart(2,"0")}`,
+        inicio:inicioReal,
+        fim:fimReal
+      });
+
+      contador++;
+    }
+
+    cursor.setDate(cursor.getDate() + 7);
+  }
+
+  return semanas;
+}
+
+function obterPeriodoPerformance(){
+  const hoje = new Date();
+  const anoSelect = document.getElementById("filtroAnoPerformance");
+  const mesSelect = document.getElementById("filtroMesPerformance");
+
+  const ano = anoSelect?.value ? parseInt(anoSelect.value) : hoje.getFullYear();
+  const mes = mesSelect?.value !== "" && mesSelect?.value !== undefined ? parseInt(mesSelect.value) : hoje.getMonth();
+
+  return {
+    ano,
+    mes,
+    base:new Date(ano, mes, 1),
+    ehMesAtual: ano === hoje.getFullYear() && mes === hoje.getMonth()
+  };
+}
+
+function popularPeriodoPerformance(){
+  const selectAno = document.getElementById("filtroAnoPerformance");
+  const selectMes = document.getElementById("filtroMesPerformance");
+  if(!selectAno || !selectMes) return;
+
+  const hoje = new Date();
+  const anoAtualSelecionado = selectAno.value || String(hoje.getFullYear());
+  const mesAtualSelecionado = selectMes.value || String(hoje.getMonth());
+
+  const anos = new Set([hoje.getFullYear()]);
+
+  dadosOriginais.forEach(r => {
+    const dataTexto = getDataTexto(r);
+    if(dataTexto){
+      anos.add(converterDataBR(dataTexto).getFullYear());
+    }
+  });
+
+  selectAno.innerHTML = "";
+  [...anos].sort((a,b)=>b-a).forEach(ano => {
+    selectAno.innerHTML += `<option value="${ano}">${ano}</option>`;
+  });
+
+  if([...selectAno.options].some(o => o.value === anoAtualSelecionado)){
+    selectAno.value = anoAtualSelecionado;
+  }else{
+    selectAno.value = String(hoje.getFullYear());
+  }
+
+  selectMes.value = mesAtualSelecionado;
+}
+
+function atualizarPeriodoPerformance(){
+  sincronizarMetaPerformanceComAno();
+  popularSemanasPerformance(true);
+  popularDiasPerformance(true);
+  gerarPerformance(false);
+}
+
+function popularSemanasPerformance(resetar=false){
+  const select = document.getElementById("filtroSemanaPerformance");
+  if(!select) return;
+
+  const valorAtual = resetar ? "atual" : (select.value || "atual");
+  const {base, ehMesAtual} = obterPeriodoPerformance();
+  const hoje = new Date();
+  hoje.setHours(0,0,0,0);
+  const semanas = gerarSemanasDoMes(base);
+
+  select.innerHTML = "";
+
+  semanas.forEach(semana => {
+    select.innerHTML += `<option value="${semana.id}">${semana.label}</option>`;
+  });
+
+  const semanaAtual = semanas.find(s => hoje >= s.inicio && hoje <= s.fim);
+
+  if(ehMesAtual && valorAtual === "atual" && semanaAtual){
+    select.value = semanaAtual.id;
+  }else if([...select.options].some(o => o.value === valorAtual)){
+    select.value = valorAtual;
+  }else if(semanas.length){
+    select.value = semanas[0].id;
+  }
+}
+
+function popularDiasPerformance(resetar=false){
+  const select = document.getElementById("filtroDiaPerformance");
+  if(!select) return;
+
+  const valorAtual = resetar ? "hoje" : (select.value || "hoje");
+  const {ano, mes, ehMesAtual} = obterPeriodoPerformance();
+
+  const hoje = new Date();
+  hoje.setHours(0,0,0,0);
+
+  const diasUteisMes = listarDiasUteisDoMes(ano, mes);
+
+  select.innerHTML = "";
+
+  if(ehMesAtual){
+    select.innerHTML += `<option value="hoje">Hoje - ${String(hoje.getDate()).padStart(2,"0")}/${String(hoje.getMonth()+1).padStart(2,"0")}</option>`;
+  }
+
+  diasUteisMes.forEach(data => {
+    const valor = `${data.getFullYear()}-${String(data.getMonth()+1).padStart(2,"0")}-${String(data.getDate()).padStart(2,"0")}`;
+    const label = `${String(data.getDate()).padStart(2,"0")}/${String(data.getMonth()+1).padStart(2,"0")} - ${data.toLocaleDateString("pt-BR",{weekday:"long"})}`;
+    select.innerHTML += `<option value="${valor}">${label}</option>`;
+  });
+
+  if(ehMesAtual && valorAtual === "hoje"){
+    select.value = "hoje";
+  }else if([...select.options].some(o => o.value === valorAtual)){
+    select.value = valorAtual;
+  }else if(select.options.length){
+    select.selectedIndex = 0;
+  }
+}
+
+async function carregar(){
+  if(!crmConfigCompleta()){
+    dadosOriginais = [];
+    mostrarPrimeiroAcessoConfig();
+    return;
+  }
+  await carregarLiberacoes();
+  popularFiltros();
+  popularPeriodoPerformance();
+  popularSemanasPerformance();
+  popularDiasPerformance();
+  popularFiltroHistoricoCliente();
+  carregarFiltrosRisco();
+  aplicarFiltros();
+  gerarHistoricoCliente();
+  gerarClientesEmRisco();
+  gerarPainelMetas();
+  gerarPerformance();
+  inicializarAtividades();
+}
+
+async function carregarLiberacoes(){
+  if(!crmConfigCompleta()){ dadosOriginais = []; return; }
+  const response = await fetch(getUrlLiberacoes() + "&t=" + Date.now());
+  const text = await response.text();
+  const json = JSON.parse(text.substring(47).slice(0,-2));
+
+  dadosOriginais = json.table.rows || [];
+}
+
+function popularFiltros(){
+  const selectAno = document.getElementById("filtroAno");
+  const selectDia = document.getElementById("filtroDia");
+
+  const anoAtual = selectAno.value;
+  const diaAtual = selectDia.value;
+
+  const anos = new Set();
+
+  dadosOriginais.forEach(r => {
+    const dataTexto = getDataTexto(r);
+
+    if(dataTexto){
+      anos.add(converterDataBR(dataTexto).getFullYear());
+    }
+  });
+
+  selectAno.innerHTML = `<option value="Todos">Todos os Anos</option>`;
+
+  [...anos].sort().forEach(ano => {
+    selectAno.innerHTML += `<option value="${ano}">${ano}</option>`;
+  });
+
+  selectDia.innerHTML = `<option value="Todos">Todos os Dias</option>`;
+
+  for(let i=1;i<=31;i++){
+    selectDia.innerHTML += `<option value="${i}">${String(i).padStart(2,"0")}</option>`;
+  }
+
+  if(anoAtual) selectAno.value = anoAtual;
+  if(diaAtual) selectDia.value = diaAtual;
+}
+
+function popularFiltroHistoricoCliente(){
+  const selectCliente = document.getElementById("filtroClienteHistorico");
+  const selectAno = document.getElementById("filtroAnoHistorico");
+
+  const clienteAtual = selectCliente.value;
+  const anoAtual = selectAno.value;
+
+  const clientes = new Set();
+  const anos = new Set();
+
+  dadosOriginais.forEach(r => {
+    const cliente = getCliente(r);
+    const dataTexto = getDataTexto(r);
+
+    if(cliente) clientes.add(cliente);
+
+    if(dataTexto){
+      const data = converterDataBR(dataTexto);
+      anos.add(data.getFullYear());
+    }
+  });
+
+  selectCliente.innerHTML = `<option value="">Selecione um cliente</option>`;
+
+  [...clientes].sort((a,b)=>a.localeCompare(b)).forEach(cliente => {
+    selectCliente.innerHTML += `<option value="${cliente}">${cliente}</option>`;
+  });
+
+  selectAno.innerHTML = `<option value="Todos">Todos os Anos</option>`;
+
+  [...anos].sort().forEach(ano => {
+    selectAno.innerHTML += `<option value="${ano}">${ano}</option>`;
+  });
+
+  if(clienteAtual && [...clientes].includes(clienteAtual)){
+    selectCliente.value = clienteAtual;
+  }
+
+  if(anoAtual && ([...anos].map(String).includes(String(anoAtual)) || anoAtual === "Todos")){
+    selectAno.value = anoAtual;
+  }
+}
+
+function escapeHTML(valor){
+  return String(valor ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+function chaveClienteRisco(cliente){
+  try{
+    return btoa(unescape(encodeURIComponent(String(cliente || "cliente")))).replace(/=/g,"");
+  }catch(e){
+    return String(cliente || "cliente").replace(/[^a-zA-Z0-9]/g,"_");
+  }
+}
+
+function mensagemPadraoRisco(cliente){
+  return `Olá, tudo bem?
+
+Notei que já faz um tempo desde o seu último pedido com a gente e queria entender se posso te ajudar com alguma nova cotação ou condição especial.
+
+Tem algum projeto em andamento que eu possa apoiar?`;
+}
+
+function obterContatoClienteRisco(cliente){
+  return localStorage.getItem(`jng_crm_contato_${chaveClienteRisco(cliente)}`) || "";
+}
+
+function obterMensagemClienteRisco(cliente){
+  return localStorage.getItem(`jng_crm_msg_${chaveClienteRisco(cliente)}`) || mensagemPadraoRisco(cliente);
+}
+
+function salvarContatoMensagemRisco(cliente){
+  const key = chaveClienteRisco(cliente);
+  const contato = document.getElementById(`contato_${key}`)?.value || "";
+  const mensagem = document.getElementById(`mensagem_${key}`)?.value || mensagemPadraoRisco(cliente);
+
+  localStorage.setItem(`jng_crm_contato_${key}`, contato.trim());
+  localStorage.setItem(`jng_crm_msg_${key}`, mensagem.trim());
+
+  const status = document.getElementById(`status_salvo_${key}`);
+  if(status){
+    status.innerText = "Salvo";
+    status.classList.remove("text-gray-400");
+    status.classList.add("text-green-600");
+    setTimeout(()=>{
+      status.innerText = "";
+    },1800);
+  }
+}
+
+function abrirWhatsAppRisco(cliente){
+  const key = chaveClienteRisco(cliente);
+  const contatoCampo = document.getElementById(`contato_${key}`);
+  const mensagemCampo = document.getElementById(`mensagem_${key}`);
+
+  const contato = String(contatoCampo?.value || obterContatoClienteRisco(cliente) || "").replace(/\D/g,"");
+  const mensagem = String(mensagemCampo?.value || obterMensagemClienteRisco(cliente) || mensagemPadraoRisco(cliente)).trim();
+
+  if(!contato){
+    alert("Preencha o WhatsApp do cliente antes de enviar a mensagem.");
+    contatoCampo?.focus();
+    return;
+  }
+
+  const numero = contato.startsWith("55") ? contato : `55${contato}`;
+
+  localStorage.setItem(`jng_crm_contato_${key}`, contatoCampo?.value.trim() || contato);
+  localStorage.setItem(`jng_crm_msg_${key}`, mensagem);
+
+  const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`;
+  window.open(url,"_blank");
+}
+
+function carregarFiltrosRisco(){
+  const minPedidos = localStorage.getItem("jng_crm_risco_min_pedidos") || "2";
+  const diasSemCompra = localStorage.getItem("jng_crm_risco_dias_sem_compra") || "30";
+  const buscaCliente = localStorage.getItem("jng_crm_risco_busca_cliente") || "";
+  const status = localStorage.getItem("jng_crm_risco_status") || "Todos";
+  const totalMinimo = localStorage.getItem("jng_crm_risco_total_minimo") || "";
+
+  const campoMinPedidos = document.getElementById("riscoMinPedidos");
+  const campoDias = document.getElementById("riscoDiasSemCompra");
+  const campoBusca = document.getElementById("riscoBuscaCliente");
+  const campoStatus = document.getElementById("riscoFiltroStatus");
+  const campoTotal = document.getElementById("riscoTotalMinimo");
+
+  if(campoMinPedidos) campoMinPedidos.value = minPedidos;
+  if(campoDias) campoDias.value = diasSemCompra;
+  if(campoBusca) campoBusca.value = buscaCliente;
+  if(campoStatus) campoStatus.value = status;
+  if(campoTotal) campoTotal.value = totalMinimo ? dinheiro(parseMoedaBR(totalMinimo)) : "";
+}
+
+function salvarFiltrosRisco(){
+  const minPedidos = parseInt(document.getElementById("riscoMinPedidos")?.value || 2);
+  const diasSemCompra = parseInt(document.getElementById("riscoDiasSemCompra")?.value || 30);
+  const buscaCliente = document.getElementById("riscoBuscaCliente")?.value || "";
+  const status = document.getElementById("riscoFiltroStatus")?.value || "Todos";
+  const totalMinimo = parseMoedaBR(document.getElementById("riscoTotalMinimo")?.value || 0);
+
+  localStorage.setItem("jng_crm_risco_min_pedidos", Math.max(minPedidos,1));
+  localStorage.setItem("jng_crm_risco_dias_sem_compra", Math.max(diasSemCompra,1));
+  localStorage.setItem("jng_crm_risco_busca_cliente", buscaCliente);
+  localStorage.setItem("jng_crm_risco_status", status);
+  localStorage.setItem("jng_crm_risco_total_minimo", totalMinimo);
+}
+
+function statusClienteRisco(diasSemComprar){
+  if(diasSemComprar >= 120) return "Sem Volta";
+  if(diasSemComprar >= 60) return "Risco Alto";
+  if(diasSemComprar >= 30) return "Atencao";
+  return "Monitorar";
+}
+
+function badgeStatusRisco(status){
+  if(status === "Sem Volta") return `<span class="bg-gray-200 text-gray-800 px-3 py-1 rounded-full font-bold text-xs">Sem Volta</span>`;
+  if(status === "Risco Alto") return `<span class="bg-red-100 text-red-700 px-3 py-1 rounded-full font-bold text-xs">Risco Alto</span>`;
+  if(status === "Atencao") return `<span class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full font-bold text-xs">Atenção</span>`;
+  return `<span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full font-bold text-xs">Monitorar</span>`;
+}
+
+let ordenacaoRisco = { campo: localStorage.getItem("jng_crm_risco_sort_campo") || "diasSemComprar", direcao: localStorage.getItem("jng_crm_risco_sort_direcao") || "desc" };
+
+function ordenarRisco(campo){
+  if(ordenacaoRisco.campo === campo){
+    ordenacaoRisco.direcao = ordenacaoRisco.direcao === "asc" ? "desc" : "asc";
+  }else{
+    ordenacaoRisco.campo = campo;
+    ordenacaoRisco.direcao = campo === "nome" || campo === "statusTexto" ? "asc" : "desc";
+  }
+
+  localStorage.setItem("jng_crm_risco_sort_campo", ordenacaoRisco.campo);
+  localStorage.setItem("jng_crm_risco_sort_direcao", ordenacaoRisco.direcao);
+  gerarClientesEmRisco();
+}
+
+function atualizarIndicadoresOrdenacaoRisco(){
+  ["nome","pedidos","ultimaCompra","diasSemComprar","total","statusTexto"].forEach(campo => {
+    const el = document.getElementById(`sortRisco_${campo}`);
+    if(!el) return;
+    el.innerText = ordenacaoRisco.campo === campo ? (ordenacaoRisco.direcao === "asc" ? "▲" : "▼") : "↕";
+  });
+}
+
+function compararRisco(a,b){
+  const campo = ordenacaoRisco.campo || "diasSemComprar";
+  const direcao = ordenacaoRisco.direcao === "asc" ? 1 : -1;
+  let resultado = 0;
+
+  if(campo === "nome" || campo === "statusTexto"){
+    resultado = String(a[campo] || "").localeCompare(String(b[campo] || ""), "pt-BR");
+  }else if(campo === "ultimaCompra"){
+    resultado = new Date(a.ultimaCompra).getTime() - new Date(b.ultimaCompra).getTime();
+  }else{
+    resultado = Number(a[campo] || 0) - Number(b[campo] || 0);
+  }
+
+  if(resultado === 0){
+    resultado = Number(b.total || 0) - Number(a.total || 0);
+  }
+
+  return resultado * direcao;
+}
+
+function gerarClientesEmRisco(){
+  const tbody = document.getElementById("clientesEmRiscoTabela");
+  if(!tbody) return;
+  atualizarIndicadoresOrdenacaoRisco();
+
+  const minPedidos = parseInt(document.getElementById("riscoMinPedidos")?.value || localStorage.getItem("jng_crm_risco_min_pedidos") || 2);
+  const diasMinimos = parseInt(document.getElementById("riscoDiasSemCompra")?.value || localStorage.getItem("jng_crm_risco_dias_sem_compra") || 30);
+  const buscaCliente = normalizar(document.getElementById("riscoBuscaCliente")?.value || localStorage.getItem("jng_crm_risco_busca_cliente") || "");
+  const statusSelecionado = document.getElementById("riscoFiltroStatus")?.value || localStorage.getItem("jng_crm_risco_status") || "Todos";
+  const totalMinimo = parseMoedaBR(document.getElementById("riscoTotalMinimo")?.value || localStorage.getItem("jng_crm_risco_total_minimo") || 0);
+
+  const hoje = new Date();
+  hoje.setHours(0,0,0,0);
+
+  const clientes = {};
+
+  dadosOriginais.forEach(r => {
+    const cliente = getCliente(r) || "Sem Nome";
+    const dataTexto = getDataTexto(r);
+    const valor = getValor(r);
+
+    if(!dataTexto) return;
+
+    const data = converterDataBR(dataTexto);
+    if(isNaN(data.getTime())) return;
+
+    if(!clientes[cliente]){
+      clientes[cliente] = {
+        nome: cliente,
+        pedidos: 0,
+        total: 0,
+        ultimaCompra: data
+      };
+    }
+
+    clientes[cliente].pedidos++;
+    clientes[cliente].total += valor;
+
+    if(data > clientes[cliente].ultimaCompra){
+      clientes[cliente].ultimaCompra = data;
+    }
+  });
+
+  const lista = Object.values(clientes)
+    .map(item => {
+      const ultima = new Date(item.ultimaCompra);
+      ultima.setHours(0,0,0,0);
+      const diasSemComprar = Math.max(Math.floor((hoje - ultima) / (1000 * 60 * 60 * 24)),0);
+      const statusTexto = statusClienteRisco(diasSemComprar);
+      return {...item, diasSemComprar, statusTexto};
+    })
+    .filter(item => item.pedidos >= minPedidos)
+    .filter(item => item.diasSemComprar >= diasMinimos)
+    .filter(item => item.total >= totalMinimo)
+    .filter(item => !buscaCliente || normalizar(item.nome).includes(buscaCliente))
+    .filter(item => statusSelecionado === "Todos" || item.statusTexto === statusSelecionado)
+    .sort(compararRisco);
+
+  const maiorDias = lista.length ? Math.max(...lista.map(x => x.diasSemComprar)) : 0;
+  const valorHistorico = lista.reduce((acc,item) => acc + item.total,0);
+  const totalSemVolta = lista.filter(item => item.statusTexto === "Sem Volta").length;
+
+  document.getElementById("riscoTotalClientes").innerText = lista.length;
+  document.getElementById("riscoMaiorDias").innerText = `${maiorDias} dias`;
+  document.getElementById("riscoValorHistorico").innerText = dinheiro(valorHistorico);
+  document.getElementById("riscoSemVolta").innerText = totalSemVolta;
+
+  tbody.innerHTML = "";
+
+  if(lista.length === 0){
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="9" class="py-6 text-center text-green-600 font-semibold">
+          Nenhum cliente em risco com os filtros atuais.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  lista.slice(0,50).forEach(item => {
+    const status = badgeStatusRisco(item.statusTexto);
+
+    const key = chaveClienteRisco(item.nome);
+    const contatoSalvo = obterContatoClienteRisco(item.nome);
+    const mensagemSalva = obterMensagemClienteRisco(item.nome);
+
+    tbody.innerHTML += `
+      <tr class="table-hover border-b align-top">
+        <td class="py-4 font-semibold">${escapeHTML(item.nome)}</td>
+        <td class="py-4">${item.pedidos}</td>
+        <td class="py-4">${item.ultimaCompra.toLocaleDateString("pt-BR")}</td>
+        <td class="py-4 font-bold text-red-600">${item.diasSemComprar} dias</td>
+        <td class="py-4 font-bold text-green-600">${dinheiro(item.total)}</td>
+        <td class="py-4">${status}</td>
+        <td class="py-4">
+          <input id="contato_${key}" value="${escapeHTML(contatoSalvo)}" placeholder="Ex: 11999999999" class="border border-gray-300 rounded-xl px-3 py-2 bg-white w-40 text-sm">
+        </td>
+        <td class="py-4">
+          <textarea id="mensagem_${key}" class="border border-gray-300 rounded-xl px-3 py-2 bg-white w-full min-h-[96px] text-sm resize-y">${escapeHTML(mensagemSalva)}</textarea>
+        </td>
+        <td class="py-4">
+          <div class="flex flex-col gap-2 min-w-[140px]">
+            <button onclick='salvarContatoMensagemRisco(${JSON.stringify(item.nome)})' class="bg-gray-700 hover:bg-gray-800 text-white px-3 py-2 rounded-xl text-xs font-semibold">Salvar</button>
+            <button onclick='abrirWhatsAppRisco(${JSON.stringify(item.nome)})' class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-xl text-xs font-semibold">WhatsApp</button>
+            <span id="status_salvo_${key}" class="text-xs text-gray-400 h-4"></span>
+          </div>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function gerarHistoricoCliente(){
+  const clienteSelecionado = document.getElementById("filtroClienteHistorico").value;
+  const anoSelecionado = document.getElementById("filtroAnoHistorico").value;
+
+  const meses = {
+    Jan:0,Fev:0,Mar:0,Abr:0,
+    Mai:0,Jun:0,Jul:0,Ago:0,
+    Set:0,Out:0,Nov:0,Dez:0
+  };
+
+  const nomesMeses = Object.keys(meses);
+
+  let total = 0;
+  let pedidos = 0;
+  if(!clienteSelecionado){
+    document.getElementById("histTotalComprado").innerText = dinheiro(0);
+    document.getElementById("histPedidos").innerText = "0";
+    document.getElementById("histTicket").innerText = dinheiro(0);
+    document.getElementById("histMelhorMes").innerText = "-";
+
+    if(historicoClienteChart){
+      historicoClienteChart.destroy();
+    }
+
+    historicoClienteChart = new Chart(document.getElementById("historicoClienteChart"), {
+      type:"bar",
+      data:{
+        labels:Object.keys(meses),
+        datasets:[{
+          label:"Compras",
+          data:Object.values(meses)
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false
+      }
+    });
+
+    return;
+  }
+
+  dadosOriginais.forEach(r => {
+    const cliente = getCliente(r);
+    const dataTexto = getDataTexto(r);
+    const valor = getValor(r);
+
+    if(!dataTexto) return;
+    if(cliente !== clienteSelecionado) return;
+
+    const data = converterDataBR(dataTexto);
+    const ano = data.getFullYear();
+    const mes = data.getMonth();
+
+    if(anoSelecionado !== "Todos" && ano != anoSelecionado) return;
+
+    total += valor;
+    pedidos++;
+
+    meses[nomesMeses[mes]] += valor;
+
+  });
+
+  const ticket = pedidos > 0 ? total / pedidos : 0;
+
+  let melhorMes = "-";
+  let melhorValor = 0;
+
+  Object.entries(meses).forEach(([mes,valor]) => {
+    if(valor > melhorValor){
+      melhorValor = valor;
+      melhorMes = mes;
+    }
+  });
+
+  document.getElementById("histTotalComprado").innerText = dinheiro(total);
+  document.getElementById("histPedidos").innerText = pedidos;
+  document.getElementById("histTicket").innerText = dinheiro(ticket);
+  document.getElementById("histMelhorMes").innerText = melhorValor > 0 ? melhorMes : "-";
+
+  if(historicoClienteChart){
+    historicoClienteChart.destroy();
+  }
+
+  historicoClienteChart = new Chart(document.getElementById("historicoClienteChart"), {
+    type:"bar",
+    data:{
+      labels:Object.keys(meses),
+      datasets:[{
+        label:"Compras",
+        data:Object.values(meses)
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false
+    }
+  });
+}
+
+document.getElementById("filtroDia").addEventListener("change",aplicarFiltros);
+document.getElementById("filtroAno").addEventListener("change",aplicarFiltros);
+document.getElementById("filtroMes").addEventListener("change",aplicarFiltros);
+
+function aplicarFiltros(){
+  const diaSelecionado = document.getElementById("filtroDia").value;
+  const anoSelecionado = document.getElementById("filtroAno").value;
+  const mesSelecionado = document.getElementById("filtroMes").value;
+
+  let faturamento = 0;
+  let pedidos = 0;
+
+  const clientes = {};
+  const clientesSet = new Set();
+
+  const meses = {
+    Jan:0,Fev:0,Mar:0,Abr:0,
+    Mai:0,Jun:0,Jul:0,Ago:0,
+    Set:0,Out:0,Nov:0,Dez:0
+  };
+
+  const nomesMeses = Object.keys(meses);
+
+  dadosOriginais.forEach(r => {
+    const cliente = getCliente(r) || "Sem Nome";
+    const dataTexto = getDataTexto(r);
+    const valor = getValor(r);
+
+    if(!dataTexto) return;
+
+    const data = converterDataBR(dataTexto);
+    const ano = data.getFullYear();
+    const mes = data.getMonth();
+    const dia = data.getDate();
+
+    if(
+      (diaSelecionado !== "Todos" && dia != diaSelecionado) ||
+      (anoSelecionado !== "Todos" && ano != anoSelecionado) ||
+      (mesSelecionado !== "Todos" && mes != mesSelecionado)
+    ){
+      return;
+    }
+
+    faturamento += valor;
+    pedidos++;
+    clientesSet.add(cliente);
+
+    if(!clientes[cliente]){
+      clientes[cliente] = {
+        pedidos:0,
+        total:0
+      };
+    }
+
+    clientes[cliente].pedidos++;
+    clientes[cliente].total += valor;
+
+    meses[nomesMeses[mes]] += valor;
+  });
+
+  document.getElementById("faturamento").innerText = dinheiro(faturamento);
+  document.getElementById("pedidos").innerText = pedidos;
+  document.getElementById("ticket").innerText = pedidos > 0 ? dinheiro(faturamento/pedidos) : "R$ 0";
+  document.getElementById("clientes").innerText = clientesSet.size;
+
+  rankingGlobal = Object.entries(clientes)
+    .map(([nome,dados]) => ({
+      nome,
+      pedidos:dados.pedidos,
+      total:dados.total
+    }))
+    .sort((a,b) => b.total - a.total);
+
+  renderTabela(rankingGlobal);
+  atualizarGraficos(meses);
+}
+
+function renderTabela(lista){
+  const tbody = document.getElementById("rankingTabela");
+  tbody.innerHTML = "";
+
+  lista.forEach((item,index) => {
+    tbody.innerHTML += `
+      <tr class="table-hover border-b">
+        <td class="py-4 font-bold">${index+1}</td>
+        <td>${item.nome}</td>
+        <td>${item.pedidos}</td>
+        <td class="font-bold text-green-600">${dinheiro(item.total)}</td>
+      </tr>
+    `;
+  });
+}
+
+function atualizarGraficos(meses){
+  if(mensalChart) mensalChart.destroy();
+  if(rankingChart) rankingChart.destroy();
+
+  mensalChart = new Chart(document.getElementById("mensalChart"), {
+    type:"bar",
+    data:{
+      labels:Object.keys(meses),
+      datasets:[{
+        label:"Faturamento",
+        data:Object.values(meses)
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false
+    }
+  });
+
+  const top = rankingGlobal.slice(0,10);
+
+  rankingChart = new Chart(document.getElementById("rankingChart"), {
+    type:"bar",
+    data:{
+      labels:top.map(x=>x.nome),
+      datasets:[{
+        label:"Total Comprado",
+        data:top.map(x=>x.total)
+      }]
+    },
+    options:{
+      indexAxis:"y",
+      responsive:true,
+      maintainAspectRatio:false
+    }
+  });
+}
+
+document.getElementById("btnClientesPerdidos").addEventListener("click",abrirModal);
+
+function abrirModal(){
+  document.getElementById("modalPerdidos").classList.remove("hidden");
+  document.getElementById("modalPerdidos").classList.add("flex");
+  gerarClientesPerdidos();
+}
+
+function fecharModal(){
+  document.getElementById("modalPerdidos").classList.remove("flex");
+  document.getElementById("modalPerdidos").classList.add("hidden");
+}
+
+function gerarClientesPerdidos(){
+  const tabela = document.getElementById("clientesPerdidosTabela");
+  tabela.innerHTML = "";
+
+  const anoSelecionado = document.getElementById("filtroAno").value;
+  const mesSelecionado = document.getElementById("filtroMes").value;
+
+  if(anoSelecionado === "Todos" || mesSelecionado === "Todos"){
+    tabela.innerHTML = `
+      <tr>
+        <td colspan="3" class="py-6 text-center text-red-500 font-semibold">
+          Selecione Ano e Mês.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  const anoAtual = parseInt(anoSelecionado);
+  const mesAtual = parseInt(mesSelecionado);
+
+  let anoAnterior = anoAtual;
+  let mesAnterior = mesAtual - 1;
+
+  if(mesAnterior < 0){
+    mesAnterior = 11;
+    anoAnterior--;
+  }
+
+  const atual = {};
+  const anterior = {};
+
+  dadosOriginais.forEach(r => {
+    const cliente = getCliente(r);
+    const dataTexto = getDataTexto(r);
+    const valor = getValor(r);
+
+    if(!dataTexto) return;
+
+    const data = converterDataBR(dataTexto);
+    const ano = data.getFullYear();
+    const mes = data.getMonth();
+
+    if(ano === anoAnterior && mes === mesAnterior){
+      if(!anterior[cliente]){
+        anterior[cliente] = 0;
+      }
+
+      anterior[cliente] += valor;
+    }
+
+    if(ano === anoAtual && mes === mesAtual){
+      atual[cliente] = true;
+    }
+  });
+
+  Object.keys(anterior).forEach(cliente => {
+    if(!atual[cliente]){
+      tabela.innerHTML += `
+        <tr class="border-b">
+          <td class="py-4">${cliente}</td>
+          <td>${String(mesAnterior+1).padStart(2,"0")}/${anoAnterior}</td>
+          <td class="font-bold text-red-500">${dinheiro(anterior[cliente])}</td>
+        </tr>
+      `;
+    }
+  });
+
+  if(tabela.innerHTML === ""){
+    tabela.innerHTML = `
+      <tr>
+        <td colspan="3" class="py-6 text-center text-green-600 font-semibold">
+          Nenhum cliente perdido.
+        </td>
+      </tr>
+    `;
+  }
+}
+
+function gerarPainelMetas(){
+  const anoSelecionado = document.getElementById("filtroMetaAno").value;
+  const metaMensal = getMetaMensalAno(anoSelecionado);
+  const campoMetaEditavel = document.getElementById("metaMensalEditavelInput");
+  if(campoMetaEditavel){
+    campoMetaEditavel.value = metaMensal > 0 ? dinheiro(metaMensal) : "";
+  }
+
+  const meses = [
+    "Jan","Fev","Mar","Abr","Mai","Jun",
+    "Jul","Ago","Set","Out","Nov","Dez"
+  ];
+
+  const faturamentoMeses = Array(12).fill(0);
+
+  dadosOriginais.forEach(r => {
+    const dataTexto = getDataTexto(r);
+    const valor = getValor(r);
+
+    if(!dataTexto) return;
+
+    const data = converterDataBR(dataTexto);
+
+    if(data.getFullYear() == anoSelecionado){
+      faturamentoMeses[data.getMonth()] += valor;
+    }
+  });
+
+  const media = faturamentoMeses.reduce((a,b)=>a+b,0) / 12;
+
+  let crescimento = 0;
+
+  if(faturamentoMeses[0] > 0){
+    crescimento = ((faturamentoMeses[11]-faturamentoMeses[0]) / faturamentoMeses[0]) * 100;
+  }
+
+  document.getElementById("metaMensal").innerText = dinheiro(metaMensal);
+  document.getElementById("mediaMensal").innerText = dinheiro(media);
+  document.getElementById("crescimentoMeta").innerText = `${crescimento.toFixed(1)}%`;
+
+  if(metaChart) metaChart.destroy();
+  if(crescimentoChart) crescimentoChart.destroy();
+
+  metaChart = new Chart(document.getElementById("metaChart"), {
+    type:"bar",
+    data:{
+      labels:meses,
+      datasets:[
+        {
+          label:"Resultado",
+          data:faturamentoMeses
+        },
+        {
+          label:"Meta Mensal",
+          data:Array(12).fill(metaMensal)
+        }
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false
+    }
+  });
+
+  crescimentoChart = new Chart(document.getElementById("crescimentoChart"), {
+    type:"line",
+    data:{
+      labels:meses,
+      datasets:[{
+        label:"Faturamento",
+        data:faturamentoMeses
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false
+    }
+  });
+}
+
+function salvarMetasPerformance(){
+  const {ano} = obterPeriodoPerformance();
+  const campoMetaMensal = document.getElementById("metaMensalPerformanceInput");
+  const metaMensal = parseMoedaBR(campoMetaMensal?.value || 0);
+
+  metasMensais[String(ano)] = metaMensal;
+  localStorage.setItem("jng_crm_metas_mensais", JSON.stringify(metasMensais));
+
+  if(campoMetaMensal){
+    campoMetaMensal.value = metaMensal > 0 ? dinheiro(metaMensal) : "";
+  }
+
+  if(document.getElementById("filtroMetaAno")?.value == ano){
+    const campoMetaEditavel = document.getElementById("metaMensalEditavelInput");
+    if(campoMetaEditavel){
+      campoMetaEditavel.value = metaMensal > 0 ? dinheiro(metaMensal) : "";
+    }
+  }
+
+  gerarPainelMetas();
+  gerarPerformance(false);
+}
+
+function carregarMetaMensalPerformance(){
+  return sincronizarMetaPerformanceComAno();
+}
+
+function atualizarCamposMetasCalculadas(metaDiaria, metaSemanal){
+  const campoMetaDiaria = document.getElementById("metaDiariaInput");
+  const campoMetaSemanal = document.getElementById("metaSemanalInput");
+
+  if(campoMetaDiaria){
+    campoMetaDiaria.value = dinheiro(metaDiaria);
+  }
+
+  if(campoMetaSemanal){
+    campoMetaSemanal.value = dinheiro(metaSemanal);
+  }
+}
+
+function gerarPerformance(atualizarListas=true){
+  const metaMensalInformada = carregarMetaMensalPerformance();
+
+  if(atualizarListas){
+    popularPeriodoPerformance();
+    popularSemanasPerformance();
+    popularDiasPerformance();
+  }
+
+  const hoje = new Date();
+  hoje.setHours(0,0,0,0);
+
+  const {ano, mes, base, ehMesAtual} = obterPeriodoPerformance();
+  const semanas = gerarSemanasDoMes(base);
+  const semanaSelecionadaId = document.getElementById("filtroSemanaPerformance").value;
+  const semanaSelecionada = semanas.find(s => s.id === semanaSelecionadaId) || semanas[0];
+
+  const iniSemana = new Date(semanaSelecionada.inicio);
+  const fimSem = new Date(semanaSelecionada.fim);
+  fimSem.setHours(23,59,59,999);
+
+  const iniSemanaAnterior = new Date(iniSemana);
+  iniSemanaAnterior.setDate(iniSemanaAnterior.getDate() - 7);
+
+  const fimSemanaAnterior = new Date(fimSem);
+  fimSemanaAnterior.setDate(fimSemanaAnterior.getDate() - 7);
+
+  const diaSelecionadoValor = document.getElementById("filtroDiaPerformance")?.value || "hoje";
+  let diaSelecionado = ehMesAtual ? new Date(hoje) : listarDiasUteisDoMes(ano, mes)[0] || new Date(ano, mes, 1);
+
+  if(diaSelecionadoValor !== "hoje"){
+    const partes = diaSelecionadoValor.split("-");
+    diaSelecionado = new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
+  }
+
+  diaSelecionado.setHours(0,0,0,0);
+
+  let fatDiaSelecionado = 0;
+  let pedidosDiaSelecionado = 0;
+
+  let fatSemana = 0;
+  let pedidosSemana = 0;
+  let fatSemanaAnterior = 0;
+
+  const diasUteisMes = listarDiasUteisDoMes(ano, mes);
+  const faturamentoPorDiaUtil = Array(diasUteisMes.length).fill(0);
+
+  dadosOriginais.forEach(r => {
+    const dataTexto = getDataTexto(r);
+    const valor = getValor(r);
+
+    if(!dataTexto) return;
+
+    const data = converterDataBR(dataTexto);
+    data.setHours(0,0,0,0);
+
+    if(!ehDiaUtil(data)) return;
+
+    const indexDiaUtil = diasUteisMes.findIndex(d => mesmaData(d,data));
+
+    if(indexDiaUtil >= 0){
+      faturamentoPorDiaUtil[indexDiaUtil] += valor;
+    }
+
+    if(mesmaData(data, diaSelecionado)){
+      fatDiaSelecionado += valor;
+      pedidosDiaSelecionado++;
+    }
+
+    if(data >= iniSemana && data <= fimSem){
+      fatSemana += valor;
+      pedidosSemana++;
+    }
+
+    if(data >= iniSemanaAnterior && data <= fimSemanaAnterior){
+      fatSemanaAnterior += valor;
+    }
+  });
+
+  let diasUteisCorridos = 0;
+  let diasUteisRestantes = 0;
+
+  if(ehMesAtual){
+    diasUteisCorridos = diasUteisMes.filter(d => d <= hoje).length;
+    diasUteisRestantes = diasUteisMes.filter(d => d > hoje).length;
+  }else if(new Date(ano, mes + 1, 0) < hoje){
+    diasUteisCorridos = diasUteisMes.length;
+    diasUteisRestantes = 0;
+  }else{
+    diasUteisCorridos = 0;
+    diasUteisRestantes = diasUteisMes.length;
+  }
+
+  const fatMesAtual = faturamentoPorDiaUtil.reduce((a,b)=>a+b,0);
+  const mediaDiariaUtil = diasUteisCorridos > 0 ? fatMesAtual / diasUteisCorridos : 0;
+  const projecaoMes = ehMesAtual ? (mediaDiariaUtil * diasUteisMes.length) : fatMesAtual;
+
+  const metaMensalAtual = metaMensalInformada > 0 ? metaMensalInformada : getMetaMensalAno(ano);
+  const diasUteisSemanaSelecionada = contarDiasUteis(iniSemana, fimSem);
+  // Cálculo revisado: a meta diária é sempre a meta mensal dividida pelos dias úteis do mês filtrado.
+  // A meta semanal é essa meta diária multiplicada apenas pelos dias úteis da semana selecionada.
+  const metaDiaria = diasUteisMes.length > 0 ? metaMensalAtual / diasUteisMes.length : 0;
+  const metaSemanal = metaDiaria * diasUteisSemanaSelecionada;
+
+  atualizarCamposMetasCalculadas(metaDiaria, metaSemanal);
+
+  const restanteParaMetaMensal = Math.max(metaMensalAtual - fatMesAtual,0);
+  const necessarioDiaUtil = diasUteisRestantes > 0 ? restanteParaMetaMensal / diasUteisRestantes : 0;
+
+  const comparativoSemanaAnterior = fatSemanaAnterior > 0 ? ((fatSemana - fatSemanaAnterior) / fatSemanaAnterior) * 100 : 0;
+
+  const pctDiaria = metaDiaria > 0 ? (fatDiaSelecionado / metaDiaria) * 100 : 0;
+  const pctSemanal = metaSemanal > 0 ? (fatSemana / metaSemanal) * 100 : 0;
+
+  const metaPeriodo = metaMensalAtual;
+  const vendidoPeriodo = fatMesAtual;
+  const faltantePeriodo = Math.max(metaPeriodo - vendidoPeriodo, 0);
+  const pctPeriodo = metaPeriodo > 0 ? (vendidoPeriodo / metaPeriodo) * 100 : 0;
+
+  document.getElementById("perfDiaTitulo").innerText = `Faturamento ${String(diaSelecionado.getDate()).padStart(2,"0")}/${String(diaSelecionado.getMonth()+1).padStart(2,"0")}`;
+  document.getElementById("perfHojeFat").innerText = dinheiro(fatDiaSelecionado);
+  document.getElementById("perfHojePedidos").innerText = `${pedidosDiaSelecionado} pedidos`;
+
+  document.getElementById("perfSemanaFat").innerText = dinheiro(fatSemana);
+  document.getElementById("perfSemanaPedidos").innerText = `${pedidosSemana} pedidos`;
+
+  document.getElementById("perfProjecaoMes").innerText = dinheiro(projecaoMes);
+  document.getElementById("perfMediaDiaria").innerText = `Média útil: ${dinheiro(mediaDiariaUtil)}`;
+
+  document.getElementById("perfMetaPeriodo").innerText = dinheiro(metaPeriodo);
+  document.getElementById("perfTotalVendidoPeriodo").innerText = dinheiro(vendidoPeriodo);
+  document.getElementById("perfFaltantePeriodo").innerText = dinheiro(faltantePeriodo);
+  document.getElementById("perfPctPeriodo").innerText = `${pctPeriodo.toFixed(1)}%`;
+  document.getElementById("perfMetaPeriodoBar").style.width = `${Math.min(pctPeriodo,100)}%`;
+  document.getElementById("perfPeriodoDescricao").innerText =
+    faltantePeriodo <= 0 && metaPeriodo > 0
+      ? `Meta mensal batida. Excedente: ${dinheiro(vendidoPeriodo - metaPeriodo)}.`
+      : `Meta mensal: falta ${dinheiro(faltantePeriodo)}. Necessário por dia útil restante: ${dinheiro(necessarioDiaUtil)}.`;
+
+  document.getElementById("perfDiasUteisCorridos").innerText = diasUteisCorridos;
+  document.getElementById("perfDiasUteisRestantes").innerText = diasUteisRestantes;
+  document.getElementById("perfNecessarioDiaUtil").innerText = dinheiro(necessarioDiaUtil);
+
+  document.getElementById("perfMetaDiariaPct").innerText = `${pctDiaria.toFixed(1)}%`;
+  document.getElementById("perfMetaDiariaBar").style.width = `${Math.min(pctDiaria,100)}%`;
+  document.getElementById("perfMetaDiariaTexto").innerText =
+    fatDiaSelecionado >= metaDiaria && metaDiaria > 0
+      ? `Meta diária batida. Excedente: ${dinheiro(fatDiaSelecionado - metaDiaria)}.`
+      : `Falta ${dinheiro(Math.max(metaDiaria - fatDiaSelecionado,0))} para bater a meta diária.`;
+
+  document.getElementById("perfMetaSemanalPct").innerText = `${pctSemanal.toFixed(1)}%`;
+  document.getElementById("perfMetaSemanalBar").style.width = `${Math.min(pctSemanal,100)}%`;
+  document.getElementById("perfMetaSemanalTexto").innerText =
+    fatSemana >= metaSemanal && metaSemanal > 0
+      ? `Meta semanal batida. Excedente: ${dinheiro(fatSemana - metaSemanal)}.`
+      : `Falta ${dinheiro(Math.max(metaSemanal - fatSemana,0))} para bater a meta semanal.`;
+
+  if(performanceDiaChart) performanceDiaChart.destroy();
+  if(performanceSemanaChart) performanceSemanaChart.destroy();
+
+  performanceDiaChart = new Chart(document.getElementById("performanceDiaChart"), {
+    type:"bar",
+    data:{
+      labels:diasUteisMes.map(d => `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}`),
+      datasets:[{
+        label:"Faturamento",
+        data:faturamentoPorDiaUtil
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false
+    }
+  });
+
+  performanceSemanaChart = new Chart(document.getElementById("performanceSemanaChart"), {
+    type:"bar",
+    data:{
+      labels:["Semana Anterior","Semana Selecionada"],
+      datasets:[{
+        label:"Faturamento",
+        data:[fatSemanaAnterior,fatSemana]
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false
+    }
+  });
+
+  gerarAlertasESugestoesPerformance({
+    ano, mes, ehMesAtual,
+    metaMensal: metaMensalAtual,
+    metaDiaria, metaSemanal,
+    fatDia: fatDiaSelecionado,
+    fatSemana,
+    fatMes: fatMesAtual,
+    projecaoMes,
+    diasUteisCorridos,
+    diasUteisRestantes
+  });
+}
+
+
+function mesNome(mes){
+  return ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"][mes] || "";
+}
+
+function resumoClientesPorMes(ano, mes){
+  const atual = {};
+  const anterior = {};
+  let anoAnterior = ano;
+  let mesAnterior = mes - 1;
+  if(mesAnterior < 0){ mesAnterior = 11; anoAnterior--; }
+
+  dadosOriginais.forEach(r => {
+    const cliente = getCliente(r) || "Sem Nome";
+    const dataTexto = getDataTexto(r);
+    const valor = getValor(r);
+    if(!dataTexto) return;
+    const data = converterDataBR(dataTexto);
+
+    if(data.getFullYear() === ano && data.getMonth() === mes){
+      if(!atual[cliente]) atual[cliente] = 0;
+      atual[cliente] += valor;
+    }
+
+    if(data.getFullYear() === anoAnterior && data.getMonth() === mesAnterior){
+      if(!anterior[cliente]) anterior[cliente] = 0;
+      anterior[cliente] += valor;
+    }
+  });
+
+  const clientesPerdidos = Object.keys(anterior)
+    .filter(cliente => !atual[cliente])
+    .map(cliente => ({cliente, valor:anterior[cliente]}))
+    .sort((a,b)=>b.valor-a.valor);
+
+  const topClientes = Object.entries(atual)
+    .map(([cliente, valor]) => ({cliente, valor}))
+    .sort((a,b)=>b.valor-a.valor);
+
+  return {clientesAtuais:Object.keys(atual).length, clientesPerdidos, topClientes};
+}
+
+function criarItemPainel(tipo, titulo, texto, extra=""){
+  const classes = {
+    danger:"alert-card alert-danger",
+    success:"alert-card alert-success",
+    info:"alert-card alert-info",
+    warn:"alert-card"
+  };
+
+  return `
+    <div class="${classes[tipo] || classes.info} rounded-2xl p-4">
+      <h3 class="font-bold text-gray-800 mb-1">${titulo}</h3>
+      <p class="text-gray-600 text-sm leading-relaxed">${texto}</p>
+      ${extra ? `<p class="text-gray-500 text-xs mt-2">${extra}</p>` : ""}
+    </div>
+  `;
+}
+
+function gerarAlertasESugestoesPerformance(ctx){
+  const listaAlertas = document.getElementById("listaAlertasPerformance");
+  const listaSugestoes = document.getElementById("listaSugestoesPerformance");
+  const resumoAlertas = document.getElementById("resumoAlertasPerformance");
+  if(!listaAlertas || !listaSugestoes) return;
+
+  const {clientesAtuais, clientesPerdidos, topClientes} = resumoClientesPorMes(ctx.ano, ctx.mes);
+  const pctMeta = ctx.metaMensal > 0 ? (ctx.fatMes / ctx.metaMensal) * 100 : 0;
+  const pctSemana = ctx.metaSemanal > 0 ? (ctx.fatSemana / ctx.metaSemanal) * 100 : 0;
+  const pctDia = ctx.metaDiaria > 0 ? (ctx.fatDia / ctx.metaDiaria) * 100 : 0;
+  const precisaPorDia = ctx.diasUteisRestantes > 0 ? Math.max(ctx.metaMensal - ctx.fatMes,0) / ctx.diasUteisRestantes : 0;
+
+  const alertas = [];
+
+  if(ctx.metaMensal <= 0){
+    alertas.push(criarItemPainel("warn","Meta mensal não cadastrada","Cadastre a meta mensal para liberar o cálculo completo de faltante, projeção e alertas de risco."));
+  }else if(ctx.fatMes >= ctx.metaMensal){
+    alertas.push(criarItemPainel("success","Meta mensal batida",`O mês de ${mesNome(ctx.mes)} já superou a meta em ${dinheiro(ctx.fatMes - ctx.metaMensal)}.`));
+  }else if(ctx.ehMesAtual && ctx.projecaoMes < ctx.metaMensal){
+    alertas.push(criarItemPainel("danger","Meta mensal em risco",`A projeção atual é de ${dinheiro(ctx.projecaoMes)}, abaixo da meta de ${dinheiro(ctx.metaMensal)}.`, `Necessário por dia útil restante: ${dinheiro(precisaPorDia)}.`));
+  }else if(pctMeta < 60 && ctx.diasUteisCorridos > 10){
+    alertas.push(criarItemPainel("warn","Ritmo mensal abaixo do ideal",`O mês está com ${pctMeta.toFixed(1)}% da meta atingida.`, `Total vendido: ${dinheiro(ctx.fatMes)}.`));
+  }else{
+    alertas.push(criarItemPainel("success","Ritmo mensal saudável",`O mês está com ${pctMeta.toFixed(1)}% da meta atingida.`, `Projeção atual: ${dinheiro(ctx.projecaoMes)}.`));
+  }
+
+  if(ctx.metaSemanal > 0 && pctSemana < 80){
+    alertas.push(criarItemPainel("warn","Semana abaixo da meta",`A semana selecionada atingiu ${pctSemana.toFixed(1)}% da meta semanal.`, `Faltante semanal: ${dinheiro(Math.max(ctx.metaSemanal - ctx.fatSemana,0))}.`));
+  }
+
+  if(ctx.metaDiaria > 0 && pctDia < 80){
+    alertas.push(criarItemPainel("info","Dia abaixo da meta diária",`O dia filtrado atingiu ${pctDia.toFixed(1)}% da meta diária.`, `Faltante diário: ${dinheiro(Math.max(ctx.metaDiaria - ctx.fatDia,0))}.`));
+  }
+
+  if(clientesPerdidos.length > 0){
+    const topPerdidos = clientesPerdidos.slice(0,3).map(x => `${x.cliente} (${dinheiro(x.valor)})`).join(", ");
+    alertas.push(criarItemPainel("danger","Clientes sem compra no mês",`${clientesPerdidos.length} cliente(s) compraram no mês anterior e ainda não compraram em ${mesNome(ctx.mes)}.`, `Prioridade: ${topPerdidos}.`));
+  }
+
+  resumoAlertas.innerText = `${alertas.length} alertas`;
+  listaAlertas.innerHTML = alertas.join("");
+
+  const sugestoes = [];
+  const faltante = Math.max(ctx.metaMensal - ctx.fatMes,0);
+  const top3 = topClientes.slice(0,3).map(x => x.cliente).join(", ");
+  const perdidos3 = clientesPerdidos.slice(0,3).map(x => x.cliente).join(", ");
+
+  if(faltante > 0 && ctx.diasUteisRestantes > 0){
+    sugestoes.push(criarItemPainel("info","Plano para bater a meta",`Para bater a meta mensal, você precisa vender ${dinheiro(precisaPorDia)} por dia útil restante.`, `Faltante total: ${dinheiro(faltante)}.`));
+  }
+
+  if(perdidos3){
+    sugestoes.push(criarItemPainel("warn","Recuperar clientes parados",`Faça contato prioritário com: ${perdidos3}.`, "Esses clientes compraram no mês anterior e podem gerar fechamento rápido."));
+  }
+
+  if(top3){
+    sugestoes.push(criarItemPainel("success","Acelerar nos maiores compradores",`Use os top clientes do mês para tentar fechar o faltante: ${top3}.`, "Sugestão: ofertar condição de volume, disponibilidade imediata ou promoção por tempo limitado."));
+  }
+
+  if(ctx.ehMesAtual && ctx.projecaoMes < ctx.metaMensal){
+    sugestoes.push(criarItemPainel("danger","Ação comercial urgente",`Aumente a cadência de follow-up nesta semana e foque nos clientes com maior histórico de compra.`, "Priorize propostas abertas, pagamentos pendentes e clientes recorrentes."));
+  }else{
+    sugestoes.push(criarItemPainel("info","Manter ritmo comercial",`Acompanhe diariamente a meta diária e reforce contato com clientes que ainda não compraram no mês.`, `Clientes ativos no mês: ${clientesAtuais}.`));
+  }
+
+  listaSugestoes.innerHTML = sugestoes.join("");
+}
+
+async function exportarPdfPerformance(){
+  const painel = document.getElementById("painelPerformance");
+  if(!painel) return;
+
+  const botao = document.getElementById("btnExportarPdfPerf");
+  const textoOriginal = botao ? botao.innerText : "";
+  if(botao){
+    botao.innerText = "Gerando PDF...";
+    botao.disabled = true;
+  }
+
+  try{
+    const {ano, mes} = obterPeriodoPerformance();
+    const canvas = await html2canvas(painel, {scale:2, backgroundColor:"#f4f7fb", useCORS:true});
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jspdf.jsPDF("p", "mm", "a4");
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = pageWidth;
+    const imgHeight = canvas.height * imgWidth / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    while(heightLeft > 0){
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    pdf.save(`Performance_JNG_${mesNome(mes)}_${ano}.pdf`);
+  }catch(e){
+    alert("Não foi possível gerar o PDF. Tente novamente em alguns segundos.");
+    console.error(e);
+  }finally{
+    if(botao){
+      botao.innerText = textoOriginal;
+      botao.disabled = false;
+    }
+  }
+}
+
+
+function abrirModalVersao(){
+  document.getElementById("modalVersao").classList.add("open");
+}
+
+function fecharModalVersao(){
+  document.getElementById("modalVersao").classList.remove("open");
+}
+
+
+function getAtividadesComerciais(){
+  try{
+    return JSON.parse(localStorage.getItem("jng_atividades_comerciais") || "[]");
+  }catch(e){
+    return [];
+  }
+}
+
+function setAtividadesComerciais(lista){
+  localStorage.setItem("jng_atividades_comerciais", JSON.stringify(lista || []));
+}
+
+function dataHojeInput(){
+  const hoje = new Date();
+  return `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,"0")}-${String(hoje.getDate()).padStart(2,"0")}`;
+}
+
+function formatarDataInputParaBR(dataIso){
+  if(!dataIso) return "-";
+  const [ano,mes,dia] = String(dataIso).split("-");
+  if(!ano || !mes || !dia) return dataIso;
+  return `${dia}/${mes}/${ano}`;
+}
+
+function inicializarAtividades(){
+  const campoData = document.getElementById("atividadeData");
+  if(campoData && !campoData.value){
+    campoData.value = dataHojeInput();
+  }
+  renderAtividadesComerciais();
+}
+
+function abrirFormularioAtividade(){
+  limparFormularioAtividade();
+  const card = document.getElementById("formularioAtividadeCard");
+  if(card) card.classList.remove("hidden");
+  const titulo = document.getElementById("atividadeTituloFormulario");
+  if(titulo) titulo.innerText = "Registrar Atividade";
+}
+
+function fecharFormularioAtividade(){
+  const card = document.getElementById("formularioAtividadeCard");
+  if(card) card.classList.add("hidden");
+  limparFormularioAtividade();
+}
+
+function limparFormularioAtividade(){
+  document.getElementById("atividadeIdEdicao").value = "";
+  document.getElementById("atividadeData").value = dataHojeInput();
+  document.getElementById("atividadeTipo").value = "Orçamento";
+  document.getElementById("atividadeCliente").value = "";
+  document.getElementById("atividadeFeedback").value = "";
+  document.getElementById("atividadeMensagem").innerText = "";
+}
+
+function formatarDataHoraBR(iso){
+  if(!iso) return "-";
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return "-";
+  return d.toLocaleString("pt-BR", {day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit"});
+}
+
+function formatarHoraBR(iso){
+  if(!iso) return "-";
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return "-";
+  return d.toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"});
+}
+
+function escaparHtml(texto){
+  return String(texto || "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+function salvarAtividadeComercial(){
+  const idEdicao = document.getElementById("atividadeIdEdicao").value;
+  const data = document.getElementById("atividadeData").value;
+  const tipo = document.getElementById("atividadeTipo").value;
+  const cliente = document.getElementById("atividadeCliente").value.trim();
+  const feedback = document.getElementById("atividadeFeedback").value.trim();
+  const msg = document.getElementById("atividadeMensagem");
+
+  if(!data || !tipo || !cliente || !feedback){
+    msg.innerText = "Preencha data, tipo, cliente e feedback.";
+    msg.className = "text-sm mt-3 text-red-500";
+    return;
+  }
+
+  let atividades = getAtividadesComerciais();
+
+  if(idEdicao){
+    atividades = atividades.map(item => item.id === idEdicao ? {...item, data, tipo, cliente, feedback, atualizadoEm:new Date().toISOString()} : item);
+    msg.innerText = "Atividade atualizada com sucesso.";
+  }else{
+    const agora = new Date().toISOString();
+    atividades.push({
+      id: String(Date.now()),
+      data,
+      tipo,
+      cliente,
+      feedback,
+      criadoEm: agora
+    });
+    msg.innerText = "Atividade salva com sucesso.";
+  }
+
+  msg.className = "text-sm mt-3 text-green-600";
+  setAtividadesComerciais(atividades);
+  limparFormularioAtividade();
+  fecharFormularioAtividade();
+  renderAtividadesComerciais();
+}
+
+function editarAtividade(id){
+  const item = getAtividadesComerciais().find(a => a.id === id);
+  if(!item) return;
+  const card = document.getElementById("formularioAtividadeCard");
+  if(card) card.classList.remove("hidden");
+  const titulo = document.getElementById("atividadeTituloFormulario");
+  if(titulo) titulo.innerText = "Editar Atividade";
+  document.getElementById("atividadeIdEdicao").value = item.id;
+  document.getElementById("atividadeData").value = item.data;
+  document.getElementById("atividadeTipo").value = item.tipo;
+  document.getElementById("atividadeCliente").value = item.cliente;
+  document.getElementById("atividadeFeedback").value = item.feedback;
+  document.getElementById("atividadeMensagem").innerText = "Editando atividade selecionada.";
+  document.getElementById("atividadeMensagem").className = "text-sm mt-3 text-yellow-600";
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function excluirAtividade(id){
+  const idRef = String(id ?? "").trim();
+
+  if(!idRef){
+    alert("Não foi possível identificar esta atividade para exclusão.");
+    return;
+  }
+
+  const confirmado = window.confirm("Deseja excluir esta atividade?");
+  if(!confirmado) return;
+
+  const atividadesAtuais = getAtividadesComerciais();
+  const atividadesFiltradas = atividadesAtuais.filter(item => String(item.id ?? "").trim() !== idRef);
+
+  setAtividadesComerciais(atividadesFiltradas);
+
+  const campoEdicao = document.getElementById("atividadeIdEdicao");
+  if(campoEdicao && String(campoEdicao.value).trim() === idRef){
+    fecharFormularioAtividade();
+  }
+
+  renderAtividadesComerciais();
+
+  if(atividadesFiltradas.length === atividadesAtuais.length){
+    alert("Atividade não encontrada. Ela pode já ter sido excluída ou o navegador pode estar com cache antigo.");
+  }
+}
+
+
+window.excluirAtividade = excluirAtividade;
+window.editarAtividade = editarAtividade;
+
+function limparFiltrosAtividades(){
+  document.getElementById("filtroAtividadeTipo").value = "Todos";
+  document.getElementById("filtroAtividadeDataInicio").value = "";
+  document.getElementById("filtroAtividadeDataFim").value = "";
+  document.getElementById("filtroAtividadeCliente").value = "";
+  renderAtividadesComerciais();
+}
+
+function renderAtividadesComerciais(){
+  const tbody = document.getElementById("atividadesTabela");
+  if(!tbody) return;
+
+  const tipoFiltro = document.getElementById("filtroAtividadeTipo")?.value || "Todos";
+  const dataInicio = document.getElementById("filtroAtividadeDataInicio")?.value || "";
+  const dataFim = document.getElementById("filtroAtividadeDataFim")?.value || "";
+  const clienteFiltro = normalizar(document.getElementById("filtroAtividadeCliente")?.value || "");
+
+  let atividades = getAtividadesComerciais();
+
+  atividades = atividades.filter(item => {
+    if(tipoFiltro !== "Todos" && item.tipo !== tipoFiltro) return false;
+    if(dataInicio && item.data < dataInicio) return false;
+    if(dataFim && item.data > dataFim) return false;
+    if(clienteFiltro && !normalizar(item.cliente).includes(clienteFiltro)) return false;
+    return true;
+  }).sort((a,b) => String(b.data).localeCompare(String(a.data)) || String(b.criadoEm || "").localeCompare(String(a.criadoEm || "")));
+
+  const todas = getAtividadesComerciais();
+  const hoje = dataHojeInput();
+  const clientesSet = new Set(todas.map(a => normalizar(a.cliente)).filter(Boolean));
+  const porTipo = {};
+  todas.forEach(a => porTipo[a.tipo] = (porTipo[a.tipo] || 0) + 1);
+  const tipoTop = Object.entries(porTipo).sort((a,b)=>b[1]-a[1])[0]?.[0] || "-";
+
+  document.getElementById("ativTotal").innerText = todas.length;
+  document.getElementById("ativHoje").innerText = todas.filter(a => a.data === hoje).length;
+  document.getElementById("ativClientes").innerText = clientesSet.size;
+  document.getElementById("ativTipoTop").innerText = tipoTop;
+
+  tbody.innerHTML = "";
+
+  if(atividades.length === 0){
+    tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-gray-400">Nenhuma atividade encontrada.</td></tr>`;
+    return;
+  }
+
+  atividades.forEach(item => {
+    tbody.innerHTML += `
+      <tr class="border-b table-hover align-middle text-center">
+        <td class="py-4 font-semibold">${formatarDataInputParaBR(item.data)}</td>
+        <td class="font-semibold text-gray-600">${formatarHoraBR(item.criadoEm)}</td>
+        <td><span class="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs font-bold">${escaparHtml(item.tipo)}</span></td>
+        <td class="font-semibold text-gray-700">${escaparHtml(item.cliente)}</td>
+        <td class="text-gray-600 max-w-[520px] whitespace-pre-wrap text-left">${escaparHtml(item.feedback)}</td>
+        <td class="text-xs text-gray-500">${formatarDataHoraBR(item.atualizadoEm)}</td>
+        <td class="min-w-[170px]">
+          <button type="button" data-atividade-action="editar" data-atividade-id="${escaparHtml(item.id)}" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-bold mr-2">Editar</button>
+          <button type="button" data-atividade-action="excluir" data-atividade-id="${escaparHtml(item.id)}" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-xs font-bold">Excluir</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+document.addEventListener("click", function(e){
+  const botaoAtividade = e.target.closest("[data-atividade-action]");
+  if(!botaoAtividade) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  const acao = botaoAtividade.getAttribute("data-atividade-action");
+  const id = botaoAtividade.getAttribute("data-atividade-id");
+
+  if(acao === "editar"){
+    editarAtividade(id);
+    return;
+  }
+
+  if(acao === "excluir"){
+    excluirAtividade(id);
+  }
+});
+
+document.addEventListener("keydown", function(e){
+  if(e.key === "Escape" && document.getElementById("modalVersao")){
+    fecharModalVersao();
+  }
+});
+
+
+function inicializarIdentidadeCRM(){
+  const tituloSalvo = localStorage.getItem("jng_crm_titulo") || "JNG CRM";
+  const vendedorSalvo = localStorage.getItem("jng_crm_vendedor") || "";
+
+  const titulo = document.getElementById("tituloCRM");
+  const vendedor = document.getElementById("nomeVendedorCRM");
+
+  if(titulo) titulo.innerText = tituloSalvo;
+  if(vendedor) vendedor.value = vendedorSalvo;
+
+  atualizarSeparadorVendedor();
+}
+
+function salvarIdentidadeCRM(){
+  const titulo = document.getElementById("tituloCRM");
+  const vendedor = document.getElementById("nomeVendedorCRM");
+
+  const tituloValor = (titulo?.innerText || "JNG CRM").trim() || "JNG CRM";
+  const vendedorValor = (vendedor?.value || "").trim();
+
+  localStorage.setItem("jng_crm_titulo", tituloValor);
+  localStorage.setItem("jng_crm_vendedor", vendedorValor);
+
+  atualizarSeparadorVendedor();
+}
+
+function atualizarSeparadorVendedor(){
+  const vendedor = document.getElementById("nomeVendedorCRM");
+  const separador = document.getElementById("separadorVendedor");
+  if(!separador || !vendedor) return;
+  if((vendedor.value || "").trim()){
+    separador.classList.remove("hidden");
+  }else{
+    separador.classList.add("hidden");
+  }
+}
+
+function atualizarBotaoSidebar(){
+  const sidebar = document.getElementById("sidebar");
+  const arrow = document.getElementById("toggleArrow");
+  if(!sidebar || !arrow) return;
+  arrow.innerText = sidebar.classList.contains("collapsed") ? "▶" : "◀";
+}
+
+function toggleSidebar(){
+  const sidebar = document.getElementById("sidebar");
+  sidebar.classList.toggle("collapsed");
+  document.body.classList.toggle("sidebar-collapsed", sidebar.classList.contains("collapsed"));
+  localStorage.setItem("jng_sidebar_collapsed", sidebar.classList.contains("collapsed") ? "1" : "0");
+  atualizarBotaoSidebar();
+}
+
+function inicializarSidebar(){
+  const sidebar = document.getElementById("sidebar");
+  const recolhido = localStorage.getItem("jng_sidebar_collapsed") === "1";
+  if(recolhido){
+    sidebar.classList.add("collapsed");
+    document.body.classList.add("sidebar-collapsed");
+  }
+  atualizarBotaoSidebar();
+  setMenuAtivo("navCRM");
+}
+
+function setMenuAtivo(id){
+  document.querySelectorAll(".side-btn").forEach(btn => btn.classList.remove("active"));
+  const ativo = document.getElementById(id);
+  if(ativo) ativo.classList.add("active");
+}
+
+function abrirDashboard(){
+  setMenuAtivo("navCRM");
+  document.getElementById("dashboardCRM").classList.remove("hidden");
+  document.getElementById("painelMetas").classList.add("hidden");
+  document.getElementById("painelPerformance").classList.add("hidden");
+  document.getElementById("painelConfig").classList.add("hidden");
+  document.getElementById("painelRisco").classList.add("hidden");
+  document.getElementById("painelAtividades").classList.add("hidden");
+}
+
+function abrirMetas(){
+  setMenuAtivo("navMetas");
+  document.getElementById("dashboardCRM").classList.add("hidden");
+  document.getElementById("painelMetas").classList.remove("hidden");
+  document.getElementById("painelPerformance").classList.add("hidden");
+  document.getElementById("painelConfig").classList.add("hidden");
+  document.getElementById("painelRisco").classList.add("hidden");
+  document.getElementById("painelAtividades").classList.add("hidden");
+  gerarPainelMetas();
+}
+
+function abrirPerformance(){
+  setMenuAtivo("navPerf");
+  document.getElementById("dashboardCRM").classList.add("hidden");
+  document.getElementById("painelMetas").classList.add("hidden");
+  document.getElementById("painelPerformance").classList.remove("hidden");
+  document.getElementById("painelConfig").classList.add("hidden");
+  document.getElementById("painelRisco").classList.add("hidden");
+  document.getElementById("painelAtividades").classList.add("hidden");
+  popularPeriodoPerformance();
+  popularSemanasPerformance();
+  popularDiasPerformance();
+  gerarPerformance();
+}
+
+function abrirRisco(){
+  setMenuAtivo("navRisco");
+  document.getElementById("dashboardCRM").classList.add("hidden");
+  document.getElementById("painelMetas").classList.add("hidden");
+  document.getElementById("painelPerformance").classList.add("hidden");
+  document.getElementById("painelConfig").classList.add("hidden");
+  document.getElementById("painelRisco").classList.remove("hidden");
+  document.getElementById("painelAtividades").classList.add("hidden");
+  carregarFiltrosRisco();
+  gerarClientesEmRisco();
+}
+
+function abrirAtividades(){
+  setMenuAtivo("navAtiv");
+  document.getElementById("dashboardCRM").classList.add("hidden");
+  document.getElementById("painelMetas").classList.add("hidden");
+  document.getElementById("painelPerformance").classList.add("hidden");
+  document.getElementById("painelConfig").classList.add("hidden");
+  document.getElementById("painelRisco").classList.add("hidden");
+  document.getElementById("painelAtividades").classList.remove("hidden");
+  inicializarAtividades();
+}
+
+function abrirConfig(){
+  setMenuAtivo("navConfig");
+  document.getElementById("dashboardCRM").classList.add("hidden");
+  document.getElementById("painelMetas").classList.add("hidden");
+  document.getElementById("painelPerformance").classList.add("hidden");
+  document.getElementById("painelConfig").classList.remove("hidden");
+  document.getElementById("painelRisco").classList.add("hidden");
+  document.getElementById("painelAtividades").classList.add("hidden");
+  const painelStatus = document.getElementById("painelStatus"); if(painelStatus) painelStatus.classList.add("hidden");
+  preencherTelaConfig();
+}
+
+document.getElementById("pesquisa").addEventListener("input",function(){
+  const termo = normalizar(this.value);
+
+  renderTabela(
+    rankingGlobal.filter(x => normalizar(x.nome).includes(termo))
+  );
+});
+
+inicializarSidebar();
+inicializarIdentidadeCRM();
+preencherTelaConfig();
+if(crmConfigCompleta()) carregar(); else mostrarPrimeiroAcessoConfig();
+
+// Atualização automática reativada no patch v1.9.4.
+
+/* ===== PATCH v1.9.3 - Risco sem WhatsApp + Atividades com ocultar ===== */
+
+function getAtividadesComerciais(){
+  try{
+    const lista = JSON.parse(localStorage.getItem("jng_crm_atividades") || "[]");
+    return Array.isArray(lista) ? lista.map((a,i)=>({
+      id: a.id || `ativ_${Date.now()}_${i}_${Math.random().toString(36).slice(2,8)}`,
+      data: a.data || "",
+      tipo: a.tipo || "Outros",
+      cliente: a.cliente || "",
+      feedback: a.feedback || "",
+      criadoEm: a.criadoEm || a.hora || new Date().toLocaleString("pt-BR"),
+      editadoEm: a.editadoEm || "",
+      oculto: !!a.oculto
+    })) : [];
+  }catch(e){
+    return [];
+  }
+}
+
+function salvarAtividadesComerciais(lista){
+  localStorage.setItem("jng_crm_atividades", JSON.stringify(lista || []));
+}
+
+function inicializarAtividades(){
+  const hoje = new Date();
+  const campoData = document.getElementById("atividadeData");
+  if(campoData && !campoData.value){
+    campoData.value = `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,"0")}-${String(hoje.getDate()).padStart(2,"0")}`;
+  }
+  const lista = getAtividadesComerciais();
+  salvarAtividadesComerciais(lista);
+  renderAtividadesComerciais();
+}
+
+function abrirFormularioAtividade(){
+  const card = document.getElementById("formularioAtividadeCard");
+  if(card) card.classList.remove("hidden");
+
+  const titulo = document.getElementById("atividadeTituloFormulario");
+  if(titulo) titulo.innerText = "Registrar Atividade";
+
+  const id = document.getElementById("atividadeIdEdicao");
+  if(id) id.value = "";
+
+  const hoje = new Date();
+  const data = document.getElementById("atividadeData");
+  const tipo = document.getElementById("atividadeTipo");
+  const cliente = document.getElementById("atividadeCliente");
+  const feedback = document.getElementById("atividadeFeedback");
+  const msg = document.getElementById("atividadeMensagem");
+
+  if(data) data.value = `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,"0")}-${String(hoje.getDate()).padStart(2,"0")}`;
+  if(tipo) tipo.value = "Orçamento";
+  if(cliente) cliente.value = "";
+  if(feedback) feedback.value = "";
+  if(msg) msg.innerText = "";
+}
+
+function fecharFormularioAtividade(){
+  const card = document.getElementById("formularioAtividadeCard");
+  if(card) card.classList.add("hidden");
+}
+
+function salvarAtividadeComercial(){
+  const idEdicao = document.getElementById("atividadeIdEdicao")?.value || "";
+  const data = document.getElementById("atividadeData")?.value || "";
+  const tipo = document.getElementById("atividadeTipo")?.value || "Outros";
+  const cliente = (document.getElementById("atividadeCliente")?.value || "").trim();
+  const feedback = (document.getElementById("atividadeFeedback")?.value || "").trim();
+  const msg = document.getElementById("atividadeMensagem");
+
+  if(!data || !cliente || !feedback){
+    if(msg) msg.innerText = "Preencha data, cliente e feedback.";
+    return;
+  }
+
+  const lista = getAtividadesComerciais();
+  const agora = new Date().toLocaleString("pt-BR");
+
+  if(idEdicao){
+    const idx = lista.findIndex(a => String(a.id) === String(idEdicao));
+    if(idx >= 0){
+      lista[idx] = {...lista[idx], data, tipo, cliente, feedback, editadoEm:agora};
+    }
+  }else{
+    lista.unshift({
+      id:`ativ_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,
+      data,
+      tipo,
+      cliente,
+      feedback,
+      criadoEm:agora,
+      editadoEm:"",
+      oculto:false
+    });
+  }
+
+  salvarAtividadesComerciais(lista);
+  if(msg) msg.innerText = "Atividade salva com sucesso.";
+  fecharFormularioAtividade();
+  renderAtividadesComerciais();
+}
+
+function editarAtividadeComercial(id){
+  const lista = getAtividadesComerciais();
+  const item = lista.find(a => String(a.id) === String(id));
+  if(!item) return;
+
+  const card = document.getElementById("formularioAtividadeCard");
+  if(card) card.classList.remove("hidden");
+
+  const titulo = document.getElementById("atividadeTituloFormulario");
+  if(titulo) titulo.innerText = "Editar Atividade";
+
+  document.getElementById("atividadeIdEdicao").value = item.id;
+  document.getElementById("atividadeData").value = item.data || "";
+  document.getElementById("atividadeTipo").value = item.tipo || "Outros";
+  document.getElementById("atividadeCliente").value = item.cliente || "";
+  document.getElementById("atividadeFeedback").value = item.feedback || "";
+}
+
+function ocultarAtividadeComercial(id){
+  const lista = getAtividadesComerciais();
+  const idx = lista.findIndex(a => String(a.id) === String(id));
+  if(idx < 0) return;
+
+  if(!confirm("Deseja ocultar esta atividade do histórico?")) return;
+
+  lista[idx].oculto = true;
+  lista[idx].editadoEm = new Date().toLocaleString("pt-BR");
+  salvarAtividadesComerciais(lista);
+  renderAtividadesComerciais();
+}
+
+function restaurarAtividadesOcultas(){
+  const lista = getAtividadesComerciais().map(a => ({...a, oculto:false}));
+  salvarAtividadesComerciais(lista);
+  renderAtividadesComerciais();
+}
+
+function limparFiltrosAtividades(){
+  const tipo = document.getElementById("filtroAtividadeTipo");
+  const ini = document.getElementById("filtroAtividadeDataInicio");
+  const fim = document.getElementById("filtroAtividadeDataFim");
+  const cliente = document.getElementById("filtroAtividadeCliente");
+  if(tipo) tipo.value = "Todos";
+  if(ini) ini.value = "";
+  if(fim) fim.value = "";
+  if(cliente) cliente.value = "";
+  renderAtividadesComerciais();
+}
+
+function formatarDataISO(dataISO){
+  if(!dataISO) return "-";
+  const p = String(dataISO).split("-");
+  if(p.length !== 3) return dataISO;
+  return `${p[2]}/${p[1]}/${p[0]}`;
+}
+
+function renderAtividadesComerciais(){
+  const tbody = document.getElementById("atividadesTabela");
+  if(!tbody) return;
+
+  const tipoFiltro = document.getElementById("filtroAtividadeTipo")?.value || "Todos";
+  const dataInicio = document.getElementById("filtroAtividadeDataInicio")?.value || "";
+  const dataFim = document.getElementById("filtroAtividadeDataFim")?.value || "";
+  const clienteFiltro = normalizar(document.getElementById("filtroAtividadeCliente")?.value || "");
+
+  const todas = getAtividadesComerciais();
+  const visiveis = todas.filter(a => {
+    if(a.oculto) return false;
+    if(tipoFiltro !== "Todos" && a.tipo !== tipoFiltro) return false;
+    if(dataInicio && a.data < dataInicio) return false;
+    if(dataFim && a.data > dataFim) return false;
+    if(clienteFiltro && !normalizar(a.cliente).includes(clienteFiltro)) return false;
+    return true;
+  });
+
+  const hojeISO = (() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  })();
+
+  const clientesSet = new Set(todas.filter(a=>!a.oculto && a.cliente).map(a=>normalizar(a.cliente)));
+  const contTipo = {};
+  todas.filter(a=>!a.oculto).forEach(a => contTipo[a.tipo] = (contTipo[a.tipo] || 0) + 1);
+  const tipoTop = Object.entries(contTipo).sort((a,b)=>b[1]-a[1])[0]?.[0] || "-";
+
+  const totalEl = document.getElementById("ativTotal");
+  const hojeEl = document.getElementById("ativHoje");
+  const clientesEl = document.getElementById("ativClientes");
+  const tipoTopEl = document.getElementById("ativTipoTop");
+  if(totalEl) totalEl.innerText = todas.filter(a=>!a.oculto).length;
+  if(hojeEl) hojeEl.innerText = todas.filter(a=>!a.oculto && a.data === hojeISO).length;
+  if(clientesEl) clientesEl.innerText = clientesSet.size;
+  if(tipoTopEl) tipoTopEl.innerText = tipoTop;
+
+  tbody.innerHTML = "";
+
+  if(visiveis.length === 0){
+    tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-gray-400">Nenhuma atividade encontrada.</td></tr>`;
+    return;
+  }
+
+  visiveis
+    .sort((a,b)=>(b.data || "").localeCompare(a.data || "") || String(b.criadoEm || "").localeCompare(String(a.criadoEm || "")))
+    .forEach(item => {
+      tbody.innerHTML += `
+        <tr class="border-b table-hover">
+          <td class="py-4 text-center">${formatarDataISO(item.data)}</td>
+          <td class="py-4 text-center">${item.criadoEm || "-"}</td>
+          <td class="py-4 text-center"><span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full font-bold text-xs">${item.tipo || "-"}</span></td>
+          <td class="py-4 text-center font-semibold">${item.cliente || "-"}</td>
+          <td class="py-4 text-center max-w-[360px]">${item.feedback || "-"}</td>
+          <td class="py-4 text-center">${item.editadoEm || "-"}</td>
+          <td class="py-4 text-center">
+            <div class="flex gap-2 justify-center">
+              <button type="button" onclick="editarAtividadeComercial('${item.id}')" class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-xl font-bold text-sm">Editar</button>
+              <button type="button" onclick="ocultarAtividadeComercial('${item.id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-xl font-bold text-sm">Ocultar</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+}
+
+function gerarClientesEmRisco(){
+  const tabela = document.getElementById("clientesEmRiscoTabela");
+  if(!tabela) return;
+
+  const minPedidos = parseInt(document.getElementById("riscoMinPedidos")?.value || 2);
+  const diasMin = parseInt(document.getElementById("riscoDiasSemCompra")?.value || 30);
+  const historicoMin = parseMoedaBR(document.getElementById("riscoTotalMinimo")?.value || 0);
+  const busca = normalizar(document.getElementById("riscoBuscaCliente")?.value || "");
+  const statusFiltro = document.getElementById("riscoFiltroStatus")?.value || "Todos";
+
+  const hoje = new Date();
+  hoje.setHours(0,0,0,0);
+
+  const clientes = {};
+
+  dadosOriginais.forEach(r => {
+    const nome = getCliente(r) || "Sem Nome";
+    const dataTexto = getDataTexto(r);
+    const valor = getValor(r);
+    if(!dataTexto) return;
+
+    const data = converterDataBR(dataTexto);
+    if(isNaN(data.getTime())) return;
+
+    if(!clientes[nome]){
+      clientes[nome] = {nome, pedidos:0, total:0, ultimaCompra:data};
+    }
+
+    clientes[nome].pedidos++;
+    clientes[nome].total += valor;
+    if(data > clientes[nome].ultimaCompra) clientes[nome].ultimaCompra = data;
+  });
+
+  let lista = Object.values(clientes).map(c => {
+    const diasSemComprar = Math.floor((hoje - c.ultimaCompra) / (1000*60*60*24));
+    let statusTexto = "Atenção";
+    let statusClass = "bg-yellow-100 text-yellow-700";
+    if(diasSemComprar >= 120){
+      statusTexto = "Sem Volta";
+      statusClass = "bg-gray-200 text-gray-700";
+    }else if(diasSemComprar >= 60){
+      statusTexto = "Risco Alto";
+      statusClass = "bg-red-100 text-red-700";
+    }
+    return {...c, diasSemComprar, statusTexto, statusClass};
+  }).filter(c => {
+    if(c.pedidos < minPedidos) return false;
+    if(c.diasSemComprar < diasMin) return false;
+    if(c.total < historicoMin) return false;
+    if(busca && !normalizar(c.nome).includes(busca)) return false;
+    if(statusFiltro !== "Todos" && c.statusTexto !== statusFiltro) return false;
+    return true;
+  });
+
+  if(window.riscoSort && window.riscoSort.campo){
+    const {campo, dir} = window.riscoSort;
+    lista.sort((a,b)=>{
+      let va = a[campo], vb = b[campo];
+      if(va instanceof Date) va = va.getTime();
+      if(vb instanceof Date) vb = vb.getTime();
+      if(typeof va === "string") return dir * va.localeCompare(vb);
+      return dir * ((va || 0) - (vb || 0));
+    });
+  }else{
+    lista.sort((a,b)=>b.diasSemComprar-a.diasSemComprar);
+  }
+
+  document.getElementById("riscoTotalClientes").innerText = lista.length;
+  document.getElementById("riscoMaiorDias").innerText = `${Math.max(0,...lista.map(c=>c.diasSemComprar))} dias`;
+  document.getElementById("riscoValorHistorico").innerText = dinheiro(lista.reduce((s,c)=>s+c.total,0));
+  document.getElementById("riscoSemVolta").innerText = lista.filter(c=>c.statusTexto==="Sem Volta").length;
+
+  tabela.innerHTML = "";
+
+  if(lista.length === 0){
+    tabela.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400">Nenhum cliente encontrado com os filtros selecionados.</td></tr>`;
+    return;
+  }
+
+  lista.forEach(c => {
+    tabela.innerHTML += `
+      <tr class="border-b table-hover">
+        <td class="py-4 font-semibold">${c.nome}</td>
+        <td>${c.pedidos}</td>
+        <td>${c.ultimaCompra.toLocaleDateString("pt-BR")}</td>
+        <td class="font-bold text-orange-600">${c.diasSemComprar} dias</td>
+        <td class="font-bold text-green-600">${dinheiro(c.total)}</td>
+        <td><span class="${c.statusClass} px-3 py-1 rounded-full font-bold text-xs">${c.statusTexto}</span></td>
+      </tr>
+    `;
+  });
+}
+
+function ordenarRisco(campo){
+  if(!window.riscoSort || window.riscoSort.campo !== campo){
+    window.riscoSort = {campo, dir: 1};
+  }else{
+    window.riscoSort.dir = window.riscoSort.dir * -1;
+  }
+
+  ["nome","pedidos","ultimaCompra","diasSemComprar","total","statusTexto"].forEach(c=>{
+    const el = document.getElementById(`sortRisco_${c}`);
+    if(el) el.innerText = "↕";
+  });
+
+  const el = document.getElementById(`sortRisco_${campo}`);
+  if(el) el.innerText = window.riscoSort.dir === 1 ? "↑" : "↓";
+
+  gerarClientesEmRisco();
+}
+
+
+/* ===== PATCH v1.9.3 - Nome do vendedor na Sidebar ===== */
+function atualizarNomeSidebar(){
+  const campo = document.getElementById("nomeVendedorCRM");
+  const el = document.getElementById("sidebarUserName");
+  const nome = (campo?.value || localStorage.getItem("jng_crm_nome_vendedor") || "Vendedor").trim();
+  if(el) el.textContent = nome || "Vendedor";
+}
+
+const salvarIdentidadeCRMOriginal_v1812 = typeof salvarIdentidadeCRM === "function" ? salvarIdentidadeCRM : null;
+function salvarIdentidadeCRM(){
+  const titulo = document.getElementById("tituloCRM")?.innerText || "JNG CRM";
+  const vendedor = document.getElementById("nomeVendedorCRM")?.value || "";
+  localStorage.setItem("jng_crm_titulo", titulo);
+  localStorage.setItem("jng_crm_nome_vendedor", vendedor);
+  const sep = document.getElementById("separadorVendedor");
+  if(sep){
+    if(vendedor.trim()) sep.classList.remove("hidden");
+    else sep.classList.add("hidden");
+  }
+  atualizarNomeSidebar();
+}
+
+const carregarIdentidadeCRMOriginal_v1812 = typeof carregarIdentidadeCRM === "function" ? carregarIdentidadeCRM : null;
+function carregarIdentidadeCRM(){
+  const titulo = localStorage.getItem("jng_crm_titulo") || "JNG CRM";
+  const vendedor = localStorage.getItem("jng_crm_nome_vendedor") || "";
+  const tituloEl = document.getElementById("tituloCRM");
+  const vendedorEl = document.getElementById("nomeVendedorCRM");
+  const sep = document.getElementById("separadorVendedor");
+
+  if(tituloEl) tituloEl.innerText = titulo;
+  if(vendedorEl) vendedorEl.value = vendedor;
+  if(sep){
+    if(vendedor.trim()) sep.classList.remove("hidden");
+    else sep.classList.add("hidden");
+  }
+  atualizarNomeSidebar();
+}
+
+document.addEventListener("DOMContentLoaded", atualizarNomeSidebar);
+setTimeout(atualizarNomeSidebar, 300);
+
+
+/* ===== PATCH v1.9.3 - Aba Status dos Pedidos ===== */
+
+function getStatusPedidoRow(row){
+  const integrador = getCelula(row, 0);
+  const clienteFinal = getCelula(row, 2);
+  const numeroPedido = getCelula(row, 3);
+  const statusBruto = getCelula(row, 10);
+  const status = String(statusBruto || "").trim() || "Sem status informado";
+  return {integrador:String(integrador||"").trim(), clienteFinal:String(clienteFinal||"").trim(), numeroPedido:String(numeroPedido||"").trim(), status};
+}
+
+function obterListaStatusPedidos(){
+  return (dadosOriginais || []).map(getStatusPedidoRow).filter(item => item.integrador || item.clienteFinal || item.numeroPedido || item.status !== "Sem status informado");
+}
+
+function popularFiltrosStatus(){
+  const selectStatus = document.getElementById("statusFiltroStatus");
+  const selectIntegrador = document.getElementById("statusFiltroIntegrador");
+  if(!selectStatus || !selectIntegrador) return;
+  const statusAtual = selectStatus.value || "Todos";
+  const integradorAtual = selectIntegrador.value || "Todos";
+  const lista = obterListaStatusPedidos();
+  const statusSet = new Set();
+  const integradorSet = new Set();
+  lista.forEach(item => { if(item.status) statusSet.add(item.status); if(item.integrador) integradorSet.add(item.integrador); });
+  selectStatus.innerHTML = `<option value="Todos">Todos</option>`;
+  [...statusSet].sort((a,b)=>a.localeCompare(b)).forEach(st => { selectStatus.innerHTML += `<option value="${String(st).replace(/"/g,'&quot;')}">${st}</option>`; });
+  selectIntegrador.innerHTML = `<option value="Todos">Todos</option>`;
+  [...integradorSet].sort((a,b)=>a.localeCompare(b)).forEach(nome => { selectIntegrador.innerHTML += `<option value="${String(nome).replace(/"/g,'&quot;')}">${nome}</option>`; });
+  if([...selectStatus.options].some(o => o.value === statusAtual)) selectStatus.value = statusAtual;
+  if([...selectIntegrador.options].some(o => o.value === integradorAtual)) selectIntegrador.value = integradorAtual;
+}
+
+function getStatusClass(status){
+  const s = normalizar(status);
+  if(s.includes("sem status")) return "bg-gray-100 text-gray-700";
+  if(s.includes("fatur") || s.includes("conclu") || s.includes("entreg")) return "bg-green-100 text-green-700";
+  if(s.includes("cancel")) return "bg-red-100 text-red-700";
+  if(s.includes("pend") || s.includes("aguard") || s.includes("analise")) return "bg-yellow-100 text-yellow-700";
+  if(s.includes("separ") || s.includes("exped") || s.includes("transp")) return "bg-blue-100 text-blue-700";
+  return "bg-purple-100 text-purple-700";
+}
+
+function renderStatusPedidos(){
+  const tabela = document.getElementById("statusPedidosTabela");
+  if(!tabela) return;
+  popularFiltrosStatus();
+  const busca = normalizar(document.getElementById("statusBusca")?.value || "");
+  const statusFiltro = document.getElementById("statusFiltroStatus")?.value || "Todos";
+  const integradorFiltro = document.getElementById("statusFiltroIntegrador")?.value || "Todos";
+  let lista = obterListaStatusPedidos().filter(item => {
+    const textoBusca = normalizar(`${item.integrador} ${item.clienteFinal} ${item.numeroPedido} ${item.status}`);
+    if(busca && !textoBusca.includes(busca)) return false;
+    if(statusFiltro !== "Todos" && item.status !== statusFiltro) return false;
+    if(integradorFiltro !== "Todos" && item.integrador !== integradorFiltro) return false;
+    return true;
+  });
+  if(window.statusSort && window.statusSort.campo){
+    const {campo, dir} = window.statusSort;
+    lista.sort((a,b)=> dir * String(a[campo] || "").localeCompare(String(b[campo] || ""), "pt-BR", {numeric:true}));
+  }
+  const todos = obterListaStatusPedidos();
+  const statusDiferentes = new Set(todos.map(i=>i.status).filter(Boolean));
+  const integradores = new Set(todos.map(i=>i.integrador).filter(Boolean));
+  const semStatus = todos.filter(i=>i.status === "Sem status informado").length;
+  if(document.getElementById("statusTotalPedidos")) document.getElementById("statusTotalPedidos").innerText = lista.length;
+  if(document.getElementById("statusQtdStatus")) document.getElementById("statusQtdStatus").innerText = statusDiferentes.size;
+  if(document.getElementById("statusSemStatus")) document.getElementById("statusSemStatus").innerText = semStatus;
+  if(document.getElementById("statusQtdIntegradores")) document.getElementById("statusQtdIntegradores").innerText = integradores.size;
+  tabela.innerHTML = "";
+  if(lista.length === 0){
+    tabela.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-gray-400">Nenhum pedido encontrado.</td></tr>`;
+    return;
+  }
+  lista.forEach(item => {
+    tabela.innerHTML += `<tr class="border-b table-hover"><td class="py-4 font-semibold">${item.integrador || "-"}</td><td class="py-4">${item.clienteFinal || "-"}</td><td class="py-4 font-bold text-blue-600">${item.numeroPedido || "-"}</td><td class="py-4"><span class="${getStatusClass(item.status)} px-3 py-1 rounded-full font-bold text-xs">${item.status}</span></td></tr>`;
+  });
+}
+
+function ordenarStatus(campo){
+  if(!window.statusSort || window.statusSort.campo !== campo){ window.statusSort = {campo, dir: 1}; } else { window.statusSort.dir = window.statusSort.dir * -1; }
+  ["integrador","clienteFinal","numeroPedido","status"].forEach(c=>{ const el = document.getElementById(`sortStatus_${c}`); if(el) el.innerText = "↕"; });
+  const el = document.getElementById(`sortStatus_${campo}`);
+  if(el) el.innerText = window.statusSort.dir === 1 ? "↑" : "↓";
+  renderStatusPedidos();
+}
+
+function limparFiltrosStatus(){
+  const busca = document.getElementById("statusBusca");
+  const status = document.getElementById("statusFiltroStatus");
+  const integrador = document.getElementById("statusFiltroIntegrador");
+  if(busca) busca.value = "";
+  if(status) status.value = "Todos";
+  if(integrador) integrador.value = "Todos";
+  renderStatusPedidos();
+}
+
+function abrirStatus(){
+  const ids = ["dashboardCRM","painelMetas","painelPerformance","painelConfig","painelRisco","painelAtividades","painelStatus"];
+  ids.forEach(id => { const el = document.getElementById(id); if(el) el.classList.add("hidden"); });
+  const painel = document.getElementById("painelStatus");
+  if(painel) painel.classList.remove("hidden");
+  ["navCRM","navMetas","navPerf","navConfig","navRisco","navAtiv","navStatus"].forEach(id=>{ const el = document.getElementById(id); if(el) el.classList.remove("active"); });
+  const nav = document.getElementById("navStatus");
+  if(nav) nav.classList.add("active");
+  popularFiltrosStatus();
+  renderStatusPedidos();
+}
+
+const carregarOriginal_v190 = typeof carregar === "function" ? carregar : null;
+if(carregarOriginal_v190){
+  carregar = async function(){
+    await carregarOriginal_v190();
+    popularFiltrosStatus();
+    renderStatusPedidos();
+  }
+}
+
+
+
+/* ===== PATCH v1.9.3 - Aba Status sem travamento ===== */
+
+const STATUS_CONFIG_PADRAO = {
+  colunaIntegrador:"A",
+  colunaClienteFinal:"C",
+  colunaNumeroPedido:"D",
+  colunaStatus:"K"
+};
+
+let statusConfigPedidos = carregarConfigStatusPedidos();
+let statusFiltrosPopulados = false;
+
+function carregarConfigStatusPedidos(){
+  try{
+    const salvo = JSON.parse(localStorage.getItem("jng_crm_status_config") || "{}");
+    return {...STATUS_CONFIG_PADRAO, ...salvo};
+  }catch(e){
+    return {...STATUS_CONFIG_PADRAO};
+  }
+}
+
+function statusConfigFoiSalva(){
+  return localStorage.getItem("jng_crm_status_config") !== null;
+}
+
+function preencherTelaConfigStatusPedidos(){
+  const c1 = document.getElementById("statusConfigColIntegrador");
+  const c2 = document.getElementById("statusConfigColClienteFinal");
+  const c3 = document.getElementById("statusConfigColNumeroPedido");
+  const c4 = document.getElementById("statusConfigColStatus");
+
+  if(c1) c1.value = statusConfigPedidos.colunaIntegrador || "A";
+  if(c2) c2.value = statusConfigPedidos.colunaClienteFinal || "C";
+  if(c3) c3.value = statusConfigPedidos.colunaNumeroPedido || "D";
+  if(c4) c4.value = statusConfigPedidos.colunaStatus || "K";
+}
+
+function atualizarMapeamentoStatus(){
+  const el = document.getElementById("statusMapeamentoAtual");
+  if(!el) return;
+  el.innerText = `Mapeamento atual: ${statusConfigPedidos.colunaIntegrador} Integrador • ${statusConfigPedidos.colunaClienteFinal} Cliente Final • ${statusConfigPedidos.colunaNumeroPedido} Pedido • ${statusConfigPedidos.colunaStatus} Status`;
+}
+
+function salvarConfigStatusPedidos(){
+  statusConfigPedidos = {
+    colunaIntegrador:(document.getElementById("statusConfigColIntegrador")?.value || "A").trim().toUpperCase() || "A",
+    colunaClienteFinal:(document.getElementById("statusConfigColClienteFinal")?.value || "C").trim().toUpperCase() || "C",
+    colunaNumeroPedido:(document.getElementById("statusConfigColNumeroPedido")?.value || "D").trim().toUpperCase() || "D",
+    colunaStatus:(document.getElementById("statusConfigColStatus")?.value || "K").trim().toUpperCase() || "K"
+  };
+
+  localStorage.setItem("jng_crm_status_config", JSON.stringify(statusConfigPedidos));
+  statusFiltrosPopulados = false;
+  preencherTelaConfigStatusPedidos();
+  mostrarConteudoStatus();
+  popularFiltrosStatus(true);
+  renderStatusPedidos();
+}
+
+function preencherPadraoStatusPedidos(){
+  statusConfigPedidos = {...STATUS_CONFIG_PADRAO};
+  preencherTelaConfigStatusPedidos();
+}
+
+function editarConfigStatusPedidos(){
+  preencherTelaConfigStatusPedidos();
+  const primeiro = document.getElementById("statusPrimeiroAcesso");
+  const conteudo = document.getElementById("statusConteudo");
+  if(primeiro) primeiro.classList.remove("hidden");
+  if(conteudo) conteudo.classList.add("hidden");
+}
+
+function mostrarConteudoStatus(){
+  const primeiro = document.getElementById("statusPrimeiroAcesso");
+  const conteudo = document.getElementById("statusConteudo");
+  if(primeiro) primeiro.classList.add("hidden");
+  if(conteudo) conteudo.classList.remove("hidden");
+  atualizarMapeamentoStatus();
+}
+
+function getStatusPedidoRow(row){
+  const integrador = getCelula(row, colunaParaIndice(statusConfigPedidos.colunaIntegrador || "A"));
+  const clienteFinal = getCelula(row, colunaParaIndice(statusConfigPedidos.colunaClienteFinal || "C"));
+  const numeroPedido = getCelula(row, colunaParaIndice(statusConfigPedidos.colunaNumeroPedido || "D"));
+  const statusBruto = getCelula(row, colunaParaIndice(statusConfigPedidos.colunaStatus || "K"));
+  const status = String(statusBruto || "").trim() || "Sem status informado";
+
+  return {
+    integrador:String(integrador || "").trim(),
+    clienteFinal:String(clienteFinal || "").trim(),
+    numeroPedido:String(numeroPedido || "").trim(),
+    status
+  };
+}
+
+function obterListaStatusPedidos(){
+  return (dadosOriginais || [])
+    .map(getStatusPedidoRow)
+    .filter(item => item.integrador || item.clienteFinal || item.numeroPedido || item.status !== "Sem status informado");
+}
+
+function popularFiltrosStatus(forcar=false){
+  const selectStatus = document.getElementById("statusFiltroStatus");
+  const selectIntegrador = document.getElementById("statusFiltroIntegrador");
+  if(!selectStatus || !selectIntegrador) return;
+  if(statusFiltrosPopulados && !forcar) return;
+
+  const statusAtual = selectStatus.value || "Todos";
+  const integradorAtual = selectIntegrador.value || "Todos";
+
+  const lista = obterListaStatusPedidos();
+  const statusSet = new Set();
+  const integradorSet = new Set();
+
+  lista.forEach(item => {
+    if(item.status) statusSet.add(item.status);
+    if(item.integrador) integradorSet.add(item.integrador);
+  });
+
+  selectStatus.innerHTML = `<option value="Todos">Todos</option>`;
+  [...statusSet].sort((a,b)=>a.localeCompare(b)).forEach(st => {
+    const opt = document.createElement("option");
+    opt.value = st;
+    opt.textContent = st;
+    selectStatus.appendChild(opt);
+  });
+
+  selectIntegrador.innerHTML = `<option value="Todos">Todos</option>`;
+  [...integradorSet].sort((a,b)=>a.localeCompare(b)).forEach(nome => {
+    const opt = document.createElement("option");
+    opt.value = nome;
+    opt.textContent = nome;
+    selectIntegrador.appendChild(opt);
+  });
+
+  if([...selectStatus.options].some(o => o.value === statusAtual)) selectStatus.value = statusAtual;
+  if([...selectIntegrador.options].some(o => o.value === integradorAtual)) selectIntegrador.value = integradorAtual;
+
+  statusFiltrosPopulados = true;
+}
+
+function getStatusClass(status){
+  const s = normalizar(status);
+  if(s.includes("sem status")) return "bg-gray-100 text-gray-700";
+  if(s.includes("fatur") || s.includes("conclu") || s.includes("entreg")) return "bg-green-100 text-green-700";
+  if(s.includes("cancel")) return "bg-red-100 text-red-700";
+  if(s.includes("pend") || s.includes("aguard") || s.includes("analise")) return "bg-yellow-100 text-yellow-700";
+  if(s.includes("separ") || s.includes("exped") || s.includes("transp")) return "bg-blue-100 text-blue-700";
+  return "bg-purple-100 text-purple-700";
+}
+
+function renderStatusPedidos(){
+  const tabela = document.getElementById("statusPedidosTabela");
+  if(!tabela) return;
+
+  const busca = normalizar(document.getElementById("statusBusca")?.value || "");
+  const statusFiltro = document.getElementById("statusFiltroStatus")?.value || "Todos";
+  const integradorFiltro = document.getElementById("statusFiltroIntegrador")?.value || "Todos";
+
+  let lista = obterListaStatusPedidos().filter(item => {
+    const textoBusca = normalizar(`${item.integrador} ${item.clienteFinal} ${item.numeroPedido} ${item.status}`);
+    if(busca && !textoBusca.includes(busca)) return false;
+    if(statusFiltro !== "Todos" && item.status !== statusFiltro) return false;
+    if(integradorFiltro !== "Todos" && item.integrador !== integradorFiltro) return false;
+    return true;
+  });
+
+  if(window.statusSort && window.statusSort.campo){
+    const {campo, dir} = window.statusSort;
+    lista.sort((a,b)=> dir * String(a[campo] || "").localeCompare(String(b[campo] || ""), "pt-BR", {numeric:true}));
+  }
+
+  const todos = obterListaStatusPedidos();
+  const statusDiferentes = new Set(todos.map(i=>i.status).filter(Boolean));
+  const integradores = new Set(todos.map(i=>i.integrador).filter(Boolean));
+  const semStatus = todos.filter(i=>i.status === "Sem status informado").length;
+
+  const totalEl = document.getElementById("statusTotalPedidos");
+  const qtdStatusEl = document.getElementById("statusQtdStatus");
+  const semStatusEl = document.getElementById("statusSemStatus");
+  const qtdIntegradoresEl = document.getElementById("statusQtdIntegradores");
+
+  if(totalEl) totalEl.innerText = lista.length;
+  if(qtdStatusEl) qtdStatusEl.innerText = statusDiferentes.size;
+  if(semStatusEl) semStatusEl.innerText = semStatus;
+  if(qtdIntegradoresEl) qtdIntegradoresEl.innerText = integradores.size;
+
+  tabela.innerHTML = "";
+
+  if(lista.length === 0){
+    tabela.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-gray-400">Nenhum pedido encontrado.</td></tr>`;
+    return;
+  }
+
+  lista.forEach(item => {
+    const tr = document.createElement("tr");
+    tr.className = "border-b table-hover";
+    tr.innerHTML = `
+      <td class="py-4 font-semibold">${item.integrador || "-"}</td>
+      <td class="py-4">${item.clienteFinal || "-"}</td>
+      <td class="py-4 font-bold text-blue-600">${item.numeroPedido || "-"}</td>
+      <td class="py-4"><span class="${getStatusClass(item.status)} px-3 py-1 rounded-full font-bold text-xs">${item.status}</span></td>
+    `;
+    tabela.appendChild(tr);
+  });
+}
+
+function ordenarStatus(campo){
+  if(!window.statusSort || window.statusSort.campo !== campo){
+    window.statusSort = {campo, dir: 1};
+  }else{
+    window.statusSort.dir = window.statusSort.dir * -1;
+  }
+
+  ["integrador","clienteFinal","numeroPedido","status"].forEach(c=>{
+    const el = document.getElementById(`sortStatus_${c}`);
+    if(el) el.innerText = "↕";
+  });
+
+  const el = document.getElementById(`sortStatus_${campo}`);
+  if(el) el.innerText = window.statusSort.dir === 1 ? "↑" : "↓";
+
+  renderStatusPedidos();
+}
+
+function limparFiltrosStatus(){
+  const busca = document.getElementById("statusBusca");
+  const status = document.getElementById("statusFiltroStatus");
+  const integrador = document.getElementById("statusFiltroIntegrador");
+  if(busca) busca.value = "";
+  if(status) status.value = "Todos";
+  if(integrador) integrador.value = "Todos";
+  renderStatusPedidos();
+}
+
+function abrirStatus(){
+  const ids = ["dashboardCRM","painelMetas","painelPerformance","painelConfig","painelRisco","painelAtividades","painelStatus"];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.classList.add("hidden");
+  });
+
+  const painel = document.getElementById("painelStatus");
+  if(painel) painel.classList.remove("hidden");
+
+  ["navCRM","navMetas","navPerf","navConfig","navRisco","navAtiv","navStatus"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.classList.remove("active");
+  });
+
+  const nav = document.getElementById("navStatus");
+  if(nav) nav.classList.add("active");
+
+  statusConfigPedidos = carregarConfigStatusPedidos();
+  preencherTelaConfigStatusPedidos();
+
+  if(!statusConfigFoiSalva()){
+    const primeiro = document.getElementById("statusPrimeiroAcesso");
+    const conteudo = document.getElementById("statusConteudo");
+    if(primeiro) primeiro.classList.remove("hidden");
+    if(conteudo) conteudo.classList.add("hidden");
+    return;
+  }
+
+  mostrarConteudoStatus();
+  popularFiltrosStatus(true);
+  renderStatusPedidos();
+}
+
+
+
+/* ===== HOTFIX v1.9.3 - Revisão geral, Status estável e otimização ===== */
+(function(){
+  const PAINEIS_CRM = ["dashboardCRM","painelMetas","painelPerformance","painelConfig","painelRisco","painelAtividades","painelStatus"];
+  const NAVS_CRM = ["navCRM","navMetas","navPerf","navConfig","navRisco","navAtiv","navStatus"];
+
+  window.escapeHTML = function(valor){
+    return String(valor ?? "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  };
+
+  window.mostrarPainelCRM = function(painelId, navId){
+    PAINEIS_CRM.forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.classList.toggle("hidden", id !== painelId);
+    });
+    NAVS_CRM.forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.classList.toggle("active", id === navId);
+    });
+    const atualizador = document.getElementById("autoRefreshBox");
+    if(atualizador) atualizador.style.display = painelId === "dashboardCRM" ? "flex" : "none";
+  };
+
+  const carregarLiberacoesOriginal = window.carregarLiberacoes;
+  window.carregarLiberacoes = async function(){
+    try{
+      const response = await fetch(getUrlLiberacoes() + "&t=" + Date.now(), {cache:"no-store"});
+      if(!response.ok) throw new Error("HTTP " + response.status);
+      const text = await response.text();
+      const inicio = text.indexOf("{");
+      const fim = text.lastIndexOf("}");
+      if(inicio < 0 || fim < 0) throw new Error("Resposta inválida do Google Sheets");
+      const json = JSON.parse(text.slice(inicio, fim + 1));
+      dadosOriginais = json?.table?.rows || [];
+    }catch(erro){
+      console.error("Erro ao carregar dados da planilha:", erro);
+      dadosOriginais = [];
+      const aviso = document.getElementById("rankingTabela");
+      if(aviso){
+        aviso.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-red-500 font-semibold">Não foi possível carregar a planilha. Confira o link, GID e compartilhamento.</td></tr>`;
+      }
+    }
+  };
+
+  window.abrirDashboard = function(){
+    mostrarPainelCRM("dashboardCRM","navCRM");
+  };
+
+  window.abrirMetas = function(){
+    mostrarPainelCRM("painelMetas","navMetas");
+    if(typeof gerarPainelMetas === "function") gerarPainelMetas();
+  };
+
+  window.abrirPerformance = function(){
+    mostrarPainelCRM("painelPerformance","navPerf");
+    if(typeof popularPeriodoPerformance === "function") popularPeriodoPerformance();
+    if(typeof popularSemanasPerformance === "function") popularSemanasPerformance();
+    if(typeof popularDiasPerformance === "function") popularDiasPerformance();
+    if(typeof gerarPerformance === "function") gerarPerformance();
+  };
+
+  window.abrirRisco = function(){
+    mostrarPainelCRM("painelRisco","navRisco");
+    if(typeof carregarFiltrosRisco === "function") carregarFiltrosRisco();
+    if(typeof gerarClientesEmRisco === "function") gerarClientesEmRisco();
+  };
+
+  window.abrirAtividades = function(){
+    mostrarPainelCRM("painelAtividades","navAtiv");
+    if(typeof inicializarAtividades === "function") inicializarAtividades();
+  };
+
+  window.abrirConfig = function(){
+    mostrarPainelCRM("painelConfig","navConfig");
+    if(typeof preencherTelaConfig === "function") preencherTelaConfig();
+  };
+
+  window.normalizarStatusConfig = function(){
+    statusConfigPedidos = {
+      colunaIntegrador:(statusConfigPedidos?.colunaIntegrador || "A").trim().toUpperCase(),
+      colunaClienteFinal:(statusConfigPedidos?.colunaClienteFinal || "C").trim().toUpperCase(),
+      colunaNumeroPedido:(statusConfigPedidos?.colunaNumeroPedido || "D").trim().toUpperCase(),
+      colunaStatus:(statusConfigPedidos?.colunaStatus || "K").trim().toUpperCase()
+    };
+  };
+
+  window.getStatusPedidoRow = function(row){
+    normalizarStatusConfig();
+    const integrador = getCelula(row, colunaParaIndice(statusConfigPedidos.colunaIntegrador));
+    const clienteFinal = getCelula(row, colunaParaIndice(statusConfigPedidos.colunaClienteFinal));
+    const numeroPedido = getCelula(row, colunaParaIndice(statusConfigPedidos.colunaNumeroPedido));
+    const statusBruto = getCelula(row, colunaParaIndice(statusConfigPedidos.colunaStatus));
+    const status = String(statusBruto || "").trim() || "Sem status informado";
+    return {
+      integrador:String(integrador || "").trim(),
+      clienteFinal:String(clienteFinal || "").trim(),
+      numeroPedido:String(numeroPedido || "").trim(),
+      status
+    };
+  };
+
+  window.obterListaStatusPedidos = function(){
+    return (dadosOriginais || [])
+      .map(getStatusPedidoRow)
+      .filter(item => item.integrador || item.clienteFinal || item.numeroPedido);
+  };
+
+  window.popularFiltrosStatus = function(forcar=false){
+    const selectStatus = document.getElementById("statusFiltroStatus");
+    const selectIntegrador = document.getElementById("statusFiltroIntegrador");
+    if(!selectStatus || !selectIntegrador) return;
+    if(statusFiltrosPopulados && !forcar) return;
+
+    const statusAtual = selectStatus.value || "Todos";
+    const integradorAtual = selectIntegrador.value || "Todos";
+    const lista = obterListaStatusPedidos();
+    const statusSet = new Set(lista.map(item => item.status).filter(Boolean));
+    const integradorSet = new Set(lista.map(item => item.integrador).filter(Boolean));
+
+    const statusOptions = [`<option value="Todos">Todos</option>`]
+      .concat([...statusSet].sort((a,b)=>a.localeCompare(b,"pt-BR")).map(st => `<option value="${escapeHTML(st)}">${escapeHTML(st)}</option>`));
+    const integradorOptions = [`<option value="Todos">Todos</option>`]
+      .concat([...integradorSet].sort((a,b)=>a.localeCompare(b,"pt-BR")).map(nome => `<option value="${escapeHTML(nome)}">${escapeHTML(nome)}</option>`));
+
+    selectStatus.innerHTML = statusOptions.join("");
+    selectIntegrador.innerHTML = integradorOptions.join("");
+
+    if([...selectStatus.options].some(o => o.value === statusAtual)) selectStatus.value = statusAtual;
+    if([...selectIntegrador.options].some(o => o.value === integradorAtual)) selectIntegrador.value = integradorAtual;
+    statusFiltrosPopulados = true;
+  };
+
+  window.renderStatusPedidos = function(){
+    const tabela = document.getElementById("statusPedidosTabela");
+    if(!tabela) return;
+
+    const busca = normalizar(document.getElementById("statusBusca")?.value || "");
+    const statusFiltro = document.getElementById("statusFiltroStatus")?.value || "Todos";
+    const integradorFiltro = document.getElementById("statusFiltroIntegrador")?.value || "Todos";
+    const todos = obterListaStatusPedidos();
+
+    let lista = todos.filter(item => {
+      const textoBusca = normalizar(`${item.integrador} ${item.clienteFinal} ${item.numeroPedido} ${item.status}`);
+      if(busca && !textoBusca.includes(busca)) return false;
+      if(statusFiltro !== "Todos" && item.status !== statusFiltro) return false;
+      if(integradorFiltro !== "Todos" && item.integrador !== integradorFiltro) return false;
+      return true;
+    });
+
+    if(window.statusSort && window.statusSort.campo){
+      const {campo, dir} = window.statusSort;
+      lista.sort((a,b)=> dir * String(a[campo] || "").localeCompare(String(b[campo] || ""), "pt-BR", {numeric:true}));
+    }
+
+    const statusDiferentes = new Set(todos.map(i=>i.status).filter(Boolean));
+    const integradores = new Set(todos.map(i=>i.integrador).filter(Boolean));
+    const semStatus = todos.filter(i=>i.status === "Sem status informado").length;
+
+    const totalEl = document.getElementById("statusTotalPedidos");
+    const qtdStatusEl = document.getElementById("statusQtdStatus");
+    const semStatusEl = document.getElementById("statusSemStatus");
+    const qtdIntegradoresEl = document.getElementById("statusQtdIntegradores");
+    if(totalEl) totalEl.innerText = lista.length;
+    if(qtdStatusEl) qtdStatusEl.innerText = statusDiferentes.size;
+    if(semStatusEl) semStatusEl.innerText = semStatus;
+    if(qtdIntegradoresEl) qtdIntegradoresEl.innerText = integradores.size;
+
+    if(lista.length === 0){
+      tabela.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-gray-400">Nenhum pedido encontrado.</td></tr>`;
+      return;
+    }
+
+    tabela.innerHTML = lista.map(item => `
+      <tr class="border-b table-hover">
+        <td class="py-4 font-semibold">${escapeHTML(item.integrador || "-")}</td>
+        <td class="py-4">${escapeHTML(item.clienteFinal || "-")}</td>
+        <td class="py-4 font-bold text-blue-600">${escapeHTML(item.numeroPedido || "-")}</td>
+        <td class="py-4"><span class="${getStatusClass(item.status)} px-3 py-1 rounded-full font-bold text-xs">${escapeHTML(item.status)}</span></td>
+      </tr>
+    `).join("");
+  };
+
+  window.salvarConfigStatusPedidos = function(){
+    statusConfigPedidos = {
+      colunaIntegrador:(document.getElementById("statusConfigColIntegrador")?.value || "A").trim().toUpperCase() || "A",
+      colunaClienteFinal:(document.getElementById("statusConfigColClienteFinal")?.value || "C").trim().toUpperCase() || "C",
+      colunaNumeroPedido:(document.getElementById("statusConfigColNumeroPedido")?.value || "D").trim().toUpperCase() || "D",
+      colunaStatus:(document.getElementById("statusConfigColStatus")?.value || "K").trim().toUpperCase() || "K"
+    };
+    localStorage.setItem("jng_crm_status_config", JSON.stringify(statusConfigPedidos));
+    statusFiltrosPopulados = false;
+    preencherTelaConfigStatusPedidos();
+    mostrarConteudoStatus();
+    popularFiltrosStatus(true);
+    renderStatusPedidos();
+  };
+
+  window.preencherPadraoStatusPedidos = function(){
+    statusConfigPedidos = {...STATUS_CONFIG_PADRAO};
+    preencherTelaConfigStatusPedidos();
+  };
+
+  window.editarConfigStatusPedidos = function(){
+    preencherTelaConfigStatusPedidos();
+    const primeiro = document.getElementById("statusPrimeiroAcesso");
+    const conteudo = document.getElementById("statusConteudo");
+    if(primeiro) primeiro.classList.remove("hidden");
+    if(conteudo) conteudo.classList.add("hidden");
+  };
+
+  window.mostrarConteudoStatus = function(){
+    const primeiro = document.getElementById("statusPrimeiroAcesso");
+    const conteudo = document.getElementById("statusConteudo");
+    if(primeiro) primeiro.classList.add("hidden");
+    if(conteudo) conteudo.classList.remove("hidden");
+    if(typeof atualizarMapeamentoStatus === "function") atualizarMapeamentoStatus();
+  };
+
+  window.abrirStatus = function(){
+    mostrarPainelCRM("painelStatus","navStatus");
+    statusConfigPedidos = carregarConfigStatusPedidos();
+    normalizarStatusConfig();
+    preencherTelaConfigStatusPedidos();
+
+    if(!statusConfigFoiSalva()){
+      const primeiro = document.getElementById("statusPrimeiroAcesso");
+      const conteudo = document.getElementById("statusConteudo");
+      if(primeiro) primeiro.classList.remove("hidden");
+      if(conteudo) conteudo.classList.add("hidden");
+      return;
+    }
+
+    mostrarConteudoStatus();
+    popularFiltrosStatus(true);
+    renderStatusPedidos();
+  };
+
+  window.renderAtividadesComerciais = function(){
+    const tbody = document.getElementById("atividadesTabela");
+    if(!tbody) return;
+
+    const tipoFiltro = document.getElementById("filtroAtividadeTipo")?.value || "Todos";
+    const dataInicio = document.getElementById("filtroAtividadeDataInicio")?.value || "";
+    const dataFim = document.getElementById("filtroAtividadeDataFim")?.value || "";
+    const clienteFiltro = normalizar(document.getElementById("filtroAtividadeCliente")?.value || "");
+    const todas = getAtividadesComerciais();
+    const ativas = todas.filter(a => !a.oculto);
+
+    const visiveis = ativas.filter(a => {
+      if(tipoFiltro !== "Todos" && a.tipo !== tipoFiltro) return false;
+      if(dataInicio && a.data < dataInicio) return false;
+      if(dataFim && a.data > dataFim) return false;
+      if(clienteFiltro && !normalizar(a.cliente).includes(clienteFiltro)) return false;
+      return true;
+    });
+
+    const hoje = new Date();
+    const hojeISO = `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,"0")}-${String(hoje.getDate()).padStart(2,"0")}`;
+    const clientesSet = new Set(ativas.filter(a=>a.cliente).map(a=>normalizar(a.cliente)));
+    const contTipo = {};
+    ativas.forEach(a => contTipo[a.tipo] = (contTipo[a.tipo] || 0) + 1);
+    const tipoTop = Object.entries(contTipo).sort((a,b)=>b[1]-a[1])[0]?.[0] || "-";
+
+    const totalEl = document.getElementById("ativTotal");
+    const hojeEl = document.getElementById("ativHoje");
+    const clientesEl = document.getElementById("ativClientes");
+    const tipoTopEl = document.getElementById("ativTipoTop");
+    if(totalEl) totalEl.innerText = ativas.length;
+    if(hojeEl) hojeEl.innerText = ativas.filter(a=>a.data === hojeISO).length;
+    if(clientesEl) clientesEl.innerText = clientesSet.size;
+    if(tipoTopEl) tipoTopEl.innerText = tipoTop;
+
+    if(visiveis.length === 0){
+      tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-gray-400">Nenhuma atividade encontrada.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = visiveis
+      .sort((a,b)=>(b.data || "").localeCompare(a.data || "") || String(b.criadoEm || "").localeCompare(String(a.criadoEm || "")))
+      .map(item => `
+        <tr class="border-b table-hover">
+          <td class="py-4 text-center">${escapeHTML(formatarDataISO(item.data))}</td>
+          <td class="py-4 text-center">${escapeHTML(item.criadoEm || "-")}</td>
+          <td class="py-4 text-center"><span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full font-bold text-xs">${escapeHTML(item.tipo || "-")}</span></td>
+          <td class="py-4 text-center font-semibold">${escapeHTML(item.cliente || "-")}</td>
+          <td class="py-4 text-center max-w-[360px]">${escapeHTML(item.feedback || "-")}</td>
+          <td class="py-4 text-center">${escapeHTML(item.editadoEm || "-")}</td>
+          <td class="py-4 text-center">
+            <div class="flex gap-2 justify-center">
+              <button type="button" onclick="editarAtividadeComercial('${escapeHTML(item.id)}')" class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-xl font-bold text-sm">Editar</button>
+              <button type="button" onclick="ocultarAtividadeComercial('${escapeHTML(item.id)}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-xl font-bold text-sm">Ocultar</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+  };
+
+  const carregarOriginalFinal = window.carregar;
+  window.carregar = async function(){
+    await carregarOriginalFinal();
+    statusFiltrosPopulados = false;
+    if(statusConfigFoiSalva()){
+      popularFiltrosStatus(true);
+      renderStatusPedidos();
+    }
+  };
+})();
+
+
+/* ===== PATCH v1.9.4 - Atualização automática do Sheets ===== */
+let autoRefreshTimerCRM = null;
+let autoRefreshEmExecucao = false;
+let ultimaAtualizacaoCRM = null;
+
+function formatarHoraAtualizacaoCRM(data){
+  if(!data) return "-";
+  return data.toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit", second:"2-digit"});
+}
+
+function setStatusAutoRefreshCRM(texto, modo="ok"){
+  const status = document.getElementById("autoRefreshStatus");
+  const dot = document.getElementById("autoRefreshDot");
+  if(status) status.innerText = texto;
+  if(dot){
+    dot.classList.remove("paused", "loading");
+    if(modo === "paused") dot.classList.add("paused");
+    if(modo === "loading") dot.classList.add("loading");
+  }
+}
+
+function atualizarTelaComDadosAtuaisCRM(){
+  try{
+    if(typeof popularFiltros === "function") popularFiltros();
+    if(typeof popularFiltroHistoricoCliente === "function") popularFiltroHistoricoCliente();
+    if(typeof aplicarFiltros === "function") aplicarFiltros();
+    if(typeof gerarHistoricoCliente === "function") gerarHistoricoCliente();
+    if(typeof gerarClientesEmRisco === "function") gerarClientesEmRisco();
+    if(typeof gerarPainelMetas === "function") gerarPainelMetas();
+    if(typeof gerarPerformance === "function") gerarPerformance();
+
+    if(typeof statusConfigFoiSalva === "function" && statusConfigFoiSalva()){
+      statusFiltrosPopulados = false;
+      if(typeof popularFiltrosStatus === "function") popularFiltrosStatus(true);
+      if(typeof renderStatusPedidos === "function") renderStatusPedidos();
+    }
+  }catch(erro){
+    console.error("Erro ao atualizar tela com dados atuais:", erro);
+  }
+}
+
+async function atualizarDadosAutomatico(manual=false){
+  if(!crmConfigCompleta()){ setStatusAutoRefreshCRM("Configure a planilha para ativar", "paused"); return; }
+  if(autoRefreshEmExecucao) return;
+  autoRefreshEmExecucao = true;
+  setStatusAutoRefreshCRM(manual ? "Atualizando agora..." : "Atualizando dados...", "loading");
+
+  try{
+    if(typeof carregarLiberacoes === "function"){
+      await carregarLiberacoes();
+      atualizarTelaComDadosAtuaisCRM();
+    }
+
+    ultimaAtualizacaoCRM = new Date();
+    const intervalo = Number(localStorage.getItem("jng_crm_auto_refresh_interval") || "15000");
+    if(intervalo > 0){
+      setStatusAutoRefreshCRM(`Atualizado às ${formatarHoraAtualizacaoCRM(ultimaAtualizacaoCRM)} • auto ${Math.round(intervalo/1000)}s`, "ok");
+    }else{
+      setStatusAutoRefreshCRM(`Atualizado às ${formatarHoraAtualizacaoCRM(ultimaAtualizacaoCRM)} • auto desligado`, "paused");
+    }
+  }catch(erro){
+    console.error("Erro na atualização automática:", erro);
+    setStatusAutoRefreshCRM("Erro ao atualizar. Confira a planilha.", "paused");
+  }finally{
+    autoRefreshEmExecucao = false;
+  }
+}
+
+function alterarIntervaloAutoRefresh(){
+  iniciarAutoRefreshCRM();
+}
+
+function iniciarAutoRefreshCRM(){
+  if(!crmConfigCompleta()){ setStatusAutoRefreshCRM("Configure a planilha para ativar", "paused"); return; }
+  const intervalo = 15000;
+  localStorage.setItem("jng_crm_auto_refresh_interval", "15000");
+  if(autoRefreshTimerCRM) clearInterval(autoRefreshTimerCRM);
+  setStatusAutoRefreshCRM("Atualização automática • 15s", "ok");
+  autoRefreshTimerCRM = setInterval(() => atualizarDadosAutomatico(false), intervalo);
+}
+
+document.addEventListener("DOMContentLoaded", iniciarAutoRefreshCRM);
+setTimeout(iniciarAutoRefreshCRM, 500);
+
+
+
+/* ===== PATCH FINAL - Atualizador apenas no CRM e Status J/K ===== */
+(function(){
+  window.STATUS_CONFIG_PADRAO = {colunaIntegrador:"A", colunaClienteFinal:"C", colunaNumeroPedido:"D", colunaStatus:"J", colunaLogistica:"K"};
+
+  window.carregarConfigStatusPedidos = function(){
+    try{
+      const salvo = JSON.parse(localStorage.getItem("jng_crm_status_config") || "{}");
+      return {...window.STATUS_CONFIG_PADRAO, ...salvo};
+    }catch(e){
+      return {...window.STATUS_CONFIG_PADRAO};
+    }
+  };
+
+  if(typeof statusConfigPedidos !== "undefined"){
+    statusConfigPedidos = window.carregarConfigStatusPedidos();
+  }
+
+  window.preencherTelaConfigStatusPedidos = function(){
+    const cfg = statusConfigPedidos || window.STATUS_CONFIG_PADRAO;
+    const campos = {
+      statusConfigColIntegrador: cfg.colunaIntegrador || "A",
+      statusConfigColClienteFinal: cfg.colunaClienteFinal || "C",
+      statusConfigColNumeroPedido: cfg.colunaNumeroPedido || "D",
+      statusConfigColStatus: cfg.colunaStatus || "J",
+      statusConfigColLogistica: cfg.colunaLogistica || "K"
+    };
+    Object.entries(campos).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.value=val; });
+  };
+
+  window.atualizarMapeamentoStatus = function(){
+    const el = document.getElementById("statusMapeamentoAtual");
+    const cfg = statusConfigPedidos || window.STATUS_CONFIG_PADRAO;
+    if(el) el.innerText = `Mapeamento atual: ${cfg.colunaIntegrador || "A"} Integrador • ${cfg.colunaClienteFinal || "C"} Cliente Final • ${cfg.colunaNumeroPedido || "D"} Pedido • ${cfg.colunaStatus || "J"} Status Manual • ${cfg.colunaLogistica || "K"} Logística`;
+  };
+
+  window.salvarConfigStatusPedidos = function(){
+    statusConfigPedidos = {
+      colunaIntegrador:(document.getElementById("statusConfigColIntegrador")?.value || "A").trim().toUpperCase() || "A",
+      colunaClienteFinal:(document.getElementById("statusConfigColClienteFinal")?.value || "C").trim().toUpperCase() || "C",
+      colunaNumeroPedido:(document.getElementById("statusConfigColNumeroPedido")?.value || "D").trim().toUpperCase() || "D",
+      colunaStatus:(document.getElementById("statusConfigColStatus")?.value || "J").trim().toUpperCase() || "J",
+      colunaLogistica:(document.getElementById("statusConfigColLogistica")?.value || "K").trim().toUpperCase() || "K"
+    };
+    localStorage.setItem("jng_crm_status_config", JSON.stringify(statusConfigPedidos));
+    statusFiltrosPopulados = false;
+    preencherTelaConfigStatusPedidos();
+    mostrarConteudoStatus();
+    popularFiltrosStatus(true);
+    renderStatusPedidos();
+  };
+
+  window.preencherPadraoStatusPedidos = function(){
+    statusConfigPedidos = {...window.STATUS_CONFIG_PADRAO};
+    preencherTelaConfigStatusPedidos();
+  };
+
+  window.getStatusPedidoRow = function(row){
+    const cfg = statusConfigPedidos || window.STATUS_CONFIG_PADRAO;
+    const integrador = getCelula(row, colunaParaIndice(cfg.colunaIntegrador || "A"));
+    const clienteFinal = getCelula(row, colunaParaIndice(cfg.colunaClienteFinal || "C"));
+    const numeroPedido = getCelula(row, colunaParaIndice(cfg.colunaNumeroPedido || "D"));
+    const manualBruto = getCelula(row, colunaParaIndice(cfg.colunaStatus || "J"));
+    const logisticaBruto = getCelula(row, colunaParaIndice(cfg.colunaLogistica || "K"));
+    const statusManual = String(manualBruto || "").trim() || "Sem status manual";
+    const statusLogistica = String(logisticaBruto || "").trim() || "Sem retorno logística";
+    return {integrador:String(integrador||"").trim(), clienteFinal:String(clienteFinal||"").trim(), numeroPedido:String(numeroPedido||"").trim(), status:statusManual, statusManual, statusLogistica};
+  };
+
+  window.popularFiltrosStatus = function(forcar=false){
+    const selectStatus = document.getElementById("statusFiltroStatus");
+    const selectIntegrador = document.getElementById("statusFiltroIntegrador");
+    if(!selectStatus || !selectIntegrador) return;
+    if(statusFiltrosPopulados && !forcar) return;
+    const statusAtual = selectStatus.value || "Todos";
+    const integradorAtual = selectIntegrador.value || "Todos";
+    const lista = obterListaStatusPedidos();
+    const statusSet = new Set(lista.map(i=>i.statusManual).filter(Boolean));
+    const integradorSet = new Set(lista.map(i=>i.integrador).filter(Boolean));
+    selectStatus.innerHTML = `<option value="Todos">Todos</option><option value="Aguardando pagamento">Aguardando pagamento</option>`;
+    [...statusSet].sort((a,b)=>a.localeCompare(b,"pt-BR")).forEach(st=>{
+      if(st === "Aguardando pagamento") return;
+      const opt=document.createElement("option"); opt.value=st; opt.textContent=st; selectStatus.appendChild(opt);
+    });
+    selectIntegrador.innerHTML = `<option value="Todos">Todos</option>`;
+    [...integradorSet].sort((a,b)=>a.localeCompare(b,"pt-BR")).forEach(nome=>{ const opt=document.createElement("option"); opt.value=nome; opt.textContent=nome; selectIntegrador.appendChild(opt); });
+    if([...selectStatus.options].some(o=>o.value===statusAtual)) selectStatus.value=statusAtual;
+    if([...selectIntegrador.options].some(o=>o.value===integradorAtual)) selectIntegrador.value=integradorAtual;
+    statusFiltrosPopulados = true;
+  };
+
+  window.renderStatusPedidos = function(){
+    const tabela = document.getElementById("statusPedidosTabela");
+    if(!tabela) return;
+    popularFiltrosStatus();
+    const busca = normalizar(document.getElementById("statusBusca")?.value || "");
+    const statusFiltro = document.getElementById("statusFiltroStatus")?.value || "Todos";
+    const integradorFiltro = document.getElementById("statusFiltroIntegrador")?.value || "Todos";
+    let lista = obterListaStatusPedidos().filter(item=>{
+      const textoBusca = normalizar(`${item.integrador} ${item.clienteFinal} ${item.numeroPedido} ${item.statusManual} ${item.statusLogistica}`);
+      if(busca && !textoBusca.includes(busca)) return false;
+      if(statusFiltro !== "Todos" && normalizar(item.statusManual) !== normalizar(statusFiltro)) return false;
+      if(integradorFiltro !== "Todos" && item.integrador !== integradorFiltro) return false;
+      return true;
+    });
+    if(window.statusSort && window.statusSort.campo){
+      const {campo, dir} = window.statusSort;
+      lista.sort((a,b)=> dir * String(a[campo] || "").localeCompare(String(b[campo] || ""), "pt-BR", {numeric:true}));
+    }
+    const todos = obterListaStatusPedidos();
+    const statusDiferentes = new Set(todos.map(i=>i.statusManual).filter(Boolean));
+    const integradores = new Set(todos.map(i=>i.integrador).filter(Boolean));
+    const semStatus = todos.filter(i=>i.statusManual === "Sem status manual").length;
+    const aguardando = todos.filter(i=>normalizar(i.statusManual).includes("aguardando pagamento")).length;
+    if(document.getElementById("statusTotalPedidos")) document.getElementById("statusTotalPedidos").innerText = lista.length;
+    if(document.getElementById("statusQtdStatus")) document.getElementById("statusQtdStatus").innerText = statusDiferentes.size;
+    if(document.getElementById("statusSemStatus")) document.getElementById("statusSemStatus").innerText = semStatus;
+    if(document.getElementById("statusQtdIntegradores")) document.getElementById("statusQtdIntegradores").innerText = integradores.size;
+    const tituloAguardando = document.getElementById("statusAguardandoPagamento");
+    if(tituloAguardando) tituloAguardando.innerText = aguardando;
+    tabela.innerHTML = "";
+    if(lista.length === 0){ tabela.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-gray-400">Nenhum pedido encontrado.</td></tr>`; return; }
+    lista.forEach(item=>{
+      tabela.innerHTML += `<tr class="border-b table-hover"><td class="py-4 font-semibold">${escapeHTML(item.integrador || "-")}</td><td class="py-4">${escapeHTML(item.clienteFinal || "-")}</td><td class="py-4 font-bold text-blue-600">${escapeHTML(item.numeroPedido || "-")}</td><td class="py-4"><span class="${getStatusClass(item.statusManual)} px-3 py-1 rounded-full font-bold text-xs">${escapeHTML(item.statusManual)}</span></td><td class="py-4"><span class="bg-slate-100 text-slate-700 px-3 py-1 rounded-full font-bold text-xs">${escapeHTML(item.statusLogistica)}</span></td></tr>`;
+    });
+  };
+
+  const painel = document.getElementById("dashboardCRM");
+  const box = document.getElementById("autoRefreshBox");
+  if(painel && box && box.parentElement !== painel) painel.insertBefore(box, painel.firstElementChild);
+})();
+
+
+/* ===== PATCH - Base limpa para compartilhamento ===== */
+(function(){
+  function bloquearSemConfig(fn){
+    return function(){
+      if(!crmConfigCompleta()){
+        mostrarPrimeiroAcessoConfig();
+        return;
+      }
+      return fn.apply(this, arguments);
+    };
+  }
+
+  ["abrirDashboard","abrirMetas","abrirPerformance","abrirRisco","abrirAtividades","abrirStatus"].forEach(nome=>{
+    if(typeof window[nome] === "function") window[nome] = bloquearSemConfig(window[nome]);
+  });
+
+  const avisoSemConfig = document.getElementById("primeiroAcessoConfigAviso");
+  if(!crmConfigCompleta()){
+    dadosOriginais = [];
+    setTimeout(()=>mostrarPrimeiroAcessoConfig(), 0);
+  }
+})();
+
+</script>
+
+</body>
+</html>
