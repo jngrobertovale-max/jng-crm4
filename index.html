@@ -11,13 +11,14 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <style>
-    body{background:#f4f7fb;font-family:Arial,sans-serif;}
+    :root{--theme-primary:#2563eb;--theme-secondary:#7c3aed;--theme-soft:#eef2ff;--theme-ring:rgba(37,99,235,.14);}
+    body{background:#f4f7fb;font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
     .card{background:white;border-radius:20px;padding:24px;box-shadow:0 4px 18px rgba(0,0,0,0.06);}
     .table-hover:hover{background:#f3f6ff;transition:0.2s;}
     .sidebar{position:fixed;left:0;top:0;width:250px;height:100vh;background:linear-gradient(180deg,#0f172a 0%,#111827 55%,#020617 100%);display:flex;flex-direction:column;padding:20px 14px;gap:12px;z-index:999;box-shadow:12px 0 32px rgba(15,23,42,.18);transition:width .25s ease,padding .25s ease;}
     .sidebar.collapsed{width:88px;padding:20px 12px;align-items:center;}
     .sidebar-brand{width:100%;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.06);border-radius:22px;padding:16px 14px;color:white;display:flex;align-items:center;gap:12px;margin-bottom:8px;overflow:hidden;}
-    .brand-icon{width:42px;height:42px;border-radius:16px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;flex:none;box-shadow:0 10px 24px rgba(37,99,235,.28);}
+    .brand-icon{width:42px;height:42px;border-radius:16px;background:linear-gradient(135deg,var(--theme-primary),var(--theme-secondary));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;flex:none;box-shadow:0 10px 24px var(--theme-ring);}
     .brand-text{line-height:1.15;white-space:nowrap;transition:opacity .2s ease;}
     .brand-text strong{display:block;font-size:13px;letter-spacing:.06em;}
     .brand-text span{font-size:11px;color:#cbd5e1;}
@@ -29,7 +30,7 @@
     .sidebar-config-area{width:100%;margin-top:auto;padding-top:12px;border-top:1px solid rgba(255,255,255,.08);}
     .side-btn{width:100%;height:52px;border-radius:17px;border:1px solid transparent;color:#cbd5e1;font-weight:800;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:12px;padding:0 14px;background:transparent;transition:.2s;position:relative;overflow:hidden;}
     .side-btn:hover{background:rgba(255,255,255,.08);color:white;transform:translateX(2px);}
-    .side-btn.active{background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;box-shadow:0 12px 28px rgba(79,70,229,.34);}
+    .side-btn.active{background:linear-gradient(135deg,var(--theme-primary),var(--theme-secondary));color:white;box-shadow:0 12px 28px var(--theme-ring);}
     .side-ico{font-size:20px;width:26px;text-align:center;flex:none;}
     .side-label{white-space:nowrap;transition:opacity .2s ease;}
     .sidebar.collapsed .side-btn{width:58px;padding:0;justify-content:center;}
@@ -38,10 +39,10 @@
     .content{margin-left:280px;transition:margin-left .25s ease;}
     body.sidebar-collapsed .content{margin-left:112px;}
     .editable-title{cursor:text;border-radius:12px;padding:2px 8px;margin-left:-8px;transition:.2s;}
-    .editable-title:hover,.editable-title:focus{background:#eef2ff;outline:none;box-shadow:0 0 0 2px rgba(37,99,235,.12);}
+    .editable-title:hover,.editable-title:focus{background:var(--theme-soft);outline:none;box-shadow:0 0 0 2px var(--theme-ring);}
     .seller-name-input{border:none;background:transparent;color:#6b7280;border-radius:10px;padding:2px 6px;min-width:160px;}
-    .seller-name-input:hover,.seller-name-input:focus{background:#eef2ff;outline:none;box-shadow:0 0 0 2px rgba(37,99,235,.12);}
-    .meta-card{border-left:6px solid #2563eb;}
+    .seller-name-input:hover,.seller-name-input:focus{background:var(--theme-soft);outline:none;box-shadow:0 0 0 2px var(--theme-ring);}
+    .meta-card{border-left:6px solid var(--theme-primary);}
     input,select,textarea{outline:none;}
     .progress-bg{background:#e5e7eb;border-radius:999px;height:12px;overflow:hidden;}
     .progress-bar{height:12px;border-radius:999px;}
@@ -53,6 +54,22 @@
     .alert-success{border-left-color:#22c55e;background:#f0fdf4;}
     .alert-info{border-left-color:#3b82f6;background:#eff6ff;}
     .action-card{border:1px solid #e5e7eb;border-radius:18px;padding:18px;background:#ffffff;}
+
+    .brand-photo-btn{width:42px;height:42px;border-radius:16px;border:0;background:rgba(255,255,255,.10);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;flex:none;transition:.2s;color:white;font-size:20px;position:relative;}
+    .brand-photo-btn:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,0,0,.18);}
+    .brand-photo-btn img{width:100%;height:100%;object-fit:cover;display:none;}
+    .brand-photo-btn.has-photo img{display:block;}
+    .brand-photo-btn.has-photo span{display:none;}
+    .theme-modal{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:2500;display:none;align-items:center;justify-content:center;padding:24px;}
+    .theme-modal.open{display:flex;}
+    .theme-box{background:white;border-radius:24px;max-width:760px;width:100%;padding:26px;box-shadow:0 25px 80px rgba(0,0,0,.30);}
+    .theme-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px;}
+    .theme-option{border:1px solid #e5e7eb;border-radius:18px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;background:#fff;transition:.2s;font-weight:900;color:#111827;}
+    .theme-option:hover{transform:translateY(-1px);box-shadow:0 10px 26px rgba(15,23,42,.12);}
+    .theme-swatch{width:34px;height:34px;border-radius:12px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35);flex:none;}
+    .theme-option.active{border-color:var(--theme-primary);background:var(--theme-soft);}
+    @media(max-width:760px){.theme-grid{grid-template-columns:repeat(2,minmax(0,1fr));}.theme-box{padding:22px;}}@media(max-width:520px){.theme-grid{grid-template-columns:1fr;}}
+
 
     .version-badge{background:#111827;color:white;border-radius:16px;padding:10px 16px;box-shadow:0 10px 30px rgba(0,0,0,.18);font-size:12px;line-height:1.35;border:1px solid rgba(255,255,255,.12);cursor:pointer;transition:.2s;text-align:left;min-width:150px;}
     .version-badge:hover{transform:translateY(-2px);box-shadow:0 14px 35px rgba(0,0,0,.28);}
@@ -95,7 +112,7 @@
       width:34px;
       height:34px;
       border-radius:999px;
-      background:linear-gradient(135deg,#2563eb,#7c3aed);
+      background:linear-gradient(135deg,var(--theme-primary),var(--theme-secondary));
       color:white;
       display:flex;
       align-items:center;
@@ -103,7 +120,7 @@
       font-size:17px;
       font-weight:900;
       flex:none;
-      box-shadow:0 10px 22px rgba(37,99,235,.28);
+      box-shadow:0 10px 22px var(--theme-ring);
     }
     .auto-refresh-dot{
       width:9px;
@@ -129,6 +146,74 @@
     }
 
 
+
+    .crm-dashboard-v2 .dash-topbar{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap;}
+    .dash-title{font-size:34px;font-weight:900;color:#111827;line-height:1.1;}
+    .dash-subtitle{color:#64748b;margin-top:8px;font-weight:600;}
+    .dash-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:flex-end;}
+    .dash-select,.dash-outline-btn,.dash-version{border:1px solid #dbe3ef;background:#fff;border-radius:14px;padding:12px 15px;font-weight:800;color:#111827;box-shadow:0 6px 16px rgba(15,23,42,.04);}
+    .dash-outline-btn:hover,.dash-version:hover{border-color:var(--theme-primary);color:var(--theme-primary);}
+    .dash-kpi,.dash-card{background:rgba(255,255,255,.94);border:1px solid #e7edf6;border-radius:20px;box-shadow:0 8px 26px rgba(15,23,42,.06);}
+    .dash-kpi{padding:22px;display:flex;align-items:center;gap:16px;}
+    .dash-kpi p{font-size:13px;color:#64748b;font-weight:800;margin-bottom:4px;}
+    .dash-kpi h2{font-size:25px;font-weight:950;color:#111827;line-height:1.1;}
+    .dash-kpi small{color:#94a3b8;font-weight:700;}
+    .kpi-icon{width:54px;height:54px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:24px;flex:none;}
+    .dash-card{padding:22px;}
+    .dash-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;}
+    .dash-card-head h2{font-size:17px;font-weight:950;color:#111827;}
+    .dash-pill{background:#eef2ff;color:var(--theme-primary);border:1px solid #dbeafe;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:900;white-space:nowrap;}
+    .dash-pill.green{background:#ecfdf5;color:#16a34a;border-color:#bbf7d0;}.dash-pill.orange{background:#fff7ed;color:#f97316;border-color:#fed7aa;}
+    .dash-link-btn{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;color:var(--theme-primary);font-weight:900;font-size:12px;padding:8px 10px;}
+    .dash-link-btn:hover{background:var(--theme-soft);}
+    .dash-progress-item{border-bottom:1px solid #eef2f7;padding:14px 0;}.dash-progress-item:last-child{border-bottom:0;}
+    .dash-progress-item>div:first-child{display:flex;justify-content:space-between;gap:12px;font-weight:900;color:#111827;}.dash-progress-item small{display:block;text-align:right;color:#64748b;margin:2px 0 8px;font-weight:700;}
+    .dash-progress{height:9px;background:#edf2f7;border-radius:999px;overflow:hidden;}.dash-progress i{display:block;height:100%;background:var(--theme-primary);border-radius:999px;}.dash-progress.green i{background:#22c55e;}.dash-progress.purple i{background:#8b5cf6;}
+    .dash-list{display:flex;flex-direction:column;gap:10px;}.dash-list-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #f1f5f9;padding:9px 0;}.dash-list-row:last-child{border-bottom:0;}.dash-list-row strong{font-size:13px;color:#111827;}.dash-list-row span{font-size:12px;color:#64748b;}.dash-tag{border-radius:999px;padding:6px 9px;font-size:11px;font-weight:900;white-space:nowrap;}.dash-empty{color:#94a3b8;text-align:center;padding:22px 0;font-weight:800;}
+    @media(max-width:900px){.dash-actions{justify-content:flex-start}.dash-select,.dash-outline-btn,.dash-version{width:100%;}.dash-card{padding:18px;}.dash-kpi h2{font-size:22px;}}
+
+
+    /* ===== AJUSTE FINAL v1.9.5 - Fonte, ícones centralizados e atualizador oculto ===== */
+    html,body,button,input,select,textarea,.dash-title,.dash-subtitle,.dash-kpi,.dash-card,.side-btn{font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif!important;-webkit-font-smoothing:antialiased;text-rendering:geometricPrecision;}
+    .kpi-icon,.side-ico,.brand-icon,.brand-photo-btn,.auto-refresh-icon,.version-dot,.theme-swatch{display:inline-flex!important;align-items:center!important;justify-content:center!important;text-align:center!important;line-height:1!important;}
+    .kpi-icon{width:54px!important;height:54px!important;border-radius:18px!important;min-width:54px!important;font-size:24px!important;}
+    .dash-kpi{align-items:center!important;}
+    .dash-kpi > div{min-width:0;}
+    .dash-kpi h2{word-break:break-word;}
+    .auto-refresh-box{
+      position:absolute!important;
+      right:0!important;
+      top:0!important;
+      width:44px!important;
+      min-width:44px!important;
+      max-width:44px!important;
+      height:44px!important;
+      min-height:44px!important;
+      padding:5px!important;
+      border-radius:999px!important;
+      opacity:.18!important;
+      overflow:hidden!important;
+      background:rgba(255,255,255,.72)!important;
+      border:1px solid rgba(148,163,184,.28)!important;
+      box-shadow:0 8px 22px rgba(15,23,42,.10)!important;
+      z-index:40!important;
+      gap:8px!important;
+      transition:width .24s ease,max-width .24s ease,opacity .2s ease,box-shadow .2s ease,background .2s ease!important;
+    }
+    .auto-refresh-box .auto-refresh-icon{width:32px!important;height:32px!important;min-width:32px!important;font-size:16px!important;border-radius:999px!important;}
+    .auto-refresh-box .auto-refresh-dot,.auto-refresh-box .auto-refresh-text{opacity:0!important;pointer-events:none!important;transition:opacity .18s ease!important;}
+    .auto-refresh-box:hover,.auto-refresh-box:focus-within{
+      width:270px!important;
+      max-width:270px!important;
+      opacity:1!important;
+      background:rgba(255,255,255,.96)!important;
+      box-shadow:0 16px 42px rgba(15,23,42,.18)!important;
+      padding:5px 13px 5px 5px!important;
+    }
+    .auto-refresh-box:hover .auto-refresh-dot,.auto-refresh-box:hover .auto-refresh-text,.auto-refresh-box:focus-within .auto-refresh-dot,.auto-refresh-box:focus-within .auto-refresh-text{opacity:1!important;}
+    .auto-refresh-text{font-size:12px!important;color:#334155!important;font-weight:800!important;white-space:nowrap!important;}
+    #dashboardCRM{position:relative;}
+
     @media print{.sidebar,.filter-panel button,#btnExportarPdfPerf{display:none!important}.content{margin-left:0}.card{box-shadow:none;border:1px solid #e5e7eb}}
   </style>
 </head>
@@ -137,10 +222,14 @@
 
 <div id="sidebar" class="sidebar">
   <div class="sidebar-brand">
-    <div class="brand-icon" style="background:rgba(255,255,255,.10);box-shadow:none;">👤</div>
+    <button type="button" id="brandPhotoBtn" class="brand-photo-btn" onclick="selecionarFotoPerfil()" title="Alterar foto do perfil">
+      <img id="brandPhotoImg" alt="Foto do vendedor">
+      <span>👤</span>
+    </button>
+    <input id="brandPhotoInput" type="file" accept="image/*" class="hidden" onchange="salvarFotoPerfil(event)">
     <div class="brand-text">
       <strong id="sidebarUserName">Vendedor</strong>
-      <span>CRM COMERCIAL • v1.9.3</span>
+      <span>v1.9.6</span>
     </div>
   </div>
 
@@ -158,7 +247,21 @@
   </div>
 
   <div class="sidebar-config-area">
+    <button id="navTemas" onclick="abrirTemas()" class="side-btn"><span class="side-ico">🎨</span><span class="side-label">Temas</span></button>
     <button id="navConfig" onclick="abrirConfig()" class="side-btn"><span class="side-ico">⚙️</span><span class="side-label">Config</span></button>
+  </div>
+</div>
+
+<div id="modalTemas" class="theme-modal">
+  <div class="theme-box">
+    <div class="flex justify-between items-start gap-4 mb-2">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-800">Temas do CRM</h2>
+        <p class="text-gray-500 mt-1">Escolha a cor principal desta instalação.</p>
+      </div>
+      <button onclick="fecharTemas()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl font-bold">X</button>
+    </div>
+    <div id="themeGrid" class="theme-grid"></div>
   </div>
 </div>
 
@@ -167,35 +270,35 @@
     <div class="flex justify-between items-start gap-4 mb-5">
       <div>
         <h2 class="text-2xl font-bold text-gray-800">Novidades da versão</h2>
-        <p class="text-gray-500 mt-1">JNG CRM • v1.9.3 • Build 2026.06.15</p>
+        <p class="text-gray-500 mt-1">JNG CRM • v1.9.6 • Build 2026.07.01</p>
       </div>
       <button onclick="fecharModalVersao()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl font-bold">X</button>
     </div>
 
     <div class="version-item">
       <div class="version-dot">✓</div>
-      <div><strong>Aba ATIV. adicionada</strong><br><span class="text-sm text-gray-500">Agora é possível registrar atividades diárias, histórico, cliente, tipo e feedback.</span></div>
+      <div><strong>Dashboard revisado</strong><br><span class="text-sm text-gray-500">Correção dos filtros do dashboard e melhor sincronização dos gráficos com ano, mês e dia selecionados.</span></div>
     </div>
 
     <div class="version-item">
       <div class="version-dot">✓</div>
-      <div><strong>Filtros de atividades</strong><br><span class="text-sm text-gray-500">Filtro por data, cliente e tipo: Orçamento, Pedido, Ligação, Reunião, Follow-up e Outros.</span></div>
+      <div><strong>Faturamento em colunas</strong><br><span class="text-sm text-gray-500">O gráfico de faturamento mensal agora usa barras e aparece antes do gráfico de quantidade de pedidos.</span></div>
     </div>
     <div class="version-item">
       <div class="version-dot">✓</div>
-      <div><strong>Status Sem Volta</strong><br><span class="text-sm text-gray-500">Clientes há 120+ dias sem comprar são classificados como Sem Volta para facilitar a limpeza da carteira.</span></div>
+      <div><strong>Clientes em risco ordenados</strong><br><span class="text-sm text-gray-500">A lista do dashboard agora prioriza os clientes com menos dias sem compra, em ordem crescente.</span></div>
     </div>
     <div class="version-item">
       <div class="version-dot">✓</div>
-      <div><strong>Modal de novidades</strong><br><span class="text-sm text-gray-500">Ao clicar na versão, você vê as principais alterações da atualização.</span></div>
+      <div><strong>Fonte mais limpa</strong><br><span class="text-sm text-gray-500">A tipografia foi suavizada com uma pilha moderna para melhor leitura no CRM.</span></div>
     </div>
     <div class="version-item">
       <div class="version-dot">✓</div>
-      <div><strong>Metas individuais por vendedor</strong><br><span class="text-sm text-gray-500">Cada usuário pode definir sua própria meta no navegador.</span></div>
+      <div><strong>Mais opções de tema</strong><br><span class="text-sm text-gray-500">Novas variações de cores foram adicionadas para personalização visual do CRM.</span></div>
     </div>
     <div class="version-item">
       <div class="version-dot">✓</div>
-      <div><strong>Configuração simplificada</strong><br><span class="text-sm text-gray-500">A configuração não exige mais coluna de Pedido.</span></div>
+      <div><strong>Revisão geral</strong><br><span class="text-sm text-gray-500">Ajustes de performance, centralização de ícones e correções sem remover funcionalidades existentes.</span></div>
     </div>
   </div>
 </div>
@@ -205,153 +308,98 @@
 
 
 
-<div id="dashboardCRM">
+<div id="dashboardCRM" class="crm-dashboard-v2">
   <div id="autoRefreshBox" class="auto-refresh-box" title="Atualização automática da aba CRM a cada 15 segundos">
     <span class="auto-refresh-icon">↻</span>
     <span id="autoRefreshDot" class="auto-refresh-dot"></span>
     <span id="autoRefreshStatus" class="auto-refresh-text">Atualização automática • 15s</span>
   </div>
 
-  <div class="flex justify-between items-center mb-10">
+  <div class="dash-topbar mb-8">
     <div>
-      <h1 id="tituloCRM" contenteditable="true" onblur="salvarIdentidadeCRM()" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" class="text-4xl font-bold text-gray-800 editable-title" title="Clique para editar o nome do CRM">JNG CRM</h1>
-      <p class="text-gray-500 mt-2">Dashboard Comercial <span id="separadorVendedor" class="hidden">•</span> <input id="nomeVendedorCRM" oninput="salvarIdentidadeCRM()" class="seller-name-input" placeholder="Nome do vendedor" title="Digite o nome do vendedor"></p>
+      <h1 id="tituloCRM" contenteditable="true" onblur="salvarIdentidadeCRM()" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" class="dash-title editable-title" title="Clique para editar o nome do CRM">Dashboard</h1>
+      <p class="dash-subtitle">Visão geral do seu desempenho comercial <span id="separadorVendedor" class="hidden">•</span> <input id="nomeVendedorCRM" oninput="salvarIdentidadeCRM()" class="seller-name-input" placeholder="Nome do vendedor" title="Digite o nome do vendedor"></p>
     </div>
-    <button onclick="abrirModalVersao()" class="version-badge" title="Ver novidades da versão">
-      <strong>📋 Versão 1.9.3</strong>
-      <span>Build 2026.06.15</span>
-    </button>
-  </div>
-
-  <div class="flex gap-4 mb-8 flex-wrap">
-    <select id="filtroDia" class="border border-gray-300 rounded-xl px-4 py-3 bg-white">
-      <option value="Todos">Todos os Dias</option>
-    </select>
-
-    <select id="filtroAno" class="border border-gray-300 rounded-xl px-4 py-3 bg-white">
-      <option value="Todos">Todos os Anos</option>
-    </select>
-
-    <select id="filtroMes" class="border border-gray-300 rounded-xl px-4 py-3 bg-white">
-      <option value="Todos">Todos os Meses</option>
-      <option value="0">Janeiro</option>
-      <option value="1">Fevereiro</option>
-      <option value="2">Março</option>
-      <option value="3">Abril</option>
-      <option value="4">Maio</option>
-      <option value="5">Junho</option>
-      <option value="6">Julho</option>
-      <option value="7">Agosto</option>
-      <option value="8">Setembro</option>
-      <option value="9">Outubro</option>
-      <option value="10">Novembro</option>
-      <option value="11">Dezembro</option>
-    </select>
-
-    <button id="btnClientesPerdidos" class="bg-red-500 hover:bg-red-600 text-white px-5 py-3 rounded-xl font-semibold shadow">
-      Clientes Perdidos
-    </button>
-  </div>
-
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-    <div class="card">
-      <p class="text-gray-500 mb-2">Faturamento</p>
-      <h2 id="faturamento" class="text-3xl font-bold text-green-600">R$ 0</h2>
-    </div>
-
-    <div class="card">
-      <p class="text-gray-500 mb-2">Pedidos</p>
-      <h2 id="pedidos" class="text-3xl font-bold text-blue-600">0</h2>
-    </div>
-
-    <div class="card">
-      <p class="text-gray-500 mb-2">Ticket Médio</p>
-      <h2 id="ticket" class="text-3xl font-bold text-orange-500">R$ 0</h2>
-    </div>
-
-    <div class="card">
-      <p class="text-gray-500 mb-2">Clientes Únicos</p>
-      <h2 id="clientes" class="text-3xl font-bold text-purple-600">0</h2>
+    <div class="dash-actions">
+      <select id="filtroDia" class="dash-select"><option value="Todos">Todos os Dias</option></select>
+      <select id="filtroAno" class="dash-select"><option value="Todos">Todos os Anos</option></select>
+      <select id="filtroMes" class="dash-select"><option value="Todos">Todos os Meses</option><option value="0">Janeiro</option><option value="1">Fevereiro</option><option value="2">Março</option><option value="3">Abril</option><option value="4">Maio</option><option value="5">Junho</option><option value="6">Julho</option><option value="7">Agosto</option><option value="8">Setembro</option><option value="9">Outubro</option><option value="10">Novembro</option><option value="11">Dezembro</option></select>
+      <button id="btnClientesPerdidos" class="dash-outline-btn">Clientes Perdidos</button>
+      <button onclick="abrirModalVersao()" class="dash-version" title="Ver novidades da versão">v1.9.6</button>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-    <div class="card">
-      <h2 class="text-xl font-bold text-gray-700 mb-6">Faturamento Mensal</h2>
-      <div style="height:450px;"><canvas id="mensalChart"></canvas></div>
+  <div class="dash-kpis grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
+    <div class="dash-kpi"><span class="kpi-icon bg-blue-100 text-blue-600">🛒</span><div><p>Pedidos</p><h2 id="pedidos">0</h2><small>Total no período</small></div></div>
+    <div class="dash-kpi"><span class="kpi-icon bg-green-100 text-green-600">💵</span><div><p>Faturamento</p><h2 id="faturamento">R$ 0</h2><small>Total no período</small></div></div>
+    <div class="dash-kpi"><span class="kpi-icon bg-yellow-100 text-yellow-600">👥</span><div><p>Clientes</p><h2 id="clientes">0</h2><small>Ativos no período</small></div></div>
+    <div class="dash-kpi"><span class="kpi-icon bg-purple-100 text-purple-600">💳</span><div><p>Ticket Médio</p><h2 id="ticket">R$ 0</h2><small>Por pedido</small></div></div>
+  </div>
+
+  <div class="dash-layout grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
+    <div class="xl:col-span-2 space-y-6">
+      <div class="dash-card">
+        <div class="dash-card-head"><h2>Faturamento por Mês (R$)</h2><span class="dash-pill green">Faturamento</span></div>
+        <div style="height:360px;"><canvas id="mensalChart"></canvas></div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-head"><h2>Quantidade de Pedidos por Mês</h2><span class="dash-pill">Pedidos</span></div>
+        <div style="height:360px;"><canvas id="pedidosMensaisChart"></canvas></div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="dash-card">
+          <div class="dash-card-head"><h2>Top Integradores</h2><button onclick="document.getElementById('rankingCompletoCRM')?.scrollIntoView({behavior:'smooth'})" class="dash-link-btn">Ver ranking</button></div>
+          <div style="height:340px;"><canvas id="rankingChart"></canvas></div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-head"><h2>Pedidos por Status Manual</h2><span class="dash-pill orange" id="dashStatusTotal">0 pedidos</span></div>
+          <div style="height:340px;"><canvas id="dashStatusChart"></canvas></div>
+        </div>
+      </div>
     </div>
 
-    <div class="card">
-      <h2 class="text-xl font-bold text-gray-700 mb-6">Top Integradores</h2>
-      <div style="height:450px;"><canvas id="rankingChart"></canvas></div>
+    <div class="space-y-6">
+      <div class="dash-card">
+        <div class="dash-card-head"><h2>Desempenho do Mês</h2><span class="dash-pill">Mês</span></div>
+        <div class="dash-progress-item"><div><b>Pedidos</b><span id="dashPedidosMes">0</span></div><small id="dashPedidosMetaTxt">Meta: -</small><div class="dash-progress"><i id="dashPedidosBar" style="width:0%"></i></div></div>
+        <div class="dash-progress-item"><div><b>Faturamento</b><span id="dashFaturamentoMes">R$ 0</span></div><small id="dashFaturamentoMetaTxt">Meta: -</small><div class="dash-progress green"><i id="dashFaturamentoBar" style="width:0%"></i></div></div>
+        <div class="dash-progress-item"><div><b>Ticket Médio</b><span id="dashTicketMes">R$ 0</span></div><small id="dashTicketMetaTxt">Meta: R$ 8.000,00</small><div class="dash-progress purple"><i id="dashTicketBar" style="width:0%"></i></div></div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-head"><h2>Atividades Recentes</h2><button onclick="abrirAtividades()" class="dash-link-btn">Ver todas</button></div>
+        <div id="dashAtividadesRecentes" class="dash-list"></div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-head"><h2>Clientes em Risco</h2><button onclick="abrirRisco()" class="dash-link-btn">Ver todos</button></div>
+        <div id="dashClientesRisco" class="dash-list"></div>
+      </div>
     </div>
   </div>
 
   <div class="card mb-10">
     <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
       <h2 class="text-2xl font-bold text-gray-700">Histórico por Cliente</h2>
-
       <div class="flex gap-3 flex-wrap">
-        <select id="filtroClienteHistorico" onchange="gerarHistoricoCliente()" class="border border-gray-300 rounded-xl px-4 py-3 bg-white min-w-[280px]">
-          <option value="">Selecione um cliente</option>
-        </select>
-
-        <select id="filtroAnoHistorico" onchange="gerarHistoricoCliente()" class="border border-gray-300 rounded-xl px-4 py-3 bg-white">
-          <option value="Todos">Todos os Anos</option>
-        </select>
+        <select id="filtroClienteHistorico" onchange="gerarHistoricoCliente()" class="border border-gray-300 rounded-xl px-4 py-3 bg-white min-w-[280px]"><option value="">Selecione um cliente</option></select>
+        <select id="filtroAnoHistorico" onchange="gerarHistoricoCliente()" class="border border-gray-300 rounded-xl px-4 py-3 bg-white"><option value="Todos">Todos os Anos</option></select>
       </div>
     </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
-      <div class="bg-gray-50 rounded-2xl p-5">
-        <p class="text-gray-500 mb-2">Total Comprado</p>
-        <h2 id="histTotalComprado" class="text-2xl font-bold text-green-600">R$ 0</h2>
-      </div>
-
-      <div class="bg-gray-50 rounded-2xl p-5">
-        <p class="text-gray-500 mb-2">Pedidos</p>
-        <h2 id="histPedidos" class="text-2xl font-bold text-blue-600">0</h2>
-      </div>
-
-      <div class="bg-gray-50 rounded-2xl p-5">
-        <p class="text-gray-500 mb-2">Ticket Médio</p>
-        <h2 id="histTicket" class="text-2xl font-bold text-orange-500">R$ 0</h2>
-      </div>
-
-      <div class="bg-gray-50 rounded-2xl p-5">
-        <p class="text-gray-500 mb-2">Melhor Mês</p>
-        <h2 id="histMelhorMes" class="text-2xl font-bold text-purple-600">-</h2>
-      </div>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div class="bg-gray-50 rounded-2xl p-5"><p class="text-gray-500 mb-2">Total Comprado</p><h2 id="histTotalComprado" class="text-2xl font-bold text-green-600">R$ 0</h2></div>
+      <div class="bg-gray-50 rounded-2xl p-5"><p class="text-gray-500 mb-2">Pedidos</p><h2 id="histPedidos" class="text-2xl font-bold text-blue-600">0</h2></div>
+      <div class="bg-gray-50 rounded-2xl p-5"><p class="text-gray-500 mb-2">Ticket Médio</p><h2 id="histTicket" class="text-2xl font-bold text-orange-500">R$ 0</h2></div>
+      <div class="bg-gray-50 rounded-2xl p-5"><p class="text-gray-500 mb-2">Melhor Mês</p><h2 id="histMelhorMes" class="text-2xl font-bold text-purple-600">-</h2></div>
     </div>
-
-    <div>
-      <h3 class="font-bold text-gray-700 mb-4">Compras por Mês</h3>
-      <div style="height:360px;">
-        <canvas id="historicoClienteChart"></canvas>
-      </div>
-    </div>
+    <h3 class="font-bold text-gray-700 mb-4">Compras por Mês</h3>
+    <div style="height:360px;"><canvas id="historicoClienteChart"></canvas></div>
   </div>
 
-
-  <div class="card">
+  <div id="rankingCompletoCRM" class="card">
     <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
       <h2 class="text-2xl font-bold text-gray-700">Ranking Integradores</h2>
       <input type="text" id="pesquisa" placeholder="Pesquisar integrador..." class="border border-gray-300 rounded-xl px-4 py-2 w-72">
     </div>
-
-    <div class="overflow-x-auto">
-      <table class="w-full">
-        <thead>
-          <tr class="border-b text-left text-gray-500">
-            <th class="pb-4">#</th>
-            <th class="pb-4">Integrador</th>
-            <th class="pb-4">Pedidos</th>
-            <th class="pb-4">Total Comprado</th>
-          </tr>
-        </thead>
-        <tbody id="rankingTabela"></tbody>
-      </table>
-    </div>
+    <div class="overflow-x-auto"><table class="w-full"><thead><tr class="border-b text-left text-gray-500"><th class="pb-4">#</th><th class="pb-4">Integrador</th><th class="pb-4">Pedidos</th><th class="pb-4">Total Comprado</th></tr></thead><tbody id="rankingTabela"></tbody></table></div>
   </div>
 </div>
 
@@ -1171,6 +1219,7 @@ let rankingGlobal = [];
 
 let mensalChart;
 let rankingChart;
+let pedidosMensaisChart;
 let metaChart;
 let crescimentoChart;
 let performanceDiaChart;
@@ -1904,6 +1953,12 @@ function gerarHistoricoCliente(){
     Set:0,Out:0,Nov:0,Dez:0
   };
 
+  const mesesPedidos = {
+    Jan:0,Fev:0,Mar:0,Abr:0,
+    Mai:0,Jun:0,Jul:0,Ago:0,
+    Set:0,Out:0,Nov:0,Dez:0
+  };
+
   const nomesMeses = Object.keys(meses);
 
   let total = 0;
@@ -2015,6 +2070,12 @@ function aplicarFiltros(){
     Set:0,Out:0,Nov:0,Dez:0
   };
 
+  const mesesPedidos = {
+    Jan:0,Fev:0,Mar:0,Abr:0,
+    Mai:0,Jun:0,Jul:0,Ago:0,
+    Set:0,Out:0,Nov:0,Dez:0
+  };
+
   const nomesMeses = Object.keys(meses);
 
   dadosOriginais.forEach(r => {
@@ -2052,6 +2113,7 @@ function aplicarFiltros(){
     clientes[cliente].total += valor;
 
     meses[nomesMeses[mes]] += valor;
+    mesesPedidos[nomesMeses[mes]]++;
   });
 
   document.getElementById("faturamento").innerText = dinheiro(faturamento);
@@ -2068,7 +2130,7 @@ function aplicarFiltros(){
     .sort((a,b) => b.total - a.total);
 
   renderTabela(rankingGlobal);
-  atualizarGraficos(meses);
+  atualizarGraficos(meses, mesesPedidos);
 }
 
 function renderTabela(lista){
@@ -2087,9 +2149,10 @@ function renderTabela(lista){
   });
 }
 
-function atualizarGraficos(meses){
+function atualizarGraficos(meses, mesesPedidos){
   if(mensalChart) mensalChart.destroy();
   if(rankingChart) rankingChart.destroy();
+  if(pedidosMensaisChart) pedidosMensaisChart.destroy();
 
   mensalChart = new Chart(document.getElementById("mensalChart"), {
     type:"bar",
@@ -2105,6 +2168,28 @@ function atualizarGraficos(meses){
       maintainAspectRatio:false
     }
   });
+
+  const pedidosEl = document.getElementById("pedidosMensaisChart");
+  if(pedidosEl){
+    const basePedidos = mesesPedidos || Object.fromEntries(Object.keys(meses).map(m=>[m,0]));
+    pedidosMensaisChart = new Chart(pedidosEl, {
+      type:"bar",
+      data:{
+        labels:Object.keys(basePedidos),
+        datasets:[{
+          label:"Pedidos",
+          data:Object.values(basePedidos),
+          borderRadius:10
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{legend:{display:true}},
+        scales:{y:{beginAtZero:true,ticks:{precision:0}}}
+      }
+    });
+  }
 
   const top = rankingGlobal.slice(0,10);
 
@@ -3134,7 +3219,7 @@ if(crmConfigCompleta()) carregar(); else mostrarPrimeiroAcessoConfig();
 
 // Atualização automática reativada no patch v1.9.4.
 
-/* ===== PATCH v1.9.3 - Risco sem WhatsApp + Atividades com ocultar ===== */
+/* ===== PATCH v1.9.6 - Risco sem WhatsApp + Atividades com ocultar ===== */
 
 function getAtividadesComerciais(){
   try{
@@ -3473,7 +3558,7 @@ function ordenarRisco(campo){
 }
 
 
-/* ===== PATCH v1.9.3 - Nome do vendedor na Sidebar ===== */
+/* ===== PATCH v1.9.6 - Nome do vendedor na Sidebar ===== */
 function atualizarNomeSidebar(){
   const campo = document.getElementById("nomeVendedorCRM");
   const el = document.getElementById("sidebarUserName");
@@ -3516,7 +3601,7 @@ document.addEventListener("DOMContentLoaded", atualizarNomeSidebar);
 setTimeout(atualizarNomeSidebar, 300);
 
 
-/* ===== PATCH v1.9.3 - Aba Status dos Pedidos ===== */
+/* ===== PATCH v1.9.6 - Aba Status dos Pedidos ===== */
 
 function getStatusPedidoRow(row){
   const integrador = getCelula(row, 0);
@@ -3618,7 +3703,7 @@ function abrirStatus(){
   ids.forEach(id => { const el = document.getElementById(id); if(el) el.classList.add("hidden"); });
   const painel = document.getElementById("painelStatus");
   if(painel) painel.classList.remove("hidden");
-  ["navCRM","navMetas","navPerf","navConfig","navRisco","navAtiv","navStatus"].forEach(id=>{ const el = document.getElementById(id); if(el) el.classList.remove("active"); });
+  ["navCRM","navMetas","navPerf","navRisco","navAtiv","navStatus","navTemas","navConfig"].forEach(id=>{ const el = document.getElementById(id); if(el) el.classList.remove("active"); });
   const nav = document.getElementById("navStatus");
   if(nav) nav.classList.add("active");
   popularFiltrosStatus();
@@ -3636,7 +3721,7 @@ if(carregarOriginal_v190){
 
 
 
-/* ===== PATCH v1.9.3 - Aba Status sem travamento ===== */
+/* ===== PATCH v1.9.6 - Aba Status sem travamento ===== */
 
 const STATUS_CONFIG_PADRAO = {
   colunaIntegrador:"A",
@@ -3881,7 +3966,7 @@ function abrirStatus(){
   const painel = document.getElementById("painelStatus");
   if(painel) painel.classList.remove("hidden");
 
-  ["navCRM","navMetas","navPerf","navConfig","navRisco","navAtiv","navStatus"].forEach(id=>{
+  ["navCRM","navMetas","navPerf","navRisco","navAtiv","navStatus","navTemas","navConfig"].forEach(id=>{
     const el = document.getElementById(id);
     if(el) el.classList.remove("active");
   });
@@ -3907,10 +3992,10 @@ function abrirStatus(){
 
 
 
-/* ===== HOTFIX v1.9.3 - Revisão geral, Status estável e otimização ===== */
+/* ===== HOTFIX v1.9.6 - Revisão geral, Status estável e otimização ===== */
 (function(){
   const PAINEIS_CRM = ["dashboardCRM","painelMetas","painelPerformance","painelConfig","painelRisco","painelAtividades","painelStatus"];
-  const NAVS_CRM = ["navCRM","navMetas","navPerf","navConfig","navRisco","navAtiv","navStatus"];
+  const NAVS_CRM = ["navCRM","navMetas","navPerf","navRisco","navAtiv","navStatus","navTemas","navConfig"];
 
   window.escapeHTML = function(valor){
     return String(valor ?? "")
@@ -4711,7 +4796,7 @@ setTimeout(iniciarAutoRefreshCRM, 500);
     ids.forEach(id => { const el = document.getElementById(id); if(el) el.classList.add("hidden"); });
     const painel = document.getElementById("painelStatus");
     if(painel) painel.classList.remove("hidden");
-    ["navCRM","navMetas","navPerf","navConfig","navRisco","navAtiv","navStatus"].forEach(id=>{ const el = document.getElementById(id); if(el) el.classList.remove("active"); });
+    ["navCRM","navMetas","navPerf","navRisco","navAtiv","navStatus","navTemas","navConfig"].forEach(id=>{ const el = document.getElementById(id); if(el) el.classList.remove("active"); });
     const nav = document.getElementById("navStatus");
     if(nav) nav.classList.add("active");
 
@@ -4724,6 +4809,404 @@ setTimeout(iniciarAutoRefreshCRM, 500);
     renderStatusPedidos();
   };
 })();
+
+/* ===== PATCH - Foto do vendedor, temas e pedidos mensais ===== */
+(function(){
+  const TEMAS_CRM = {
+    azul:{nome:"Azul Profissional", primary:"#2563eb", secondary:"#7c3aed", soft:"#eef2ff", ring:"rgba(37,99,235,.18)"},
+    oceano:{nome:"Oceano", primary:"#0284c7", secondary:"#0f766e", soft:"#ecfeff", ring:"rgba(2,132,199,.20)"},
+    laranja:{nome:"Laranja Comercial", primary:"#f97316", secondary:"#dc2626", soft:"#fff7ed", ring:"rgba(249,115,22,.22)"},
+    solar:{nome:"Solar", primary:"#f59e0b", secondary:"#f97316", soft:"#fffbeb", ring:"rgba(245,158,11,.22)"},
+    verde:{nome:"Verde Energia", primary:"#16a34a", secondary:"#059669", soft:"#f0fdf4", ring:"rgba(22,163,74,.20)"},
+    esmeralda:{nome:"Esmeralda", primary:"#10b981", secondary:"#0f766e", soft:"#ecfdf5", ring:"rgba(16,185,129,.20)"},
+    roxo:{nome:"Roxo Premium", primary:"#7c3aed", secondary:"#db2777", soft:"#f5f3ff", ring:"rgba(124,58,237,.20)"},
+    magenta:{nome:"Magenta", primary:"#c026d3", secondary:"#e11d48", soft:"#fdf4ff", ring:"rgba(192,38,211,.20)"},
+    vermelho:{nome:"Vermelho Forte", primary:"#dc2626", secondary:"#991b1b", soft:"#fef2f2", ring:"rgba(220,38,38,.20)"},
+    grafite:{nome:"Grafite", primary:"#334155", secondary:"#0f172a", soft:"#f1f5f9", ring:"rgba(51,65,85,.20)"},
+    preto:{nome:"Preto Elegante", primary:"#111827", secondary:"#4f46e5", soft:"#f8fafc", ring:"rgba(17,24,39,.20)"},
+    vinho:{nome:"Vinho", primary:"#9f1239", secondary:"#7f1d1d", soft:"#fff1f2", ring:"rgba(159,18,57,.20)"}
+  };
+
+  window.aplicarTemaCRM = function(chave){
+    const tema = TEMAS_CRM[chave] || TEMAS_CRM.azul;
+    const root = document.documentElement;
+    root.style.setProperty("--theme-primary", tema.primary);
+    root.style.setProperty("--theme-secondary", tema.secondary);
+    root.style.setProperty("--theme-soft", tema.soft);
+    root.style.setProperty("--theme-ring", tema.ring);
+    localStorage.setItem("jng_crm_tema", chave);
+    document.querySelectorAll(".theme-option").forEach(btn=>btn.classList.toggle("active", btn.dataset.theme === chave));
+  };
+
+  window.abrirTemas = function(){
+    if(typeof mostrarPainelCRM === "function"){
+      ["navCRM","navMetas","navPerf","navRisco","navAtiv","navStatus","navTemas","navConfig"].forEach(id=>{
+        const el = document.getElementById(id);
+        if(el) el.classList.toggle("active", id === "navTemas");
+      });
+    }
+    montarGradeTemas();
+    document.getElementById("modalTemas")?.classList.add("open");
+  };
+
+  window.fecharTemas = function(){
+    document.getElementById("modalTemas")?.classList.remove("open");
+    const dashboardVisivel = !document.getElementById("dashboardCRM")?.classList.contains("hidden");
+    if(dashboardVisivel){
+      const nav = document.getElementById("navCRM");
+      const temas = document.getElementById("navTemas");
+      if(nav) nav.classList.add("active");
+      if(temas) temas.classList.remove("active");
+    }
+  };
+
+  window.montarGradeTemas = function(){
+    const grid = document.getElementById("themeGrid");
+    if(!grid || grid.dataset.ready === "1") return;
+    grid.innerHTML = Object.entries(TEMAS_CRM).map(([chave,tema])=>`<button type="button" class="theme-option" data-theme="${chave}" onclick="aplicarTemaCRM('${chave}')"><span class="theme-swatch" style="background:linear-gradient(135deg,${tema.primary},${tema.secondary})"></span><span>${tema.nome}</span></button>`).join("");
+    grid.dataset.ready = "1";
+  };
+
+  window.selecionarFotoPerfil = function(){
+    document.getElementById("brandPhotoInput")?.click();
+  };
+
+  window.salvarFotoPerfil = function(event){
+    const arquivo = event?.target?.files?.[0];
+    if(!arquivo) return;
+    const reader = new FileReader();
+    reader.onload = function(){
+      localStorage.setItem("jng_crm_foto_vendedor", String(reader.result || ""));
+      aplicarFotoPerfil();
+    };
+    reader.readAsDataURL(arquivo);
+  };
+
+  window.aplicarFotoPerfil = function(){
+    const foto = localStorage.getItem("jng_crm_foto_vendedor") || "";
+    const btn = document.getElementById("brandPhotoBtn");
+    const img = document.getElementById("brandPhotoImg");
+    if(!btn || !img) return;
+    if(foto){
+      img.src = foto;
+      btn.classList.add("has-photo");
+    }else{
+      img.removeAttribute("src");
+      btn.classList.remove("has-photo");
+    }
+  };
+
+  document.addEventListener("DOMContentLoaded", function(){
+    montarGradeTemas();
+    aplicarTemaCRM(localStorage.getItem("jng_crm_tema") || "azul");
+    aplicarFotoPerfil();
+  });
+})();
+
+
+/* ===== PATCH - Dashboard executivo no estilo moderno ===== */
+(function(){
+  function pct(valor, meta){ return Math.max(0, Math.min(100, meta > 0 ? (valor/meta)*100 : 0)); }
+  function setTxt(id, txt){ const el=document.getElementById(id); if(el) el.innerText=txt; }
+  function setW(id, val){ const el=document.getElementById(id); if(el) el.style.width = `${Math.round(val)}%`; }
+  function tagClass(txt){
+    const n = typeof normalizar === 'function' ? normalizar(txt) : String(txt||'').toLowerCase();
+    if(n.includes('pedido') || n.includes('liber')) return 'bg-green-100 text-green-700';
+    if(n.includes('lig')) return 'bg-blue-100 text-blue-700';
+    if(n.includes('reuni')) return 'bg-yellow-100 text-yellow-700';
+    if(n.includes('orc')) return 'bg-red-100 text-red-700';
+    if(n.includes('follow')) return 'bg-emerald-100 text-emerald-700';
+    return 'bg-slate-100 text-slate-700';
+  }
+  window.atualizarDashboardExecutivo = function(meses, mesesPedidos){
+    try{
+      const now = new Date();
+      const anoSel = document.getElementById('filtroAno')?.value;
+      const mesSel = document.getElementById('filtroMes')?.value;
+      const anoBase = anoSel && anoSel !== 'Todos' ? parseInt(anoSel,10) : now.getFullYear();
+      const mesBase = mesSel && mesSel !== 'Todos' ? parseInt(mesSel,10) : now.getMonth();
+      const labelMes = `${String(mesBase+1).padStart(2,'0')}/${anoBase}`;
+      const fatMes = (meses && Object.prototype.hasOwnProperty.call(meses,labelMes)) ? Number(meses[labelMes]||0) : 0;
+      const pedMes = (mesesPedidos && Object.prototype.hasOwnProperty.call(mesesPedidos,labelMes)) ? Number(mesesPedidos[labelMes]||0) : 0;
+      const ticketMes = pedMes ? fatMes / pedMes : 0;
+      const metaFat = typeof getMetaMensalAno === 'function' ? Number(getMetaMensalAno(anoBase)||0) : 0;
+      const metaPed = Math.max(1, Math.round(metaFat > 0 && ticketMes > 0 ? metaFat / ticketMes : 80));
+      setTxt('dashPedidosMes', pedMes);
+      setTxt('dashFaturamentoMes', typeof dinheiro==='function' ? dinheiro(fatMes) : fatMes.toLocaleString('pt-BR'));
+      setTxt('dashTicketMes', typeof dinheiro==='function' ? dinheiro(ticketMes) : ticketMes.toLocaleString('pt-BR'));
+      setTxt('dashPedidosMetaTxt', `Meta: ${metaPed}`);
+      setTxt('dashFaturamentoMetaTxt', `Meta: ${typeof dinheiro==='function' ? dinheiro(metaFat) : metaFat}`);
+      setW('dashPedidosBar', pct(pedMes, metaPed));
+      setW('dashFaturamentoBar', pct(fatMes, metaFat));
+      setW('dashTicketBar', pct(ticketMes, 8000));
+
+      const atividadesBox = document.getElementById('dashAtividadesRecentes');
+      if(atividadesBox){
+        let atividades = [];
+        try{ atividades = (typeof getAtividadesComerciais === 'function' ? getAtividadesComerciais() : JSON.parse(localStorage.getItem('jng_atividades_comerciais')||'[]')); }catch(e){}
+        atividades = atividades.filter(a=>!a.oculto).sort((a,b)=>String(b.data||'').localeCompare(String(a.data||'')) || String(b.criadoEm||'').localeCompare(String(a.criadoEm||''))).slice(0,5);
+        atividadesBox.innerHTML = atividades.length ? atividades.map(a=>`<div class="dash-list-row"><div><strong>${escapeHTML(a.tipo || 'Atividade')} com ${escapeHTML(a.cliente || 'cliente')}</strong><br><span>${escapeHTML((a.feedback || '').slice(0,54) || 'Sem observação')}</span></div><em class="dash-tag ${tagClass(a.tipo)}">${escapeHTML(a.tipo || '-')}</em></div>`).join('') : `<div class="dash-empty">Nenhuma atividade recente.</div>`;
+      }
+
+      const riscoBox = document.getElementById('dashClientesRisco');
+      if(riscoBox){
+        const porCliente = {};
+        (dadosOriginais||[]).forEach(row=>{
+          const cliente = String(getCelula(row, colunaParaIndice(configCRM.colunaCliente || 'A'))||'').trim();
+          const dataTxt = getCelula(row, colunaParaIndice(configCRM.colunaData || 'B'));
+          if(!cliente || !dataTxt) return;
+          const data = converterDataBR(dataTxt);
+          if(isNaN(data)) return;
+          if(!porCliente[cliente] || data > porCliente[cliente]) porCliente[cliente]=data;
+        });
+        const hoje = new Date();
+        const lista = Object.entries(porCliente).map(([nome,data])=>({nome,dias:Math.floor((hoje-data)/(1000*60*60*24))})).filter(x=>x.dias>=30).sort((a,b)=>a.dias-b.dias).slice(0,5);
+        riscoBox.innerHTML = lista.length ? lista.map(c=>`<div class="dash-list-row"><div><strong>${escapeHTML(c.nome)}</strong><br><span>Último pedido há ${c.dias} dias</span></div><em class="dash-tag ${c.dias>=60?'bg-red-100 text-red-700':c.dias>=45?'bg-orange-100 text-orange-700':'bg-yellow-100 text-yellow-700'}">${c.dias} dias</em></div>`).join('') : `<div class="dash-empty">Nenhum cliente crítico no momento.</div>`;
+      }
+
+      const statusCanvas = document.getElementById('dashStatusChart');
+      if(statusCanvas && typeof Chart !== 'undefined'){
+        let listaStatus = [];
+        try{ listaStatus = typeof obterListaStatusPedidos === 'function' ? obterListaStatusPedidos() : []; }catch(e){}
+        const cont = {};
+        listaStatus.forEach(i=>{ const st=String(i.statusManual || i.status || 'Sem status').trim() || 'Sem status'; cont[st]=(cont[st]||0)+1; });
+        const entries = Object.entries(cont).sort((a,b)=>b[1]-a[1]).slice(0,6);
+        setTxt('dashStatusTotal', `${listaStatus.length} pedidos`);
+        if(window.dashStatusChart) window.dashStatusChart.destroy();
+        window.dashStatusChart = new Chart(statusCanvas,{type:'doughnut',data:{labels:entries.map(e=>e[0]),datasets:[{data:entries.map(e=>e[1])}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right'}}}});
+      }
+    }catch(err){ console.warn('Dashboard executivo:', err); }
+  };
+
+  const tentarWrap = function(){
+    if(typeof window.atualizarGraficos !== 'function' || window.atualizarGraficos.__dashWrap) return false;
+    const original = window.atualizarGraficos;
+    window.atualizarGraficos = function(meses, mesesPedidos){
+      const r = original.apply(this, arguments);
+      setTimeout(()=>window.atualizarDashboardExecutivo(meses, mesesPedidos), 0);
+      return r;
+    };
+    window.atualizarGraficos.__dashWrap = true;
+    return true;
+  };
+  if(!tentarWrap()) document.addEventListener('DOMContentLoaded', ()=>setTimeout(tentarWrap, 300));
+  document.addEventListener('DOMContentLoaded', ()=>setTimeout(()=>window.atualizarDashboardExecutivo({},{}), 700));
+})();
+
+
+/* ===== AJUSTE FINAL v1.9.5 - Dashboard filtrado, estabilidade e leveza ===== */
+(function(){
+  const MESES_CRM = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+  const MAX_RANKING_DASH = 1000;
+
+  function safeGet(id){ return document.getElementById(id); }
+  function setText(id, value){ const el = safeGet(id); if(el) el.innerText = value; }
+  function setWidth(id, value){ const el = safeGet(id); if(el) el.style.width = `${Math.max(0, Math.min(100, Math.round(value || 0)))}%`; }
+  function pct(valor, meta){ return meta > 0 ? (Number(valor || 0) / Number(meta || 0)) * 100 : 0; }
+  function mesObj(){ return Object.fromEntries(MESES_CRM.map(m => [m, 0])); }
+  function valorData(row){
+    const dataTexto = typeof getDataTexto === "function" ? getDataTexto(row) : getCelula(row, colunaParaIndice(configCRM.colunaData || "B"));
+    if(!dataTexto) return null;
+    const data = typeof converterDataBR === "function" ? converterDataBR(dataTexto) : new Date(dataTexto);
+    return isNaN(data) ? null : data;
+  }
+  function linhaBase(row){
+    const data = valorData(row);
+    if(!data) return null;
+    const cliente = String((typeof getCliente === "function" ? getCliente(row) : getCelula(row, colunaParaIndice(configCRM.colunaCliente || "A"))) || "Sem Nome").trim() || "Sem Nome";
+    const valor = Number(typeof getValor === "function" ? getValor(row) : parseMoedaBR(getCelula(row, colunaParaIndice(configCRM.colunaValor || "I")))) || 0;
+    return {row, data, cliente, valor, ano:data.getFullYear(), mes:data.getMonth(), dia:data.getDate()};
+  }
+  function passaFiltros(item){
+    const diaSel = safeGet("filtroDia")?.value || "Todos";
+    const anoSel = safeGet("filtroAno")?.value || "Todos";
+    const mesSel = safeGet("filtroMes")?.value || "Todos";
+    if(diaSel !== "Todos" && Number(item.dia) !== Number(diaSel)) return false;
+    if(anoSel !== "Todos" && Number(item.ano) !== Number(anoSel)) return false;
+    if(mesSel !== "Todos" && Number(item.mes) !== Number(mesSel)) return false;
+    return true;
+  }
+  function chartSafeDestroy(chart){ try{ if(chart) chart.destroy(); }catch(e){} }
+
+  window.atualizarGraficos = function(meses, mesesPedidos){
+    chartSafeDestroy(window.mensalChart || mensalChart);
+    chartSafeDestroy(window.rankingChart || rankingChart);
+    chartSafeDestroy(window.pedidosMensaisChart || pedidosMensaisChart);
+
+    const mensalCanvas = safeGet("mensalChart");
+    if(mensalCanvas && typeof Chart !== "undefined"){
+      mensalChart = window.mensalChart = new Chart(mensalCanvas,{
+        type:"bar",
+        data:{labels:Object.keys(meses),datasets:[{label:"Faturamento",data:Object.values(meses),borderRadius:10}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true}},scales:{y:{beginAtZero:true}}}
+      });
+    }
+
+    const pedidosCanvas = safeGet("pedidosMensaisChart");
+    if(pedidosCanvas && typeof Chart !== "undefined"){
+      pedidosMensaisChart = window.pedidosMensaisChart = new Chart(pedidosCanvas,{
+        type:"bar",
+        data:{labels:Object.keys(mesesPedidos),datasets:[{label:"Pedidos",data:Object.values(mesesPedidos),borderRadius:10}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}
+      });
+    }
+
+    const rankingCanvas = safeGet("rankingChart");
+    if(rankingCanvas && typeof Chart !== "undefined"){
+      const top = (rankingGlobal || []).slice(0,10);
+      rankingChart = window.rankingChart = new Chart(rankingCanvas,{
+        type:"bar",
+        data:{labels:top.map(x=>x.nome),datasets:[{label:"Total Comprado",data:top.map(x=>x.total),borderRadius:8}]},
+        options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true}}}
+      });
+    }
+
+    if(typeof window.atualizarDashboardExecutivo === "function"){
+      setTimeout(()=>window.atualizarDashboardExecutivo(meses, mesesPedidos),0);
+    }
+  };
+
+  window.aplicarFiltros = function(){
+    const linhas = (dadosOriginais || []).map(linhaBase).filter(Boolean);
+    const filtradas = linhas.filter(passaFiltros);
+
+    let faturamento = 0;
+    let pedidos = 0;
+    const clientes = {};
+    const clientesSet = new Set();
+    const meses = mesObj();
+    const mesesPedidos = mesObj();
+
+    filtradas.forEach(item=>{
+      faturamento += item.valor;
+      pedidos += 1;
+      clientesSet.add(item.cliente);
+      if(!clientes[item.cliente]) clientes[item.cliente] = {pedidos:0,total:0};
+      clientes[item.cliente].pedidos += 1;
+      clientes[item.cliente].total += item.valor;
+      const label = MESES_CRM[item.mes];
+      if(label){ meses[label] += item.valor; mesesPedidos[label] += 1; }
+    });
+
+    setText("faturamento", typeof dinheiro === "function" ? dinheiro(faturamento) : faturamento.toLocaleString("pt-BR"));
+    setText("pedidos", pedidos);
+    setText("ticket", pedidos > 0 ? (typeof dinheiro === "function" ? dinheiro(faturamento/pedidos) : (faturamento/pedidos).toLocaleString("pt-BR")) : "R$ 0");
+    setText("clientes", clientesSet.size);
+
+    rankingGlobal = Object.entries(clientes).map(([nome,dados])=>({nome,pedidos:dados.pedidos,total:dados.total})).sort((a,b)=>b.total-a.total);
+    if(typeof renderTabela === "function") renderTabela(rankingGlobal.slice(0, MAX_RANKING_DASH));
+    atualizarGraficos(meses, mesesPedidos);
+  };
+
+  window.atualizarDashboardExecutivo = function(meses, mesesPedidos){
+    try{
+      const pedidosPeriodo = Object.values(mesesPedidos || {}).reduce((a,b)=>a+Number(b||0),0);
+      const faturamentoPeriodo = Object.values(meses || {}).reduce((a,b)=>a+Number(b||0),0);
+      const ticketPeriodo = pedidosPeriodo ? faturamentoPeriodo / pedidosPeriodo : 0;
+      const anoSel = safeGet("filtroAno")?.value;
+      const anoBase = anoSel && anoSel !== "Todos" ? parseInt(anoSel,10) : new Date().getFullYear();
+      const metaFat = typeof getMetaMensalAno === "function" ? Number(getMetaMensalAno(anoBase)||0) : 0;
+      const metaPed = Math.max(1, Math.round(metaFat > 0 && ticketPeriodo > 0 ? metaFat / ticketPeriodo : 80));
+
+      setText("dashPedidosMes", pedidosPeriodo);
+      setText("dashFaturamentoMes", typeof dinheiro === "function" ? dinheiro(faturamentoPeriodo) : faturamentoPeriodo.toLocaleString("pt-BR"));
+      setText("dashTicketMes", typeof dinheiro === "function" ? dinheiro(ticketPeriodo) : ticketPeriodo.toLocaleString("pt-BR"));
+      setText("dashPedidosMetaTxt", `Meta: ${metaPed}`);
+      setText("dashFaturamentoMetaTxt", `Meta: ${typeof dinheiro === "function" ? dinheiro(metaFat) : metaFat}`);
+      setWidth("dashPedidosBar", pct(pedidosPeriodo, metaPed));
+      setWidth("dashFaturamentoBar", pct(faturamentoPeriodo, metaFat));
+      setWidth("dashTicketBar", pct(ticketPeriodo, 8000));
+
+      const atividadesBox = safeGet("dashAtividadesRecentes");
+      if(atividadesBox){
+        let atividades = [];
+        try{ atividades = typeof getAtividadesComerciais === "function" ? getAtividadesComerciais() : JSON.parse(localStorage.getItem("jng_atividades_comerciais")||"[]"); }catch(e){}
+        atividades = atividades.filter(a=>!a.oculto).sort((a,b)=>String(b.data||"").localeCompare(String(a.data||"")) || String(b.criadoEm||"").localeCompare(String(a.criadoEm||""))).slice(0,5);
+        atividadesBox.innerHTML = atividades.length ? atividades.map(a=>`<div class="dash-list-row"><div><strong>${escapeHTML(a.tipo || "Atividade")} com ${escapeHTML(a.cliente || "cliente")}</strong><br><span>${escapeHTML((a.feedback || "").slice(0,54) || "Sem observação")}</span></div><em class="dash-tag bg-slate-100 text-slate-700">${escapeHTML(a.tipo || "-")}</em></div>`).join("") : `<div class="dash-empty">Nenhuma atividade recente.</div>`;
+      }
+
+      const riscoBox = safeGet("dashClientesRisco");
+      if(riscoBox){
+        const porCliente = {};
+        (dadosOriginais || []).map(linhaBase).filter(Boolean).forEach(item=>{ if(!porCliente[item.cliente] || item.data > porCliente[item.cliente]) porCliente[item.cliente] = item.data; });
+        const hoje = new Date();
+        const lista = Object.entries(porCliente).map(([nome,data])=>({nome,dias:Math.floor((hoje-data)/(1000*60*60*24))})).filter(x=>x.dias>=30).sort((a,b)=>a.dias-b.dias).slice(0,5);
+        riscoBox.innerHTML = lista.length ? lista.map(c=>`<div class="dash-list-row"><div><strong>${escapeHTML(c.nome)}</strong><br><span>Último pedido há ${c.dias} dias</span></div><em class="dash-tag ${c.dias>=60?"bg-red-100 text-red-700":c.dias>=45?"bg-orange-100 text-orange-700":"bg-yellow-100 text-yellow-700"}">${c.dias} dias</em></div>`).join("") : `<div class="dash-empty">Nenhum cliente crítico no momento.</div>`;
+      }
+
+      const statusCanvas = safeGet("dashStatusChart");
+      if(statusCanvas && typeof Chart !== "undefined"){
+        let listaStatus = [];
+        try{ listaStatus = typeof obterListaStatusPedidos === "function" ? obterListaStatusPedidos() : []; }catch(e){}
+        const buscaPedidosFiltrados = new Set((dadosOriginais || []).map(linhaBase).filter(Boolean).filter(passaFiltros).map(i=>String(getCelula(i.row, colunaParaIndice((window.statusConfigPedidos||{}).colunaNumeroPedido || "D"))).trim()).filter(Boolean));
+        if(buscaPedidosFiltrados.size){ listaStatus = listaStatus.filter(i=>buscaPedidosFiltrados.has(String(i.numeroPedido||"").trim())); }
+        const cont = {};
+        listaStatus.forEach(i=>{ const st = String(i.statusManual || i.status || "Sem status").trim() || "Sem status"; cont[st] = (cont[st] || 0) + 1; });
+        const entries = Object.entries(cont).sort((a,b)=>b[1]-a[1]).slice(0,6);
+        setText("dashStatusTotal", `${listaStatus.length} pedidos`);
+        try{ if(window.dashStatusChart) window.dashStatusChart.destroy(); }catch(e){}
+        window.dashStatusChart = new Chart(statusCanvas,{type:"doughnut",data:{labels:entries.map(e=>e[0]),datasets:[{data:entries.map(e=>e[1])}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"right"}}}});
+      }
+    }catch(e){ console.warn("Dashboard executivo ajustado:", e); }
+  };
+
+  function religarFiltros(){
+    ["filtroDia","filtroAno","filtroMes"].forEach(id=>{
+      const el = safeGet(id);
+      if(el && !el.dataset.filtroFinalOk){ el.addEventListener("change", ()=>window.aplicarFiltros()); el.dataset.filtroFinalOk = "1"; }
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    religarFiltros();
+    const box = safeGet("autoRefreshBox");
+    const painel = safeGet("dashboardCRM");
+    if(box && painel && box.parentElement !== painel) painel.insertBefore(box, painel.firstElementChild);
+    setTimeout(()=>{ if(typeof window.aplicarFiltros === "function") window.aplicarFiltros(); }, 600);
+  });
+  setTimeout(religarFiltros, 800);
+})();
+
+
+/* ===== PATCH v1.9.6 - Fonte suave, gráfico em colunas, temas e ordenação de risco ===== */
+(function(){
+  const VERSAO_CRM_ATUAL = "v1.9.6";
+  function setTxt(id, value){ const el = document.getElementById(id); if(el) el.textContent = value; }
+  document.addEventListener("DOMContentLoaded", function(){
+    document.querySelectorAll(".dash-version").forEach(el=>el.textContent = VERSAO_CRM_ATUAL);
+    const sidebarVersion = document.querySelector(".brand-text span");
+    if(sidebarVersion) sidebarVersion.textContent = VERSAO_CRM_ATUAL;
+  });
+
+  const originalAtualizarDashboard196 = window.atualizarDashboardExecutivo;
+  window.atualizarDashboardExecutivo = function(meses, mesesPedidos){
+    if(typeof originalAtualizarDashboard196 === "function"){
+      originalAtualizarDashboard196.apply(this, arguments);
+    }
+    try{
+      const riscoBox = document.getElementById("dashClientesRisco");
+      if(riscoBox && Array.isArray(window.dadosOriginais || dadosOriginais)){
+        const porCliente = {};
+        (window.dadosOriginais || dadosOriginais || []).forEach(row=>{
+          const cliente = String((typeof getCliente === "function" ? getCliente(row) : getCelula(row, colunaParaIndice((configCRM||{}).colunaCliente || "A"))) || "").trim();
+          const dataTexto = String((typeof getDataTexto === "function" ? getDataTexto(row) : getCelula(row, colunaParaIndice((configCRM||{}).colunaData || "B"))) || "").trim();
+          if(!cliente || !dataTexto) return;
+          const data = typeof converterDataBR === "function" ? converterDataBR(dataTexto) : new Date(dataTexto);
+          if(isNaN(data)) return;
+          if(!porCliente[cliente] || data > porCliente[cliente]) porCliente[cliente] = data;
+        });
+        const hoje = new Date();
+        const lista = Object.entries(porCliente)
+          .map(([nome,data])=>({nome,dias:Math.floor((hoje-data)/(1000*60*60*24))}))
+          .filter(x=>x.dias>=30)
+          .sort((a,b)=>a.dias-b.dias)
+          .slice(0,5);
+        riscoBox.innerHTML = lista.length ? lista.map(c=>`<div class="dash-list-row"><div><strong>${escapeHTML(c.nome)}</strong><br><span>Último pedido há ${c.dias} dias</span></div><em class="dash-tag ${c.dias>=60?"bg-red-100 text-red-700":c.dias>=45?"bg-orange-100 text-orange-700":"bg-yellow-100 text-yellow-700"}">${c.dias} dias</em></div>`).join("") : `<div class="dash-empty">Nenhum cliente crítico no momento.</div>`;
+      }
+    }catch(e){ console.warn("Ajuste de risco v1.9.6:", e); }
+  };
+})();
+
 </script>
 
 </body>
