@@ -257,7 +257,7 @@
     <input id="brandPhotoInput" type="file" accept="image/*" class="hidden" onchange="salvarFotoPerfil(event)">
     <div class="brand-text">
       <strong id="sidebarUserName">Vendedor</strong>
-      <span>v2.0.3</span>
+      <span>v2.0.4</span>
     </div>
   </div>
 
@@ -298,7 +298,7 @@
     <div class="flex justify-between items-start gap-4 mb-5">
       <div>
         <h2 class="text-2xl font-bold text-gray-800">Novidades da versão</h2>
-        <p class="text-gray-500 mt-1">JNG CRM • v2.0.3 • Build 2026.07.14</p>
+        <p class="text-gray-500 mt-1">JNG CRM • v2.0.4 • Build 2026.07.14</p>
       </div>
       <button onclick="fecharModalVersao()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl font-bold">X</button>
     </div>
@@ -306,15 +306,15 @@
 
     <div class="version-item">
       <div class="version-dot">✓</div>
+      <div><strong>Metas e Performance restauradas</strong><br><span class="text-sm text-gray-500">As duas abas foram reintegradas ao CRM com seus filtros, gráficos, metas mensais e cálculos preservados.</span></div>
+    </div>
+    <div class="version-item">
+      <div class="version-dot">✓</div>
       <div><strong>Dashboard e cálculos corrigidos</strong><br><span class="text-sm text-gray-500">Corrigida a contabilização do desempenho mensal, atividades recentes e clientes em risco. A aba Carteira foi removida sem afetar as demais funcionalidades.</span></div>
     </div>
     <div class="version-item">
       <div class="version-dot">✓</div>
       <div><strong>Metas mensais por mês</strong><br><span class="text-sm text-gray-500">Novo filtro de mês na aba Metas, com valores independentes por ano e mês e sincronização com Performance e Dashboard.</span></div>
-    </div>
-<div class="version-item">
-      <div class="version-dot">✓</div>
-      <div><strong>Filtros de carteira</strong><br><span class="text-sm text-gray-500">Agora é possível filtrar clientes que orçam, não orçam, fazem pedidos, orçam sem comprar e compram sem orçamento.</span></div>
     </div>
 
     <div class="version-item">
@@ -392,7 +392,7 @@
       <select id="filtroAno" class="dash-select"><option value="Todos">Todos os Anos</option></select>
       <select id="filtroMes" class="dash-select"><option value="Todos">Todos os Meses</option><option value="0">Janeiro</option><option value="1">Fevereiro</option><option value="2">Março</option><option value="3">Abril</option><option value="4">Maio</option><option value="5">Junho</option><option value="6">Julho</option><option value="7">Agosto</option><option value="8">Setembro</option><option value="9">Outubro</option><option value="10">Novembro</option><option value="11">Dezembro</option></select>
       <button id="btnClientesPerdidos" class="dash-outline-btn">Clientes Perdidos</button>
-      <button onclick="abrirModalVersao()" class="dash-version" title="Ver novidades da versão">v2.0.3</button>
+      <button onclick="abrirModalVersao()" class="dash-version" title="Ver novidades da versão">v2.0.4</button>
     </div>
   </div>
 
@@ -838,6 +838,249 @@
 </div>
 
 
+
+
+
+<div class="hidden" id="painelMetas">
+<div class="flex justify-between items-center mb-10">
+<div>
+<h1 class="text-4xl font-bold text-gray-800">Painel de Metas</h1>
+<p class="text-gray-500 mt-2">Metas Mensais</p>
+</div>
+<div class="flex gap-3 flex-wrap items-end justify-end">
+<div class="filter-field">
+<label for="filtroMetaAno">Ano</label>
+<select class="border border-gray-300 rounded-xl px-4 py-3 bg-white" id="filtroMetaAno" onchange="gerarPainelMetas()">
+<option value="2024">2024</option>
+<option value="2025">2025</option>
+<option value="2026">2026</option>
+</select>
+</div>
+<div class="filter-field">
+<label for="filtroMetaMes">Mês</label>
+<select class="border border-gray-300 rounded-xl px-4 py-3 bg-white" id="filtroMetaMes" onchange="gerarPainelMetas()">
+<option value="0">Janeiro</option>
+<option value="1">Fevereiro</option>
+<option value="2">Março</option>
+<option value="3">Abril</option>
+<option value="4">Maio</option>
+<option value="5">Junho</option>
+<option value="6">Julho</option>
+<option value="7">Agosto</option>
+<option value="8">Setembro</option>
+<option value="9">Outubro</option>
+<option value="10">Novembro</option>
+<option value="11">Dezembro</option>
+</select>
+</div>
+<div class="filter-field">
+<label for="metaMensalEditavelInput">Meta mensal individual</label>
+<input class="border border-green-300 rounded-xl px-4 py-3 bg-white font-semibold text-green-700 w-56" id="metaMensalEditavelInput" inputmode="decimal" onblur="formatarCampoMoeda(this)" placeholder="R$ 0,00" type="text"/>
+</div>
+<button class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold shadow" onclick="salvarMetaMensalAno()">
+        Salvar Meta
+      </button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+<div class="card meta-card">
+<p class="text-gray-500 mb-2">Meta Mensal</p>
+<h2 class="text-3xl font-bold text-blue-600" id="metaMensal">R$ 0</h2>
+</div>
+<div class="card meta-card">
+<p class="text-gray-500 mb-2">Média Mensal</p>
+<h2 class="text-3xl font-bold text-green-600" id="mediaMensal">R$ 0</h2>
+</div>
+<div class="card meta-card">
+<p class="text-gray-500 mb-2">Crescimento</p>
+<h2 class="text-3xl font-bold text-purple-600" id="crescimentoMeta">0%</h2>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<div class="card">
+<h2 class="text-xl font-bold text-gray-700 mb-6">Meta x Resultado</h2>
+<div style="height:450px;"><canvas id="metaChart"></canvas></div>
+</div>
+<div class="card">
+<h2 class="text-xl font-bold text-gray-700 mb-6">Crescimento Mensal</h2>
+<div style="height:450px;"><canvas id="crescimentoChart"></canvas></div>
+</div>
+</div>
+</div>
+
+<div class="hidden" id="painelPerformance">
+<div class="flex justify-between items-center mb-10 flex-wrap gap-4">
+<div>
+<h1 class="text-4xl font-bold text-gray-800">Painel de Performance</h1>
+<p class="text-gray-500 mt-2">Somente dias úteis: segunda a sexta</p>
+</div>
+<div class="filter-panel w-full">
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-8 gap-4 items-end">
+<div class="filter-field">
+<label for="filtroAnoPerformance">Ano</label>
+<select class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full" id="filtroAnoPerformance" onchange="atualizarPeriodoPerformance()"></select>
+</div>
+<div class="filter-field">
+<label for="filtroMesPerformance">Mês</label>
+<select class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full" id="filtroMesPerformance" onchange="atualizarPeriodoPerformance()">
+<option value="0">Janeiro</option>
+<option value="1">Fevereiro</option>
+<option value="2">Março</option>
+<option value="3">Abril</option>
+<option value="4">Maio</option>
+<option value="5">Junho</option>
+<option value="6">Julho</option>
+<option value="7">Agosto</option>
+<option value="8">Setembro</option>
+<option value="9">Outubro</option>
+<option value="10">Novembro</option>
+<option value="11">Dezembro</option>
+</select>
+</div>
+<div class="filter-field xl:col-span-2">
+<label for="filtroSemanaPerformance">Filtrar semana</label>
+<select class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full" id="filtroSemanaPerformance" onchange="gerarPerformance()">
+<option value="atual">Semana atual</option>
+</select>
+</div>
+<div class="filter-field">
+<label for="filtroDiaPerformance">Filtrar dia</label>
+<select class="border border-gray-300 rounded-xl px-4 py-3 bg-white w-full" id="filtroDiaPerformance" onchange="gerarPerformance()">
+<option value="hoje">Hoje</option>
+</select>
+</div>
+<div class="filter-field">
+<label for="metaMensalPerformanceInput">Meta mensal</label>
+<input class="border border-purple-300 rounded-xl px-4 py-3 bg-white w-full font-semibold text-purple-700" id="metaMensalPerformanceInput" inputmode="decimal" onblur="formatarCampoMoeda(this); salvarMetasPerformance()" placeholder="R$ 0,00" type="text"/>
+</div>
+<div class="filter-field">
+<label for="metaDiariaInput">Meta diária automática</label>
+<input class="border border-gray-300 rounded-xl px-4 py-3 bg-gray-100 w-full font-semibold text-gray-700" id="metaDiariaInput" placeholder="R$ 0,00" readonly="" type="text"/>
+</div>
+<div class="filter-field">
+<label for="metaSemanalInput">Meta semanal automática</label>
+<input class="border border-gray-300 rounded-xl px-4 py-3 bg-gray-100 w-full font-semibold text-gray-700" id="metaSemanalInput" placeholder="R$ 0,00" readonly="" type="text"/>
+</div>
+<div class="md:col-span-2 xl:col-span-8 flex justify-end gap-3 flex-wrap">
+<button class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-semibold shadow" onclick="salvarMetasPerformance()">
+            Salvar Meta Mensal
+          </button>
+<button class="bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-xl font-semibold shadow" id="btnExportarPdfPerf" onclick="exportarPdfPerformance()">
+            Exportar PDF
+          </button>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+<div class="card">
+<p class="text-gray-500 mb-2" id="perfDiaTitulo">Faturamento Dia Selecionado</p>
+<h2 class="text-3xl font-bold text-green-600" id="perfHojeFat">R$ 0</h2>
+<p class="text-gray-500 mt-2" id="perfHojePedidos">0 pedidos</p>
+</div>
+<div class="card">
+<p class="text-gray-500 mb-2">Semana Selecionada</p>
+<h2 class="text-3xl font-bold text-blue-600" id="perfSemanaFat">R$ 0</h2>
+<p class="text-gray-500 mt-2" id="perfSemanaPedidos">0 pedidos</p>
+</div>
+<div class="card">
+<p class="text-gray-500 mb-2">Projeção do Mês</p>
+<h2 class="text-3xl font-bold text-purple-600" id="perfProjecaoMes">R$ 0</h2>
+<p class="text-gray-500 mt-2" id="perfMediaDiaria">Média útil: R$ 0</p>
+</div>
+<div class="card">
+<div class="flex justify-between items-start gap-3 mb-3">
+<div>
+<p class="text-gray-500 mb-1">Meta Mensal</p>
+<h2 class="text-3xl font-bold text-orange-500" id="perfMetaPeriodo">R$ 0</h2>
+</div>
+<span class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full font-bold text-sm" id="perfPctPeriodo">0%</span>
+</div>
+<div class="progress-bg mb-3">
+<div class="progress-bar bg-orange-500" id="perfMetaPeriodoBar" style="width:0%;"></div>
+</div>
+<div class="grid grid-cols-2 gap-3 text-sm">
+<div class="bg-green-50 rounded-xl p-3">
+<p class="text-gray-500">Total vendido</p>
+<p class="font-bold text-green-600" id="perfTotalVendidoPeriodo">R$ 0</p>
+</div>
+<div class="bg-red-50 rounded-xl p-3">
+<p class="text-gray-500">Faltante</p>
+<p class="font-bold text-red-500" id="perfFaltantePeriodo">R$ 0</p>
+</div>
+</div>
+<p class="text-gray-500 mt-3 text-sm" id="perfPeriodoDescricao">Baseado na meta mensal cadastrada.</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<div class="card">
+<p class="text-gray-500 mb-2">Dias Úteis Corridos</p>
+<h2 class="text-3xl font-bold text-blue-600" id="perfDiasUteisCorridos">0</h2>
+</div>
+<div class="card">
+<p class="text-gray-500 mb-2">Dias Úteis Restantes</p>
+<h2 class="text-3xl font-bold text-orange-500" id="perfDiasUteisRestantes">0</h2>
+</div>
+<div class="card">
+<p class="text-gray-500 mb-2">Necessário por Dia Útil</p>
+<h2 class="text-3xl font-bold text-red-500" id="perfNecessarioDiaUtil">R$ 0</h2>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+<div class="card">
+<div class="flex justify-between items-center mb-3">
+<h2 class="text-xl font-bold text-gray-700">Meta Diária</h2>
+<span class="font-bold text-purple-600" id="perfMetaDiariaPct">0%</span>
+</div>
+<div class="progress-bg">
+<div class="progress-bar bg-purple-600" id="perfMetaDiariaBar" style="width:0%;"></div>
+</div>
+<p class="text-gray-500 mt-3" id="perfMetaDiariaTexto">Falta R$ 0 para bater a meta diária.</p>
+</div>
+<div class="card">
+<div class="flex justify-between items-center mb-3">
+<h2 class="text-xl font-bold text-gray-700">Meta Semanal</h2>
+<span class="font-bold text-blue-600" id="perfMetaSemanalPct">0%</span>
+</div>
+<div class="progress-bg">
+<div class="progress-bar bg-blue-600" id="perfMetaSemanalBar" style="width:0%;"></div>
+</div>
+<p class="text-gray-500 mt-3" id="perfMetaSemanalTexto">Falta R$ 0 para bater a meta semanal.</p>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+<div class="card">
+<h2 class="text-xl font-bold text-gray-700 mb-6">Faturamento por Dia Útil do Mês</h2>
+<div style="height:450px;"><canvas id="performanceDiaChart"></canvas></div>
+</div>
+<div class="card">
+<h2 class="text-xl font-bold text-gray-700 mb-6">Semana Selecionada vs Semana Anterior</h2>
+<div style="height:450px;"><canvas id="performanceSemanaChart"></canvas></div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8" id="blocoInteligenciaPerformance">
+<div class="card">
+<div class="flex justify-between items-center mb-5 gap-3 flex-wrap">
+<div>
+<h2 class="text-2xl font-bold text-gray-800">Alertas Automáticos</h2>
+<p class="text-gray-500 mt-1">Análise automática do período selecionado.</p>
+</div>
+<span class="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-full font-bold text-sm" id="resumoAlertasPerformance">0 alertas</span>
+</div>
+<div class="space-y-4" id="listaAlertasPerformance"></div>
+</div>
+<div class="card">
+<div class="flex justify-between items-center mb-5 gap-3 flex-wrap">
+<div>
+<h2 class="text-2xl font-bold text-gray-800">IA Comercial</h2>
+<p class="text-gray-500 mt-1">Sugestões práticas com base nos números do CRM.</p>
+</div>
+<span class="bg-purple-100 text-purple-700 px-4 py-2 rounded-full font-bold text-sm">Ações sugeridas</span>
+</div>
+<div class="space-y-4" id="listaSugestoesPerformance"></div>
+</div>
+</div>
+</div>
 
 <div id="painelConfig" class="hidden">
   <div class="flex justify-between items-center mb-10 flex-wrap gap-4">
@@ -3036,7 +3279,7 @@ if(crmConfigCompleta()) carregar(); else mostrarPrimeiroAcessoConfig();
 
 // Atualização automática reativada no patch v1.9.4.
 
-/* ===== PATCH v2.0.3 - Risco sem WhatsApp + Atividades com ocultar ===== */
+/* ===== PATCH v2.0.4 - Risco sem WhatsApp + Atividades com ocultar ===== */
 
 function getAtividadesComerciais(){
   try{
@@ -3375,7 +3618,7 @@ function ordenarRisco(campo){
 }
 
 
-/* ===== PATCH v2.0.3 - Nome do vendedor na Sidebar ===== */
+/* ===== PATCH v2.0.4 - Nome do vendedor na Sidebar ===== */
 function atualizarNomeSidebar(){
   const campo = document.getElementById("nomeVendedorCRM");
   const el = document.getElementById("sidebarUserName");
@@ -3418,7 +3661,7 @@ document.addEventListener("DOMContentLoaded", atualizarNomeSidebar);
 setTimeout(atualizarNomeSidebar, 300);
 
 
-/* ===== PATCH v2.0.3 - Aba Status dos Pedidos ===== */
+/* ===== PATCH v2.0.4 - Aba Status dos Pedidos ===== */
 
 function getStatusPedidoRow(row){
   const integrador = getCelula(row, 0);
@@ -3538,7 +3781,7 @@ if(carregarOriginal_v190){
 
 
 
-/* ===== PATCH v2.0.3 - Aba Status sem travamento ===== */
+/* ===== PATCH v2.0.4 - Aba Status sem travamento ===== */
 
 const STATUS_CONFIG_PADRAO = {
   colunaIntegrador:"A",
@@ -3809,7 +4052,7 @@ function abrirStatus(){
 
 
 
-/* ===== HOTFIX v2.0.3 - Revisão geral, Status estável e otimização ===== */
+/* ===== HOTFIX v2.0.4 - Revisão geral, Status estável e otimização ===== */
 (function(){
   const PAINEIS_CRM = ["dashboardCRM","painelMetas","painelPerformance","painelConfig","painelRisco","painelAtividades","painelStatus"];
   const NAVS_CRM = ["navCRM","navMetas","navPerf","navRisco","navAtiv","navStatus","navTemas","navConfig"];
@@ -5033,9 +5276,9 @@ setTimeout(iniciarAutoRefreshCRM, 500);
 })();
 
 
-/* ===== PATCH v2.0.3 - Fonte Inter, pedidos em ondas, metas editáveis, temas e risco 10+ ===== */
+/* ===== PATCH v2.0.4 - Fonte Inter, pedidos em ondas, metas editáveis, temas e risco 10+ ===== */
 (function(){
-  const VERSAO_CRM_ATUAL = "v2.0.3";
+  const VERSAO_CRM_ATUAL = "v2.0.4";
   function setTxt(id, value){ const el = document.getElementById(id); if(el) el.textContent = value; }
   document.addEventListener("DOMContentLoaded", function(){
     document.querySelectorAll(".dash-version").forEach(el=>el.textContent = VERSAO_CRM_ATUAL);
@@ -5068,14 +5311,14 @@ setTimeout(iniciarAutoRefreshCRM, 500);
           .slice(0,5);
         riscoBox.innerHTML = lista.length ? lista.map(c=>`<div class="dash-list-row"><div><strong>${escapeHTML(c.nome)}</strong><br><span>Último pedido há ${c.dias} dias</span></div><em class="dash-tag ${c.dias>=60?"bg-red-100 text-red-700":c.dias>=45?"bg-orange-100 text-orange-700":"bg-yellow-100 text-yellow-700"}">${c.dias} dias</em></div>`).join("") : `<div class="dash-empty">Nenhum cliente crítico no momento.</div>`;
       }
-    }catch(e){ console.warn("Ajuste de risco v2.0.3:", e); }
+    }catch(e){ console.warn("Ajuste de risco v2.0.4:", e); }
   };
 })();
 
 
-/* ===== PATCH v2.0.3 - Correção definitiva: pedidos em ondas e desempenho após metas ===== */
+/* ===== PATCH v2.0.4 - Correção definitiva: pedidos em ondas e desempenho após metas ===== */
 (function(){
-  const VERSAO_CRM_ATUAL = "v2.0.3";
+  const VERSAO_CRM_ATUAL = "v2.0.4";
   const MESES_LABELS = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
 
   function el(id){ return document.getElementById(id); }
@@ -5240,7 +5483,7 @@ setTimeout(iniciarAutoRefreshCRM, 500);
         atividades = atividades.filter(a=>!a.oculto).sort((a,b)=>String(b.data||"").localeCompare(String(a.data||"")) || String(b.criadoEm||"").localeCompare(String(a.criadoEm||""))).slice(0,5);
         atividadesBox.innerHTML = atividades.length ? atividades.map(a=>`<div class="dash-list-row"><div><strong>${escapeHTML(a.tipo || "Atividade")} com ${escapeHTML(a.cliente || "cliente")}</strong><br><span>${escapeHTML((a.feedback || "").slice(0,54) || "Sem observação")}</span></div><em class="dash-tag bg-slate-100 text-slate-700">${escapeHTML(a.tipo || "-")}</em></div>`).join("") : `<div class="dash-empty">Nenhuma atividade recente.</div>`;
       }
-    }catch(e){ console.warn("Dashboard v2.0.3:", e); }
+    }catch(e){ console.warn("Dashboard v2.0.4:", e); }
   };
 
   function atualizarTudoDashboardV198(){
@@ -5275,7 +5518,7 @@ setTimeout(iniciarAutoRefreshCRM, 500);
 
 
 <script>
-/* ===== REPARO INTEGRAL v2.0.3 - preservação de abas, cálculos e navegação ===== */
+/* ===== REPARO INTEGRAL v2.0.4 - preservação de abas, cálculos e navegação ===== */
 (function(){
   const TODOS_PAINEIS = [
     "dashboardCRM","painelMetas","painelPerformance","painelRisco",
@@ -5406,7 +5649,7 @@ setTimeout(iniciarAutoRefreshCRM, 500);
     const versoes=document.querySelectorAll(".version-badge strong, #sidebarUserName + span, .version-box p");
     versoes.forEach(el=>{
       if(el && /v?\d+\.\d+\.\d+|Versão\s+\d+\.\d+\.\d+/i.test(el.textContent||"")){
-        el.textContent=(el.textContent||"").replace(/v?\d+\.\d+\.\d+/i,"v2.0.3").replace(/Versão\s+v/i,"Versão ");
+        el.textContent=(el.textContent||"").replace(/v?\d+\.\d+\.\d+/i,"v2.0.4").replace(/Versão\s+v/i,"Versão ");
       }
     });
   });
