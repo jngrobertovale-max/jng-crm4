@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JNG CRM</title>
+  <title>JNG CRM • Sales Intelligence</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -243,7 +243,407 @@
     .classe-A{background:#dcfce7;color:#166534;}.classe-B{background:#fef3c7;color:#92400e;}.classe-C{background:#fee2e2;color:#991b1b;}.classe-D{background:#e0e7ff;color:#3730a3;}
 
     @media print{.sidebar,.filter-panel button,#btnExportarPdfPerf{display:none!important}.content{margin-left:0}.card{box-shadow:none;border:1px solid #e5e7eb}}
-  </style>
+  
+
+    /* ===== NOVA EXPERIÊNCIA VISUAL v3.0.0 ===== */
+    :root{
+      --ui-bg:#eef2f6;
+      --ui-surface:#ffffff;
+      --ui-surface-soft:#f8fafc;
+      --ui-ink:#101828;
+      --ui-muted:#667085;
+      --ui-subtle:#98a2b3;
+      --ui-line:#e4e7ec;
+      --ui-dark:#0b1220;
+      --ui-dark-2:#172033;
+      --ui-success:#12b76a;
+      --ui-warning:#f79009;
+      --ui-danger:#f04438;
+      --ui-radius-sm:12px;
+      --ui-radius:18px;
+      --ui-radius-lg:26px;
+      --ui-shadow-sm:0 1px 3px rgba(16,24,40,.05),0 1px 2px rgba(16,24,40,.03);
+      --ui-shadow:0 12px 30px rgba(16,24,40,.07),0 2px 8px rgba(16,24,40,.04);
+      --ui-shadow-lg:0 24px 60px rgba(16,24,40,.13);
+    }
+    *{box-sizing:border-box;}
+    html{background:var(--ui-bg);scroll-behavior:smooth;}
+    body{
+      min-height:100vh;
+      margin:0;
+      color:var(--ui-ink);
+      background:
+        radial-gradient(circle at 78% -10%,color-mix(in srgb,var(--theme-primary) 11%,transparent),transparent 29%),
+        linear-gradient(180deg,#f8fafc 0,var(--ui-bg) 420px)!important;
+      overflow-x:hidden;
+    }
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:.24;
+      background-image:linear-gradient(rgba(148,163,184,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,.08) 1px,transparent 1px);
+      background-size:40px 40px;
+      mask-image:linear-gradient(to bottom,black,transparent 48%);
+      z-index:-1;
+    }
+    .hidden{display:none!important;}
+    ::selection{background:color-mix(in srgb,var(--theme-primary) 24%,white);color:var(--ui-ink);}
+    ::-webkit-scrollbar{width:10px;height:10px;}
+    ::-webkit-scrollbar-thumb{background:#cbd5e1;border:3px solid transparent;background-clip:padding-box;border-radius:999px;}
+    ::-webkit-scrollbar-track{background:transparent;}
+
+    /* App shell */
+    .content,.content.p-8{
+      margin-left:282px;
+      padding:18px 32px 56px!important;
+      max-width:1920px;
+      transition:margin-left .26s ease,padding .26s ease;
+    }
+    body.sidebar-collapsed .content{margin-left:112px;}
+    .app-shell-header{
+      position:sticky;
+      top:0;
+      z-index:90;
+      min-height:68px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+      margin:0 -10px 18px;
+      padding:10px 12px;
+      background:rgba(248,250,252,.78);
+      border-bottom:1px solid rgba(228,231,236,.68);
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+    }
+    .app-shell-context,.app-shell-actions{display:flex;align-items:center;gap:12px;min-width:0;}
+    .app-shell-context h2{margin:1px 0 0;font-size:18px;font-weight:760;letter-spacing:-.035em;color:var(--ui-ink);}
+    .app-shell-eyebrow{font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--theme-primary);}
+    .app-shell-mark{
+      width:40px;height:40px;border-radius:13px;display:grid;place-items:center;flex:none;
+      background:linear-gradient(145deg,var(--ui-dark),var(--ui-dark-2));color:#fff;
+      box-shadow:0 10px 22px rgba(11,18,32,.18);font-weight:850;font-size:14px;
+    }
+    .app-system-status,.app-date-box{
+      min-height:40px;display:flex;align-items:center;gap:9px;padding:0 12px;
+      border:1px solid rgba(228,231,236,.9);border-radius:13px;background:rgba(255,255,255,.82);
+      box-shadow:var(--ui-shadow-sm);color:var(--ui-muted);font-size:11px;font-weight:650;
+    }
+    .app-system-status i{width:8px;height:8px;border-radius:50%;background:var(--ui-success);box-shadow:0 0 0 5px rgba(18,183,106,.10);}
+    .app-date-box{display:block;text-align:right;padding-top:7px;line-height:1.15;}
+    .app-date-box strong{display:block;color:var(--ui-ink);font-size:11px;}
+    .app-date-box span{font-size:9px;color:var(--ui-subtle);}
+    .app-mobile-menu{display:none;width:40px;height:40px;border:1px solid var(--ui-line);border-radius:12px;background:#fff;color:var(--ui-ink);align-items:center;justify-content:center;}
+
+    /* Floating sidebar */
+    .sidebar{
+      left:16px;top:16px;bottom:16px;width:248px;height:auto;
+      padding:12px;gap:8px;border-radius:24px;
+      background:rgba(255,255,255,.94)!important;
+      border:1px solid rgba(228,231,236,.95);
+      box-shadow:0 24px 70px rgba(16,24,40,.10),0 4px 12px rgba(16,24,40,.04);
+      backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+      overflow:hidden;
+    }
+    .sidebar.collapsed{width:80px;padding:10px;align-items:center;}
+    .sidebar-brand{
+      min-height:74px;width:100%;margin:0 0 2px;padding:13px;
+      border:0;border-radius:17px;color:#fff;
+      background:
+        radial-gradient(circle at 92% 10%,color-mix(in srgb,var(--theme-primary) 78%,white) 0,transparent 34%),
+        linear-gradient(145deg,var(--ui-dark),var(--ui-dark-2));
+      box-shadow:0 15px 34px rgba(11,18,32,.18);
+      gap:11px;
+    }
+    .brand-photo-btn{width:42px;height:42px;border-radius:13px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18);box-shadow:none;}
+    .brand-photo-btn:hover{transform:none;box-shadow:0 0 0 4px rgba(255,255,255,.08);}
+    .brand-text strong{font-size:13px;font-weight:760;letter-spacing:-.015em;color:#fff;}
+    .brand-text span{font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.62);}
+    .sidebar-toggle{
+      height:34px;border:0;border-radius:11px;background:transparent;color:var(--ui-muted);font-size:10px;font-weight:750;
+    }
+    .sidebar-toggle:hover{background:var(--ui-surface-soft);color:var(--ui-ink);transform:none;}
+    .sidebar-nav{gap:5px;margin-top:5px;}
+    .sidebar-main-nav::before{
+      content:"NAVEGAÇÃO";display:block;padding:6px 12px 7px;color:var(--ui-subtle);
+      font-size:8px;font-weight:850;letter-spacing:.14em;
+    }
+    .sidebar-config-area{margin-top:auto;padding-top:9px;border-top:1px solid var(--ui-line);}
+    .side-btn{
+      height:46px;padding:0 12px;gap:11px;border-radius:13px;
+      color:var(--ui-muted);font-size:12px;font-weight:680;border:1px solid transparent;
+      background:transparent;
+    }
+    .side-btn:hover{background:#f6f8fb;color:var(--ui-ink);transform:none;border-color:#edf0f4;}
+    .side-btn.active{
+      color:var(--theme-primary);
+      background:linear-gradient(90deg,color-mix(in srgb,var(--theme-primary) 11%,white),color-mix(in srgb,var(--theme-primary) 4%,white));
+      border-color:color-mix(in srgb,var(--theme-primary) 14%,white);
+      box-shadow:none;
+    }
+    .side-btn.active::after{content:"";position:absolute;right:7px;width:5px;height:5px;border-radius:50%;background:var(--theme-primary);}
+    .side-ico{width:24px;height:24px;display:grid!important;place-items:center!important;font-size:0;color:inherit;}
+    .side-ico svg{width:18px;height:18px;stroke-width:1.9;}
+    .side-label{letter-spacing:-.01em;}
+    .sidebar.collapsed .sidebar-brand{width:58px;height:58px;min-height:58px;padding:8px;justify-content:center;}
+    .sidebar.collapsed .brand-photo-btn{width:40px;height:40px;}
+    .sidebar.collapsed .brand-text,.sidebar.collapsed .sidebar-main-nav::before{display:none;}
+    .sidebar.collapsed .side-btn{width:58px;height:46px;padding:0;justify-content:center;}
+    .sidebar.collapsed .side-btn.active::after{right:4px;}
+
+    /* Dashboard executive hero */
+    #dashboardCRM{position:relative;}
+    .dash-topbar{
+      position:relative;isolation:isolate;overflow:hidden;
+      min-height:210px;margin:0 0 0;padding:31px 32px 76px;
+      border-radius:var(--ui-radius-lg);
+      background:
+        radial-gradient(circle at 84% 22%,color-mix(in srgb,var(--theme-primary) 74%,white) 0,transparent 26%),
+        radial-gradient(circle at 68% 120%,color-mix(in srgb,var(--theme-secondary) 48%,transparent) 0,transparent 36%),
+        linear-gradient(135deg,#0a1020 0%,#172033 58%,#101828 100%);
+      box-shadow:0 30px 70px rgba(16,24,40,.18);
+      border:1px solid rgba(255,255,255,.06);
+    }
+    .dash-topbar::before{content:"";position:absolute;right:-80px;top:-130px;width:360px;height:360px;border:1px solid rgba(255,255,255,.10);border-radius:50%;z-index:-1;}
+    .dash-topbar::after{content:"";position:absolute;right:90px;bottom:-125px;width:260px;height:260px;border:1px solid rgba(255,255,255,.08);border-radius:50%;z-index:-1;}
+    .dash-title{font-size:37px;font-weight:780;letter-spacing:-.055em;color:#fff;line-height:1.05;}
+    .dash-subtitle{margin-top:9px;color:rgba(255,255,255,.64);font-size:13px;font-weight:520;}
+    .dash-topbar .editable-title:hover,.dash-topbar .editable-title:focus{background:rgba(255,255,255,.08);box-shadow:0 0 0 2px rgba(255,255,255,.08);}
+    .dash-topbar .seller-name-input{color:#fff!important;min-height:auto!important;border:0!important;background:transparent!important;box-shadow:none!important;}
+    .dash-topbar .seller-name-input::placeholder{color:rgba(255,255,255,.42);}
+    .dash-actions{position:relative;z-index:3;gap:9px;max-width:700px;}
+    .dash-select,.dash-outline-btn,.dash-version{
+      min-height:42px;padding:0 13px;border-radius:12px!important;
+      border:1px solid rgba(255,255,255,.14)!important;
+      background:rgba(255,255,255,.09)!important;color:#fff!important;
+      box-shadow:none!important;font-size:11px;font-weight:700;backdrop-filter:blur(10px);
+    }
+    .dash-select:hover,.dash-outline-btn:hover,.dash-version:hover{background:rgba(255,255,255,.15)!important;border-color:rgba(255,255,255,.24)!important;color:#fff!important;}
+    .dash-select option{color:var(--ui-ink);background:#fff;}
+    .dash-kpis{position:relative;z-index:8;margin:-53px 18px 24px;}
+    .dash-kpi{
+      --metric:var(--theme-primary);
+      position:relative;min-height:116px;padding:19px 18px;gap:14px;
+      background:rgba(255,255,255,.97)!important;
+      border:1px solid rgba(228,231,236,.9)!important;
+      border-radius:18px!important;
+      box-shadow:0 16px 38px rgba(16,24,40,.10),0 2px 5px rgba(16,24,40,.04)!important;
+      overflow:hidden;
+    }
+    .dash-kpi::after{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--metric);}
+    .dash-kpi:nth-child(1){--metric:#3867f4}.dash-kpi:nth-child(2){--metric:#12a66a}.dash-kpi:nth-child(3){--metric:#f79009}.dash-kpi:nth-child(4){--metric:#7a5af8}
+    .dash-kpi:hover{transform:translateY(-3px);box-shadow:0 22px 45px rgba(16,24,40,.13)!important;}
+    .dash-kpi p{margin:0 0 5px;color:var(--ui-muted);font-size:10px;font-weight:780;text-transform:uppercase;letter-spacing:.08em;}
+    .dash-kpi h2{font-size:24px;font-weight:780;letter-spacing:-.045em;color:var(--ui-ink);}
+    .dash-kpi small{font-size:10px;color:var(--ui-subtle);font-weight:570;}
+    .kpi-icon{
+      width:45px!important;height:45px!important;min-width:45px!important;border-radius:14px!important;
+      background:color-mix(in srgb,var(--metric) 11%,white)!important;color:var(--metric)!important;
+      font-size:0!important;border:1px solid color-mix(in srgb,var(--metric) 12%,white);
+    }
+    .kpi-icon svg{width:21px;height:21px;stroke-width:1.8;}
+
+    /* Cards and content */
+    .card,.dash-card,.filter-panel,.action-card,.carteira-kpi{
+      background:rgba(255,255,255,.96)!important;
+      border:1px solid rgba(228,231,236,.96)!important;
+      border-radius:var(--ui-radius)!important;
+      box-shadow:var(--ui-shadow-sm)!important;
+    }
+    .card{padding:22px;}
+    .dash-card{padding:21px;}
+    .dash-card:hover,.card:hover{border-color:#d7dce3!important;}
+    .dash-card-head{margin-bottom:17px;}
+    .dash-card-head h2,.card h2{letter-spacing:-.03em;}
+    .dash-card-head h2{font-size:15px;font-weight:760;color:var(--ui-ink);}
+    .dash-pill{padding:6px 10px;border:0;border-radius:999px;background:color-mix(in srgb,var(--theme-primary) 9%,white);color:var(--theme-primary);font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;}
+    .dash-pill.green{background:#ecfdf3;color:#027a48}.dash-pill.orange{background:#fff4e5;color:#b54708}
+    .dash-link-btn{padding:6px 9px;border:0;border-radius:9px;background:#f8fafc;color:var(--theme-primary);font-size:10px;font-weight:750;}
+    .dash-link-btn:hover{background:color-mix(in srgb,var(--theme-primary) 8%,white);}
+    .dash-goal-panel{margin-top:13px;padding:12px;border:1px solid var(--ui-line);border-radius:14px;background:var(--ui-surface-soft);}
+    .dash-goal-panel label,.filter-field label{font-size:9px;font-weight:820;text-transform:uppercase;letter-spacing:.09em;color:var(--ui-muted);}
+    .dash-progress-item{padding:15px 0;border-color:#eef1f4;}
+    .dash-progress-item>div:first-child{font-size:12px;}.dash-progress-item small{font-size:10px;}
+    .progress-bg,.dash-progress{height:8px;background:#eef2f6;border-radius:999px;}
+    .progress-bar,.dash-progress i{height:8px;}
+    .dash-list-row{padding:11px 0;border-color:#eef1f4;}.dash-list-row strong{font-size:11px;}.dash-list-row span{font-size:10px;}
+    .dash-tag{font-size:9px;padding:5px 8px;}
+
+    /* Internal page heroes */
+    .page-hero{
+      position:relative;isolation:isolate;overflow:hidden;
+      margin-bottom:24px!important;padding:24px 26px!important;border-radius:22px;
+      background:linear-gradient(135deg,#101828,#1d2939 70%,color-mix(in srgb,var(--theme-primary) 50%,#1d2939));
+      border:1px solid rgba(255,255,255,.06);box-shadow:0 20px 45px rgba(16,24,40,.14);
+    }
+    .page-hero::after{content:"";position:absolute;right:-80px;top:-125px;width:300px;height:300px;border-radius:50%;border:1px solid rgba(255,255,255,.10);z-index:-1;}
+    .page-hero h1{color:#fff!important;font-size:30px!important;font-weight:770!important;letter-spacing:-.05em;}
+    .page-hero p{color:rgba(255,255,255,.62)!important;font-size:12px;}
+    .page-hero>.bg-gray-800{background:rgba(255,255,255,.10)!important;border:1px solid rgba(255,255,255,.14);box-shadow:none!important;border-radius:12px!important;}
+    .page-hero>.flex,.page-hero .filter-field{position:relative;z-index:2;}
+    .page-hero .filter-panel{margin-top:5px;background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.13)!important;box-shadow:none!important;}
+    .page-hero .filter-panel label,.page-hero>.flex label,.page-hero>div>label{color:rgba(255,255,255,.60)!important;}
+    .page-hero input,.page-hero select{background:rgba(255,255,255,.96)!important;}
+    .page-hero button[class*="bg-"]{box-shadow:none!important;}
+
+    /* Controls */
+    input:not([type="file"]),select,textarea{
+      min-height:44px;border:1px solid #dfe3e8!important;border-radius:12px!important;
+      background:#fff!important;color:var(--ui-ink);box-shadow:0 1px 2px rgba(16,24,40,.02)!important;
+      font-size:12px;transition:border-color .16s ease,box-shadow .16s ease,background .16s ease;
+    }
+    textarea{padding-top:12px!important;line-height:1.55;}
+    input:not([type="file"]):hover,select:hover,textarea:hover{border-color:#cbd2da!important;}
+    input:not([type="file"]):focus,select:focus,textarea:focus{
+      border-color:var(--theme-primary)!important;box-shadow:0 0 0 4px color-mix(in srgb,var(--theme-primary) 12%,transparent)!important;
+    }
+    input[readonly]{background:#f5f7fa!important;color:#667085!important;}
+    .seller-name-input{padding:1px 4px!important;}
+    .filter-panel{padding:17px;}
+    button{transition:background-color .16s ease,border-color .16s ease,color .16s ease,box-shadow .16s ease,transform .16s ease!important;}
+    button:not(.side-btn):not(.sidebar-toggle):not(.brand-photo-btn):hover{transform:translateY(-1px);}
+    .bg-blue-600,.bg-green-600,.bg-purple-600,.bg-yellow-500,
+    .hover\:bg-blue-700:hover,.hover\:bg-green-700:hover,.hover\:bg-purple-700:hover,.hover\:bg-yellow-600:hover{
+      background:var(--theme-primary)!important;color:#fff!important;
+    }
+    .bg-gray-900,.hover\:bg-black:hover{background:var(--ui-dark)!important;color:#fff!important;}
+    .bg-gray-100,.bg-gray-200{background:#f2f4f7!important;color:#344054!important;}
+    .rounded-xl{border-radius:12px!important}.rounded-2xl{border-radius:16px!important}.rounded-full{border-radius:999px!important}
+    .shadow,.shadow-lg{box-shadow:none!important;}
+
+    /* Tables */
+    .overflow-x-auto{border-radius:14px;}
+    table{width:100%;border-collapse:separate;border-spacing:0;}
+    thead th{
+      padding:13px 12px!important;background:#f7f9fb;color:#667085!important;
+      font-size:9px!important;font-weight:830!important;letter-spacing:.075em;text-transform:uppercase;white-space:nowrap;
+      border-top:1px solid #edf0f3;border-bottom:1px solid #e7eaee;
+    }
+    thead th:first-child{border-left:1px solid #edf0f3;border-radius:12px 0 0 12px;}
+    thead th:last-child{border-right:1px solid #edf0f3;border-radius:0 12px 12px 0;}
+    tbody td{padding:14px 12px!important;color:#344054;font-size:11px;vertical-align:middle;border-bottom:1px solid #eef1f4;}
+    tbody tr:last-child td{border-bottom:0;}
+    tbody tr:hover{background:color-mix(in srgb,var(--theme-primary) 3%,white)!important;}
+    .table-hover:hover{background:color-mix(in srgb,var(--theme-primary) 3%,white)!important;}
+
+    /* Semantic info tiles */
+    .bg-gray-50,.bg-green-50,.bg-red-50,.bg-orange-50,.bg-purple-50,.bg-blue-50,.bg-yellow-50{
+      border-radius:14px!important;border:1px solid #edf0f3!important;
+    }
+    .meta-card{border-left:1px solid var(--ui-line)!important;position:relative;overflow:hidden;}
+    .meta-card::before{content:"";position:absolute;left:0;top:0;right:0;height:4px;background:var(--theme-primary);}
+    .alert-card{border-left-width:4px!important;}
+    .action-card{padding:17px;}
+
+    /* Modals */
+    .theme-modal,.version-modal,.app-modal{
+      position:fixed;inset:0;z-index:2500;align-items:center;justify-content:center;padding:22px;
+      background:rgba(10,16,32,.58);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);
+    }
+    .app-modal.flex{display:flex;}
+    .theme-box,.version-box,.app-modal-panel{
+      width:min(760px,100%);max-height:calc(100vh - 44px);overflow:auto;
+      padding:24px;border:1px solid rgba(255,255,255,.7);border-radius:22px;
+      background:rgba(255,255,255,.98);box-shadow:var(--ui-shadow-lg);
+    }
+    .app-modal-panel{width:min(860px,100%);}
+    .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding-bottom:17px;margin-bottom:17px;border-bottom:1px solid var(--ui-line);}
+    .modal-head h2{font-size:23px;font-weight:770;letter-spacing:-.04em;color:var(--ui-ink);}
+    .modal-head p{margin-top:4px;font-size:11px;color:var(--ui-muted);}
+    .modal-eyebrow{margin-bottom:5px;color:var(--theme-primary);font-size:9px;font-weight:850;letter-spacing:.12em;text-transform:uppercase;}
+    .modal-close{width:38px;height:38px;border:1px solid var(--ui-line);border-radius:12px;background:#fff;color:#475467;font-size:21px;display:grid;place-items:center;}
+    .modal-close:hover{background:#f5f7fa;}
+    .version-item{padding:14px 0;gap:12px;border-color:#eef1f4;}
+    .version-dot{width:25px;height:25px;background:color-mix(in srgb,var(--theme-primary) 10%,white);color:var(--theme-primary);}
+    .version-item strong{font-size:12px}.version-item span{font-size:11px;color:var(--ui-muted);}
+    .theme-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+    .theme-option{padding:12px;border-radius:14px;border-color:var(--ui-line);font-size:11px;box-shadow:none;}
+    .theme-option:hover{transform:translateY(-1px);box-shadow:var(--ui-shadow-sm);}
+    .theme-option.active{background:color-mix(in srgb,var(--theme-primary) 7%,white);border-color:color-mix(in srgb,var(--theme-primary) 36%,white);}
+    .theme-swatch{width:31px;height:31px;border-radius:10px;}
+
+    /* Refresh control */
+    .auto-refresh-box{
+      position:absolute!important;right:12px!important;top:224px!important;
+      width:42px!important;max-width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;
+      padding:4px!important;border-radius:13px!important;opacity:.75!important;overflow:hidden!important;
+      background:#fff!important;border:1px solid var(--ui-line)!important;box-shadow:var(--ui-shadow-sm)!important;gap:8px!important;
+      transition:width .24s ease,max-width .24s ease,opacity .2s ease,box-shadow .2s ease!important;
+    }
+    .auto-refresh-box .auto-refresh-icon{width:32px!important;height:32px!important;min-width:32px!important;border-radius:10px!important;background:var(--ui-dark)!important;color:#fff!important;font-size:14px!important;box-shadow:none!important;}
+    .auto-refresh-box .auto-refresh-dot,.auto-refresh-box .auto-refresh-text{opacity:0!important;pointer-events:none!important;transition:opacity .18s ease!important;}
+    .auto-refresh-box:hover,.auto-refresh-box:focus-within{width:248px!important;max-width:248px!important;opacity:1!important;padding:4px 11px 4px 4px!important;box-shadow:var(--ui-shadow)!important;}
+    .auto-refresh-box:hover .auto-refresh-dot,.auto-refresh-box:hover .auto-refresh-text,.auto-refresh-box:focus-within .auto-refresh-dot,.auto-refresh-box:focus-within .auto-refresh-text{opacity:1!important;}
+    .auto-refresh-text{font-size:10px!important;color:#475467!important;font-weight:700!important;white-space:nowrap!important;}
+
+    /* Responsive */
+    @media(max-width:1180px){
+      .sidebar{width:80px;padding:10px;align-items:center;}
+      .sidebar .brand-text,.sidebar .side-label,.sidebar-main-nav::before,.sidebar-toggle .toggle-text,.sidebar-toggle .toggle-menu-icon{display:none!important;}
+      .sidebar .sidebar-brand{width:58px;height:58px;min-height:58px;padding:8px;justify-content:center;}
+      .sidebar .brand-photo-btn{width:40px;height:40px;}
+      .sidebar .side-btn{width:58px;height:46px;padding:0;justify-content:center;}
+      .content,.content.p-8{margin-left:112px!important;padding-left:24px!important;padding-right:24px!important;}
+      .dash-topbar{padding-left:26px;padding-right:26px;}
+    }
+    @media(max-width:900px){
+      .app-system-status{display:none;}
+      .app-shell-header{margin-bottom:14px;}
+      .dash-topbar{padding:25px 22px 72px;min-height:230px;}
+      .dash-title{font-size:31px;}
+      .dash-actions{justify-content:flex-start;width:100%;}
+      .dash-kpis{margin-left:10px;margin-right:10px;}
+      .page-hero{padding:22px!important;}
+    }
+    @media(max-width:700px){
+      body{padding-bottom:84px;}
+      .sidebar,.sidebar.collapsed{
+        left:10px;right:10px;top:auto;bottom:9px;width:auto;height:68px;padding:7px 8px;
+        border-radius:20px;display:flex;flex-direction:row;align-items:center;gap:4px;overflow-x:auto;overflow-y:hidden;
+        box-shadow:0 18px 45px rgba(16,24,40,.18);z-index:2000;
+      }
+      .sidebar-brand,.sidebar-toggle{display:none!important;}
+      .sidebar-nav,.sidebar-config-area{display:flex;flex-direction:row;gap:4px;margin:0;padding:0;border:0;width:auto;flex:none;}
+      .sidebar-main-nav{flex:1;width:auto;}
+      .sidebar-main-nav::before{display:none!important;}
+      .sidebar .side-btn,.sidebar.collapsed .side-btn{width:52px;height:52px;min-width:52px;border-radius:15px;padding:0;justify-content:center;}
+      .sidebar .side-btn.active::after{right:auto;bottom:4px;width:4px;height:4px;}
+      .content,.content.p-8,body.sidebar-collapsed .content{margin-left:0!important;padding:10px 12px 28px!important;}
+      .app-shell-header{top:0;margin:0 -2px 12px;padding:7px 2px;min-height:58px;}
+      .app-shell-mark{width:37px;height:37px;border-radius:12px;}
+      .app-shell-context h2{font-size:15px;}.app-shell-eyebrow{font-size:8px;}
+      .app-date-box{display:none;}.app-mobile-menu{display:none;}
+      .dash-topbar{min-height:250px;padding:23px 18px 77px;border-radius:21px;}
+      .dash-title{font-size:28px;}.dash-subtitle{font-size:11px;}
+      .dash-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+      .dash-select,.dash-outline-btn,.dash-version{width:100%;min-width:0;padding:0 9px;font-size:10px;}
+      .dash-kpis{margin:-53px 8px 20px;grid-template-columns:1fr 1fr!important;gap:9px!important;}
+      .dash-kpi{min-height:105px;padding:15px 13px;gap:9px;}
+      .kpi-icon{width:38px!important;height:38px!important;min-width:38px!important;}
+      .dash-kpi h2{font-size:18px;}.dash-kpi small{display:none;}
+      .card,.dash-card{padding:16px;border-radius:16px!important;}
+      .page-hero{padding:19px!important;border-radius:19px;}
+      .page-hero h1{font-size:25px!important;}
+      .theme-grid{grid-template-columns:1fr 1fr;}
+      .auto-refresh-box{display:none!important;}
+      thead th,tbody td{padding-left:10px!important;padding-right:10px!important;}
+    }
+    @media(max-width:430px){
+      .dash-actions{grid-template-columns:1fr;}
+      .dash-topbar{min-height:330px;}
+      .dash-kpis{grid-template-columns:1fr!important;}
+      .theme-grid{grid-template-columns:1fr;}
+    }
+    @media print{
+      .sidebar,.app-shell-header,.auto-refresh-box,.filter-panel button,#btnExportarPdfPerf{display:none!important;}
+      .content,.content.p-8{margin-left:0!important;padding:0!important;}
+      body{background:#fff!important;}
+      .card,.dash-card,.dash-kpi{box-shadow:none!important;border:1px solid #d0d5dd!important;}
+    }
+
+</style>
 </head>
 
 <body>
@@ -257,7 +657,7 @@
     <input id="brandPhotoInput" type="file" accept="image/*" class="hidden" onchange="salvarFotoPerfil(event)">
     <div class="brand-text">
       <strong id="sidebarUserName">Vendedor</strong>
-      <span>v2.0.4</span>
+      <span>v3.0.0</span>
     </div>
   </div>
 
@@ -266,17 +666,17 @@
   </button>
 
   <div class="sidebar-nav sidebar-main-nav">
-    <button id="navCRM" onclick="abrirDashboard()" class="side-btn active"><span class="side-ico">📊</span><span class="side-label">CRM</span></button>
-    <button id="navMetas" onclick="abrirMetas()" class="side-btn"><span class="side-ico">🎯</span><span class="side-label">Metas</span></button>
-    <button id="navPerf" onclick="abrirPerformance()" class="side-btn"><span class="side-ico">📈</span><span class="side-label">Performance</span></button>
-    <button id="navRisco" onclick="abrirRisco()" class="side-btn"><span class="side-ico">🚨</span><span class="side-label">Risco</span></button>
-    <button id="navAtiv" onclick="abrirAtividades()" class="side-btn"><span class="side-ico">📋</span><span class="side-label">Atividades</span></button>
-    <button id="navStatus" onclick="abrirStatus()" class="side-btn"><span class="side-ico">📦</span><span class="side-label">Status</span></button>
+    <button id="navCRM" onclick="abrirDashboard()" class="side-btn active"><span class="side-ico">▦</span><span class="side-label">CRM</span></button>
+    <button id="navMetas" onclick="abrirMetas()" class="side-btn"><span class="side-ico">◎</span><span class="side-label">Metas</span></button>
+    <button id="navPerf" onclick="abrirPerformance()" class="side-btn"><span class="side-ico">↗</span><span class="side-label">Performance</span></button>
+    <button id="navRisco" onclick="abrirRisco()" class="side-btn"><span class="side-ico">!</span><span class="side-label">Risco</span></button>
+    <button id="navAtiv" onclick="abrirAtividades()" class="side-btn"><span class="side-ico">≡</span><span class="side-label">Atividades</span></button>
+    <button id="navStatus" onclick="abrirStatus()" class="side-btn"><span class="side-ico">□</span><span class="side-label">Status</span></button>
 </div>
 
   <div class="sidebar-config-area">
-    <button id="navTemas" onclick="abrirTemas()" class="side-btn"><span class="side-ico">🎨</span><span class="side-label">Temas</span></button>
-    <button id="navConfig" onclick="abrirConfig()" class="side-btn"><span class="side-ico">⚙️</span><span class="side-label">Config</span></button>
+    <button id="navTemas" onclick="abrirTemas()" class="side-btn"><span class="side-ico">◇</span><span class="side-label">Temas</span></button>
+    <button id="navConfig" onclick="abrirConfig()" class="side-btn"><span class="side-ico">⚙</span><span class="side-label">Config</span></button>
   </div>
 </div>
 
@@ -293,85 +693,61 @@
   </div>
 </div>
 
-<div id="modalVersao" class="version-modal">
+<div id="modalVersao" class="version-modal" role="dialog" aria-modal="true" aria-labelledby="tituloModalVersao">
   <div class="version-box">
-    <div class="flex justify-between items-start gap-4 mb-5">
+    <div class="modal-head">
       <div>
-        <h2 class="text-2xl font-bold text-gray-800">Novidades da versão</h2>
-        <p class="text-gray-500 mt-1">JNG CRM • v2.0.4 • Build 2026.07.14</p>
+        <span class="modal-eyebrow">JNG CRM</span>
+        <h2 id="tituloModalVersao">Versão 3.0.0</h2>
+        <p>Build 2026.07.23 • Nova experiência</p>
       </div>
-      <button onclick="fecharModalVersao()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl font-bold">X</button>
+      <button type="button" onclick="fecharModalVersao()" class="modal-close" aria-label="Fechar">×</button>
     </div>
+    <div class="version-list">
+      <div class="version-item"><div class="version-dot">✓</div><div><strong>Experiência executiva</strong><span>Dashboard em camadas, indicadores destacados e leitura mais rápida das informações comerciais.</span></div></div>
+      <div class="version-item"><div class="version-dot">✓</div><div><strong>Clientes Perdidos restaurado</strong><span>O modal voltou a funcionar e respeita o período selecionado.</span></div></div>
+      <div class="version-item"><div class="version-dot">✓</div><div><strong>Interface completamente redesenhada</strong><span>Novo shell executivo, navegação flutuante, hierarquia visual e experiência responsiva.</span></div></div>
+      <div class="version-item"><div class="version-dot">✓</div><div><strong>Configuração mais segura</strong><span>Melhor leitura de links publicados e validação das colunas.</span></div></div>
+    </div>
+  </div>
+</div>
 
-
-    <div class="version-item">
-      <div class="version-dot">✓</div>
-      <div><strong>Metas e Performance restauradas</strong><br><span class="text-sm text-gray-500">As duas abas foram reintegradas ao CRM com seus filtros, gráficos, metas mensais e cálculos preservados.</span></div>
+<div id="modalPerdidos" class="app-modal hidden" role="dialog" aria-modal="true" aria-labelledby="tituloClientesPerdidos">
+  <div class="app-modal-panel">
+    <div class="modal-head">
+      <div>
+        <span class="modal-eyebrow">Análise de carteira</span>
+        <h2 id="tituloClientesPerdidos">Clientes Perdidos</h2>
+        <p>Compraram no mês anterior e ainda não compraram no período selecionado.</p>
+      </div>
+      <button type="button" onclick="fecharModal()" class="modal-close" aria-label="Fechar">×</button>
     </div>
-    <div class="version-item">
-      <div class="version-dot">✓</div>
-      <div><strong>Dashboard e cálculos corrigidos</strong><br><span class="text-sm text-gray-500">Corrigida a contabilização do desempenho mensal, atividades recentes e clientes em risco. A aba Carteira foi removida sem afetar as demais funcionalidades.</span></div>
-    </div>
-    <div class="version-item">
-      <div class="version-dot">✓</div>
-      <div><strong>Metas mensais por mês</strong><br><span class="text-sm text-gray-500">Novo filtro de mês na aba Metas, com valores independentes por ano e mês e sincronização com Performance e Dashboard.</span></div>
-    </div>
-
-    <div class="version-item">
-      <div class="version-dot">✓</div>
-      <div><strong>Fonte Inter aplicada</strong><br><span class="text-sm text-gray-500">Toda a tipografia do CRM foi ajustada para Inter, deixando letras e números mais limpos e suaves.</span></div>
-    </div>
-    <div class="version-item">
-      <div class="version-dot">✓</div>
-      <div><strong>Pedidos mensais em ondas</strong><br><span class="text-sm text-gray-500">O gráfico de quantidade de pedidos por mês agora usa linha suavizada para leitura de tendência.</span></div>
-    </div>
-    <div class="version-item">
-      <div class="version-dot">✓</div>
-      <div><strong>Metas editáveis no dashboard</strong><br><span class="text-sm text-gray-500">Meta de pedidos e meta de ticket médio agora podem ser alteradas diretamente no painel.</span></div>
-    </div>
-    <div class="version-item">
-      <div class="version-dot">✓</div>
-      <div><strong>Correção dos gráficos de pedidos e desempenho</strong><br><span class="text-sm text-gray-500">Gráfico de pedidos em ondas e indicadores do mês passam a recalcular corretamente após alteração das metas.</span></div>
-    </div>
-    <div class="version-item">
-      <div class="version-dot">✓</div>
-      <div><strong>Risco a partir de 10 dias</strong><br><span class="text-sm text-gray-500">Clientes com 10 dias ou mais sem compras também passam a aparecer no acompanhamento de risco.</span></div>
-    </div>
-    <div class="version-item">
-      <div class="version-dot">✓</div>
-      <div><strong>Temas mais completos</strong><br><span class="text-sm text-gray-500">As cores dos temas agora impactam mais áreas do CRM, incluindo fundo, cards, botões, menu e gráficos.</span></div>
-    </div>
-
-    <div class="version-item">
-      <div class="version-dot">✓</div>
-      <div><strong>Dashboard revisado</strong><br><span class="text-sm text-gray-500">Correção dos filtros do dashboard e melhor sincronização dos gráficos com ano, mês e dia selecionados.</span></div>
-    </div>
-
-    <div class="version-item">
-      <div class="version-dot">✓</div>
-      <div><strong>Faturamento em colunas</strong><br><span class="text-sm text-gray-500">O gráfico de faturamento mensal agora usa barras e aparece antes do gráfico de quantidade de pedidos.</span></div>
-    </div>
-    <div class="version-item">
-      <div class="version-dot">✓</div>
-      <div><strong>Clientes em risco ordenados</strong><br><span class="text-sm text-gray-500">A lista do dashboard agora prioriza os clientes com menos dias sem compra, em ordem crescente.</span></div>
-    </div>
-    <div class="version-item">
-      <div class="version-dot">✓</div>
-      <div><strong>Fonte mais limpa</strong><br><span class="text-sm text-gray-500">A tipografia foi suavizada com uma pilha moderna para melhor leitura no CRM.</span></div>
-    </div>
-    <div class="version-item">
-      <div class="version-dot">✓</div>
-      <div><strong>Mais opções de tema</strong><br><span class="text-sm text-gray-500">Novas variações de cores foram adicionadas para personalização visual do CRM.</span></div>
-    </div>
-    <div class="version-item">
-      <div class="version-dot">✓</div>
-      <div><strong>Revisão geral</strong><br><span class="text-sm text-gray-500">Ajustes de performance, centralização de ícones e correções sem remover funcionalidades existentes.</span></div>
+    <div class="table-shell">
+      <table class="w-full">
+        <thead><tr><th>Cliente</th><th>Última referência</th><th>Valor anterior</th></tr></thead>
+        <tbody id="clientesPerdidosTabela"></tbody>
+      </table>
     </div>
   </div>
 </div>
 
 
 <div class="content p-8">
+
+<header class="app-shell-header" aria-label="Cabeçalho do CRM">
+  <div class="app-shell-context">
+    <div class="app-shell-mark" aria-hidden="true">JNG</div>
+    <div class="min-w-0">
+      <div class="app-shell-eyebrow">Sales Intelligence</div>
+      <h2 id="appCurrentPage">Central Comercial</h2>
+    </div>
+  </div>
+  <div class="app-shell-actions">
+    <div class="app-system-status"><i aria-hidden="true"></i><span id="appBaseStatus">Workspace operacional</span></div>
+    <div class="app-date-box"><strong id="appCurrentDate">Hoje</strong><span id="appCurrentTime">--:--</span></div>
+  </div>
+</header>
+
 
 
 
@@ -392,15 +768,15 @@
       <select id="filtroAno" class="dash-select"><option value="Todos">Todos os Anos</option></select>
       <select id="filtroMes" class="dash-select"><option value="Todos">Todos os Meses</option><option value="0">Janeiro</option><option value="1">Fevereiro</option><option value="2">Março</option><option value="3">Abril</option><option value="4">Maio</option><option value="5">Junho</option><option value="6">Julho</option><option value="7">Agosto</option><option value="8">Setembro</option><option value="9">Outubro</option><option value="10">Novembro</option><option value="11">Dezembro</option></select>
       <button id="btnClientesPerdidos" class="dash-outline-btn">Clientes Perdidos</button>
-      <button onclick="abrirModalVersao()" class="dash-version" title="Ver novidades da versão">v2.0.4</button>
+      <button onclick="abrirModalVersao()" class="dash-version" title="Ver novidades da versão">v3.0.0</button>
     </div>
   </div>
 
   <div class="dash-kpis grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
-    <div class="dash-kpi"><span class="kpi-icon bg-blue-100 text-blue-600">🛒</span><div><p>Pedidos</p><h2 id="pedidos">0</h2><small>Total no período</small></div></div>
-    <div class="dash-kpi"><span class="kpi-icon bg-green-100 text-green-600">💵</span><div><p>Faturamento</p><h2 id="faturamento">R$ 0</h2><small>Total no período</small></div></div>
-    <div class="dash-kpi"><span class="kpi-icon bg-yellow-100 text-yellow-600">👥</span><div><p>Clientes</p><h2 id="clientes">0</h2><small>Ativos no período</small></div></div>
-    <div class="dash-kpi"><span class="kpi-icon bg-purple-100 text-purple-600">💳</span><div><p>Ticket Médio</p><h2 id="ticket">R$ 0</h2><small>Por pedido</small></div></div>
+    <div class="dash-kpi"><span class="kpi-icon bg-blue-100 text-blue-600">#</span><div><p>Pedidos</p><h2 id="pedidos">0</h2><small>Total no período</small></div></div>
+    <div class="dash-kpi"><span class="kpi-icon bg-green-100 text-green-600">R$</span><div><p>Faturamento</p><h2 id="faturamento">R$ 0</h2><small>Total no período</small></div></div>
+    <div class="dash-kpi"><span class="kpi-icon bg-yellow-100 text-yellow-600">C</span><div><p>Clientes</p><h2 id="clientes">0</h2><small>Ativos no período</small></div></div>
+    <div class="dash-kpi"><span class="kpi-icon bg-purple-100 text-purple-600">TM</span><div><p>Ticket Médio</p><h2 id="ticket">R$ 0</h2><small>Por pedido</small></div></div>
   </div>
 
   <div class="dash-layout grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
@@ -485,7 +861,7 @@
   <div class="card mb-10">
     <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
       <div>
-        <h2 class="text-2xl font-bold text-gray-700">🚨 Clientes em Risco</h2>
+        <h2 class="text-2xl font-bold text-gray-700">Clientes em Risco</h2>
         <p class="text-gray-500 mt-1">Clientes com histórico relevante que estão há muitos dias sem comprar.</p>
       </div>
 
@@ -790,7 +1166,7 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 mb-8">
       <div class="card">
         <p class="text-gray-500 mb-2">Total de Pedidos</p>
         <h2 id="statusTotalPedidos" class="text-3xl font-bold text-blue-600">0</h2>
@@ -1632,7 +2008,11 @@ async function carregarLiberacoes(){
   if(!crmConfigCompleta()){ dadosOriginais = []; return; }
   const response = await fetch(getUrlLiberacoes() + "&t=" + Date.now());
   const text = await response.text();
-  const json = JSON.parse(text.substring(47).slice(0,-2));
+  const inicio = text.indexOf("{");
+  const fim = text.lastIndexOf("}");
+  if(!response.ok) throw new Error(`Falha HTTP ${response.status || ""}`.trim());
+  if(inicio < 0 || fim < inicio) throw new Error("Resposta inválida da planilha");
+  const json = JSON.parse(text.slice(inicio, fim + 1));
 
   dadosOriginais = json.table.rows || [];
 }
@@ -2295,18 +2675,23 @@ function atualizarGraficos(meses, mesesPedidos){
 document.getElementById("btnClientesPerdidos").addEventListener("click",abrirModal);
 
 function abrirModal(){
-  document.getElementById("modalPerdidos").classList.remove("hidden");
-  document.getElementById("modalPerdidos").classList.add("flex");
+  const modal = document.getElementById("modalPerdidos");
+  if(!modal) return;
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
   gerarClientesPerdidos();
 }
 
 function fecharModal(){
-  document.getElementById("modalPerdidos").classList.remove("flex");
-  document.getElementById("modalPerdidos").classList.add("hidden");
+  const modal = document.getElementById("modalPerdidos");
+  if(!modal) return;
+  modal.classList.remove("flex");
+  modal.classList.add("hidden");
 }
 
 function gerarClientesPerdidos(){
   const tabela = document.getElementById("clientesPerdidosTabela");
+  if(!tabela) return;
   tabela.innerHTML = "";
 
   const anoSelecionado = document.getElementById("filtroAno").value;
@@ -2365,7 +2750,7 @@ function gerarClientesPerdidos(){
     if(!atual[cliente]){
       tabela.innerHTML += `
         <tr class="border-b">
-          <td class="py-4">${cliente}</td>
+          <td class="py-4 font-semibold">${escapeHTML(cliente)}</td>
           <td>${String(mesAnterior+1).padStart(2,"0")}/${anoAnterior}</td>
           <td class="font-bold text-red-500">${dinheiro(anterior[cliente])}</td>
         </tr>
@@ -3275,11 +3660,11 @@ document.getElementById("pesquisa").addEventListener("input",function(){
 inicializarSidebar();
 inicializarIdentidadeCRM();
 preencherTelaConfig();
-if(crmConfigCompleta()) carregar(); else mostrarPrimeiroAcessoConfig();
+if(crmConfigCompleta()) carregar().catch(erro=>{ console.error("Falha ao iniciar o CRM:",erro); setStatusAutoRefreshCRM?.("Erro ao carregar a planilha", "paused"); }); else mostrarPrimeiroAcessoConfig();
 
 // Atualização automática reativada no patch v1.9.4.
 
-/* ===== PATCH v2.0.4 - Risco sem WhatsApp + Atividades com ocultar ===== */
+/* ===== PATCH v3.0.0 - Risco sem WhatsApp + Atividades com ocultar ===== */
 
 function getAtividadesComerciais(){
   try{
@@ -3618,7 +4003,7 @@ function ordenarRisco(campo){
 }
 
 
-/* ===== PATCH v2.0.4 - Nome do vendedor na Sidebar ===== */
+/* ===== PATCH v3.0.0 - Nome do vendedor na Sidebar ===== */
 function atualizarNomeSidebar(){
   const campo = document.getElementById("nomeVendedorCRM");
   const el = document.getElementById("sidebarUserName");
@@ -3661,7 +4046,7 @@ document.addEventListener("DOMContentLoaded", atualizarNomeSidebar);
 setTimeout(atualizarNomeSidebar, 300);
 
 
-/* ===== PATCH v2.0.4 - Aba Status dos Pedidos ===== */
+/* ===== PATCH v3.0.0 - Aba Status dos Pedidos ===== */
 
 function getStatusPedidoRow(row){
   const integrador = getCelula(row, 0);
@@ -3781,7 +4166,7 @@ if(carregarOriginal_v190){
 
 
 
-/* ===== PATCH v2.0.4 - Aba Status sem travamento ===== */
+/* ===== PATCH v3.0.0 - Aba Status sem travamento ===== */
 
 const STATUS_CONFIG_PADRAO = {
   colunaIntegrador:"A",
@@ -4052,7 +4437,7 @@ function abrirStatus(){
 
 
 
-/* ===== HOTFIX v2.0.4 - Revisão geral, Status estável e otimização ===== */
+/* ===== HOTFIX v3.0.0 - Revisão geral, Status estável e otimização ===== */
 (function(){
   const PAINEIS_CRM = ["dashboardCRM","painelMetas","painelPerformance","painelConfig","painelRisco","painelAtividades","painelStatus"];
   const NAVS_CRM = ["navCRM","navMetas","navPerf","navRisco","navAtiv","navStatus","navTemas","navConfig"];
@@ -5276,9 +5661,9 @@ setTimeout(iniciarAutoRefreshCRM, 500);
 })();
 
 
-/* ===== PATCH v2.0.4 - Fonte Inter, pedidos em ondas, metas editáveis, temas e risco 10+ ===== */
+/* ===== PATCH v3.0.0 - Fonte Inter, pedidos em ondas, metas editáveis, temas e risco 10+ ===== */
 (function(){
-  const VERSAO_CRM_ATUAL = "v2.0.4";
+  const VERSAO_CRM_ATUAL = "v3.0.0";
   function setTxt(id, value){ const el = document.getElementById(id); if(el) el.textContent = value; }
   document.addEventListener("DOMContentLoaded", function(){
     document.querySelectorAll(".dash-version").forEach(el=>el.textContent = VERSAO_CRM_ATUAL);
@@ -5311,14 +5696,14 @@ setTimeout(iniciarAutoRefreshCRM, 500);
           .slice(0,5);
         riscoBox.innerHTML = lista.length ? lista.map(c=>`<div class="dash-list-row"><div><strong>${escapeHTML(c.nome)}</strong><br><span>Último pedido há ${c.dias} dias</span></div><em class="dash-tag ${c.dias>=60?"bg-red-100 text-red-700":c.dias>=45?"bg-orange-100 text-orange-700":"bg-yellow-100 text-yellow-700"}">${c.dias} dias</em></div>`).join("") : `<div class="dash-empty">Nenhum cliente crítico no momento.</div>`;
       }
-    }catch(e){ console.warn("Ajuste de risco v2.0.4:", e); }
+    }catch(e){ console.warn("Ajuste de risco v3.0.0:", e); }
   };
 })();
 
 
-/* ===== PATCH v2.0.4 - Correção definitiva: pedidos em ondas e desempenho após metas ===== */
+/* ===== PATCH v3.0.0 - Correção definitiva: pedidos em ondas e desempenho após metas ===== */
 (function(){
-  const VERSAO_CRM_ATUAL = "v2.0.4";
+  const VERSAO_CRM_ATUAL = "v3.0.0";
   const MESES_LABELS = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
 
   function el(id){ return document.getElementById(id); }
@@ -5483,7 +5868,7 @@ setTimeout(iniciarAutoRefreshCRM, 500);
         atividades = atividades.filter(a=>!a.oculto).sort((a,b)=>String(b.data||"").localeCompare(String(a.data||"")) || String(b.criadoEm||"").localeCompare(String(a.criadoEm||""))).slice(0,5);
         atividadesBox.innerHTML = atividades.length ? atividades.map(a=>`<div class="dash-list-row"><div><strong>${escapeHTML(a.tipo || "Atividade")} com ${escapeHTML(a.cliente || "cliente")}</strong><br><span>${escapeHTML((a.feedback || "").slice(0,54) || "Sem observação")}</span></div><em class="dash-tag bg-slate-100 text-slate-700">${escapeHTML(a.tipo || "-")}</em></div>`).join("") : `<div class="dash-empty">Nenhuma atividade recente.</div>`;
       }
-    }catch(e){ console.warn("Dashboard v2.0.4:", e); }
+    }catch(e){ console.warn("Dashboard v3.0.0:", e); }
   };
 
   function atualizarTudoDashboardV198(){
@@ -5518,7 +5903,7 @@ setTimeout(iniciarAutoRefreshCRM, 500);
 
 
 <script>
-/* ===== REPARO INTEGRAL v2.0.4 - preservação de abas, cálculos e navegação ===== */
+/* ===== REPARO INTEGRAL v3.0.0 - preservação de abas, cálculos e navegação ===== */
 (function(){
   const TODOS_PAINEIS = [
     "dashboardCRM","painelMetas","painelPerformance","painelRisco",
@@ -5544,7 +5929,7 @@ setTimeout(iniciarAutoRefreshCRM, 500);
       if(el) el.classList.toggle("active", id===navId);
     });
     const atualizador=document.getElementById("autoRefreshBox");
-    if(atualizador) atualizador.style.display = painelId==="dashboardCRM" ? "none" : "none";
+    if(atualizador) atualizador.style.display = painelId==="dashboardCRM" ? "flex" : "none";
   }
   window.mostrarPainelCRM=exibirPainelSeguro;
 
@@ -5645,14 +6030,199 @@ setTimeout(iniciarAutoRefreshCRM, 500);
 
   document.addEventListener("DOMContentLoaded",()=>{
     const box=document.getElementById("autoRefreshBox");
-    if(box) box.style.display="none";
+    if(box) box.style.display=configPronta()?"flex":"none";
     const versoes=document.querySelectorAll(".version-badge strong, #sidebarUserName + span, .version-box p");
     versoes.forEach(el=>{
       if(el && /v?\d+\.\d+\.\d+|Versão\s+\d+\.\d+\.\d+/i.test(el.textContent||"")){
-        el.textContent=(el.textContent||"").replace(/v?\d+\.\d+\.\d+/i,"v2.0.4").replace(/Versão\s+v/i,"Versão ");
+        el.textContent=(el.textContent||"").replace(/v?\d+\.\d+\.\d+/i,"v3.0.0").replace(/Versão\s+v/i,"Versão ");
       }
     });
   });
+})();
+</script>
+
+
+<script>
+/* ===== REPAROS FUNCIONAIS E ACESSIBILIDADE v3.0.0 ===== */
+(function(){
+  const originalExtrairSheetId = window.extrairSheetId;
+  window.extrairSheetId = function(valor){
+    const texto = String(valor || "").trim();
+    if(!texto) return "";
+    const publicado = texto.match(/\/spreadsheets\/d\/(e\/[A-Za-z0-9_-]+)/i);
+    if(publicado) return publicado[1];
+    const padrao = texto.match(/\/spreadsheets\/d\/([A-Za-z0-9_-]+)/i) || texto.match(/\/d\/([A-Za-z0-9_-]+)/i);
+    if(padrao) return padrao[1];
+    return typeof originalExtrairSheetId === "function" ? originalExtrairSheetId(texto) : texto.replace(/^\/+|\/+$/g,"");
+  };
+
+  window.extrairGidCRM = function(valor){
+    const texto = String(valor || "");
+    const match = texto.match(/[?&#]gid=(\d+)/i);
+    return match ? match[1] : "";
+  };
+
+  window.converterDataBR = function(valor){
+    if(valor instanceof Date) return new Date(valor.getTime());
+    const texto = String(valor || "").trim();
+    if(!texto) return new Date(NaN);
+    let m = texto.match(/^Date\((\d{4}),(\d{1,2}),(\d{1,2})/i);
+    if(m) return new Date(Number(m[1]),Number(m[2]),Number(m[3]));
+    m = texto.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if(m) return new Date(Number(m[3]),Number(m[2])-1,Number(m[1]));
+    m = texto.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if(m) return new Date(Number(m[1]),Number(m[2])-1,Number(m[3]));
+    const data = new Date(texto);
+    return Number.isNaN(data.getTime()) ? new Date(NaN) : data;
+  };
+
+  window.getCelula = function(row,index){
+    const celula = row?.c?.[index];
+    if(!celula) return "";
+    if(celula.f !== undefined && celula.f !== null && String(celula.f).trim() !== "") return celula.f;
+    return celula.v ?? "";
+  };
+
+  const salvarConfigOriginal = window.salvarConfigCRM;
+  if(typeof salvarConfigOriginal === "function"){
+    window.salvarConfigCRM = async function(){
+      const urlInput = document.getElementById("configSheetUrl");
+      const idInput = document.getElementById("configSheetId");
+      const gidInput = document.getElementById("configGid");
+      const url = urlInput?.value.trim() || "";
+      if(idInput && !idInput.value.trim()) idInput.value = window.extrairSheetId(url);
+      if(gidInput && !gidInput.value.trim()) gidInput.value = window.extrairGidCRM(url);
+      const colunas = ["configColCliente","configColData","configColValor"]
+        .map(id=>document.getElementById(id)?.value.trim().toUpperCase() || "");
+      if(colunas.some(col=>!/^[A-Z]{1,3}$/.test(col))){
+        alert("Use somente letras válidas nas colunas, por exemplo: A, B ou AA.");
+        return;
+      }
+      return salvarConfigOriginal.apply(this,arguments);
+    };
+  }
+
+  const modalPerdidos = document.getElementById("modalPerdidos");
+  const modalVersao = document.getElementById("modalVersao");
+  const modalTemas = document.getElementById("modalTemas");
+  [modalPerdidos,modalVersao,modalTemas].forEach(modal=>{
+    modal?.addEventListener("click",event=>{
+      if(event.target !== modal) return;
+      if(modal === modalPerdidos && typeof fecharModal === "function") fecharModal();
+      if(modal === modalVersao && typeof fecharModalVersao === "function") fecharModalVersao();
+      if(modal === modalTemas && typeof fecharTemas === "function") fecharTemas();
+    });
+  });
+  document.addEventListener("keydown",event=>{
+    if(event.key !== "Escape") return;
+    if(modalPerdidos && !modalPerdidos.classList.contains("hidden")) fecharModal?.();
+    if(modalVersao?.classList.contains("open")) fecharModalVersao?.();
+    if(modalTemas?.classList.contains("open")) fecharTemas?.();
+  });
+
+  const refreshBox = document.getElementById("autoRefreshBox");
+  if(refreshBox){
+    refreshBox.setAttribute("role","button");
+    refreshBox.setAttribute("tabindex","0");
+    refreshBox.setAttribute("aria-label","Atualizar dados agora");
+    const acionar = ()=>{ if(typeof atualizarDadosAutomatico === "function") atualizarDadosAutomatico(true); };
+    refreshBox.addEventListener("click",acionar);
+    refreshBox.addEventListener("keydown",event=>{ if(event.key === "Enter" || event.key === " "){ event.preventDefault(); acionar(); } });
+  }
+
+  document.querySelectorAll('input.uppercase').forEach(input=>{
+    input.addEventListener('input',()=>{ input.value=input.value.toUpperCase().replace(/[^A-Z]/g,'').slice(0,3); });
+  });
+
+  // Keep the correct updater visibility after every navigation call.
+  const nomes = ["abrirDashboard","abrirMetas","abrirPerformance","abrirRisco","abrirAtividades","abrirStatus","abrirConfig"];
+  nomes.forEach(nome=>{
+    const fn = window[nome];
+    if(typeof fn !== "function") return;
+    window[nome] = function(){
+      const retorno = fn.apply(this,arguments);
+      const box = document.getElementById("autoRefreshBox");
+      if(box) box.style.display = nome === "abrirDashboard" && (typeof crmConfigCompleta !== "function" || crmConfigCompleta()) ? "flex" : "none";
+      return retorno;
+    };
+  });
+
+  document.querySelectorAll('.version-badge strong,.dash-version,.brand-text span').forEach(el=>{
+    if(el.classList.contains('dash-version') || el.matches('.brand-text span')) el.textContent='v3.0.0';
+  });
+})();
+</script>
+
+
+<script id="crmVisualV3">
+(function(){
+  const svg = (paths, viewBox='0 0 24 24') => `<svg viewBox="${viewBox}" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+  const icons = {
+    dashboard: svg('<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>'),
+    target: svg('<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>'),
+    trend: svg('<path d="M3 17l6-6 4 4 8-9"/><path d="M15 6h6v6"/>'),
+    risk: svg('<path d="M10.3 3.4L2.7 17a2 2 0 001.7 3h15.2a2 2 0 001.7-3L13.7 3.4a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/>'),
+    activity: svg('<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>'),
+    status: svg('<path d="M21 8l-9 5-9-5 9-5 9 5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>'),
+    palette: svg('<path d="M12 3a9 9 0 100 18h1.5a2.5 2.5 0 000-5H12a2 2 0 010-4h5a4 4 0 004-4c0-2.8-4-5-9-5z"/><circle cx="7.5" cy="9" r=".7" fill="currentColor"/><circle cx="10" cy="6.5" r=".7" fill="currentColor"/><circle cx="14" cy="6.5" r=".7" fill="currentColor"/>'),
+    settings: svg('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.6v.2h-4V21a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 00.3-1.9A1.7 1.7 0 003 14H2.8v-4H3a1.7 1.7 0 001.6-1 1.7 1.7 0 00-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 009 4.6 1.7 1.7 0 0010 3V2.8h4V3a1.7 1.7 0 001 1.6 1.7 1.7 0 001.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 00-.3 1.9 1.7 1.7 0 001.6 1h.2v4H21a1.7 1.7 0 00-1.6 1z"/>'),
+    cart: svg('<circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M3 4h2l2.2 10.1a2 2 0 002 1.6h7.9a2 2 0 002-1.6L21 7H6"/>'),
+    money: svg('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h.01M17 15h.01"/><circle cx="12" cy="12" r="3"/>'),
+    users: svg('<path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.9M16 3.1a4 4 0 010 7.8"/>'),
+    receipt: svg('<path d="M6 2l2 1.5L10 2l2 1.5L14 2l2 1.5L18 2v20l-2-1.5L14 22l-2-1.5L10 22l-2-1.5L6 22V2z"/><path d="M9 8h6M9 12h6M9 16h4"/>'),
+    user: svg('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/>')
+  };
+
+  function applyIcons(){
+    const navMap={navCRM:'dashboard',navMetas:'target',navPerf:'trend',navRisco:'risk',navAtiv:'activity',navStatus:'status',navTemas:'palette',navConfig:'settings'};
+    Object.entries(navMap).forEach(([id,name])=>{const el=document.querySelector(`#${id} .side-ico`);if(el) el.innerHTML=icons[name];});
+    const metricMap={pedidos:'cart',faturamento:'money',clientes:'users',ticket:'receipt'};
+    Object.entries(metricMap).forEach(([id,name])=>{const metric=document.getElementById(id);const icon=metric?.closest('.dash-kpi')?.querySelector('.kpi-icon');if(icon) icon.innerHTML=icons[name];});
+    const profile=document.querySelector('#brandPhotoBtn span');if(profile) profile.innerHTML=icons.user;
+  }
+
+  const pages={
+    navCRM:'Visão geral',navMetas:'Metas comerciais',navPerf:'Performance',navRisco:'Clientes em risco',
+    navAtiv:'Atividades comerciais',navStatus:'Status dos pedidos',navTemas:'Personalização',navConfig:'Configuração da base'
+  };
+  function setPage(id){
+    const label=document.getElementById('appCurrentPage');
+    if(label && pages[id]) label.textContent=pages[id];
+  }
+  function wirePageNames(){
+    Object.keys(pages).forEach(id=>document.getElementById(id)?.addEventListener('click',()=>setPage(id)));
+  }
+  function decoratePanels(){
+    ['painelRisco','painelAtividades','painelStatus','painelMetas','painelPerformance','painelConfig'].forEach(id=>{
+      const panel=document.getElementById(id);
+      const head=panel?.querySelector(':scope > .flex.justify-between');
+      if(head) head.classList.add('page-hero');
+    });
+  }
+  function updateClock(){
+    const now=new Date();
+    const date=document.getElementById('appCurrentDate');
+    const time=document.getElementById('appCurrentTime');
+    if(date) date.textContent=new Intl.DateTimeFormat('pt-BR',{weekday:'short',day:'2-digit',month:'short'}).format(now).replace('.','');
+    if(time) time.textContent=new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit'}).format(now);
+  }
+  function setChartDefaults(){
+    if(!window.Chart) return;
+    Chart.defaults.font.family='Inter, Segoe UI, sans-serif';
+    Chart.defaults.font.size=11;
+    Chart.defaults.color='#667085';
+    Chart.defaults.borderColor='rgba(152,162,179,.16)';
+    Chart.defaults.plugins.legend.labels.usePointStyle=true;
+    Chart.defaults.plugins.legend.labels.boxWidth=7;
+    Chart.defaults.plugins.legend.labels.boxHeight=7;
+    Chart.defaults.plugins.legend.labels.padding=18;
+  }
+  function init(){
+    applyIcons();decoratePanels();wirePageNames();updateClock();setChartDefaults();
+    setInterval(updateClock,30000);
+    const active=document.querySelector('.side-btn.active');if(active?.id) setPage(active.id);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
 })();
 </script>
 
