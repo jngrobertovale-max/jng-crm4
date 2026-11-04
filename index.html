@@ -267,7 +267,7 @@
     <input id="brandPhotoInput" type="file" accept="image/*" class="hidden" onchange="salvarFotoPerfil(event)">
     <div class="brand-text">
       <strong id="sidebarUserName">Vendedor</strong>
-      <span>v2.0.6</span>
+      <span>v2.0.7</span>
     </div>
   </div>
 
@@ -308,12 +308,16 @@
     <div class="flex justify-between items-start gap-4 mb-5">
       <div>
         <h2 class="text-2xl font-bold text-gray-800">Novidades da versão</h2>
-        <p class="text-gray-500 mt-1">JNG CRM • v2.0.6 • Build 2026.11.04</p>
+        <p class="text-gray-500 mt-1">JNG CRM • v2.0.7 • Build 2026.11.04</p>
       </div>
       <button onclick="fecharModalVersao()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl font-bold">X</button>
     </div>
 
 
+    <div class="version-item">
+      <div class="version-dot">✓</div>
+      <div><strong>Comissão por cliente novo</strong><br><span class="text-sm text-gray-500">A aba Comissão lê a coluna G para saber se o cliente é novo (1,5% por boleto) ou antigo (0,5%). Coluna, texto e percentuais podem ser ajustados em Regras. O valor vendido no mês também aparece no gráfico.</span></div>
+    </div>
     <div class="version-item">
       <div class="version-dot">✓</div>
       <div><strong>Atualização a cada 30 segundos</strong><br><span class="text-sm text-gray-500">A atualização automática da planilha passou de 15 para 30 segundos. Um botão discreto no canto inferior direito (↻) atualiza na hora, em qualquer aba.</span></div>
@@ -410,7 +414,7 @@
       <select id="filtroAno" class="dash-select"><option value="Todos">Todos os Anos</option></select>
       <select id="filtroMes" class="dash-select"><option value="Todos">Todos os Meses</option><option value="0">Janeiro</option><option value="1">Fevereiro</option><option value="2">Março</option><option value="3">Abril</option><option value="4">Maio</option><option value="5">Junho</option><option value="6">Julho</option><option value="7">Agosto</option><option value="8">Setembro</option><option value="9">Outubro</option><option value="10">Novembro</option><option value="11">Dezembro</option></select>
       <button id="btnClientesPerdidos" class="dash-outline-btn">Clientes Perdidos</button>
-      <button onclick="abrirModalVersao()" class="dash-version" title="Ver novidades da versão">v2.0.6</button>
+      <button onclick="abrirModalVersao()" class="dash-version" title="Ver novidades da versão">v2.0.7</button>
     </div>
   </div>
 
@@ -751,7 +755,19 @@
         <input id="comCfgDataBase" class="border border-gray-300 rounded-xl px-4 py-3 bg-white uppercase" placeholder="Vazio = data do pedido">
       </div>
       <div class="filter-field">
-        <label for="comCfgPercentual">Comissão por boleto (%)</label>
+        <label for="comCfgColTipo">Coluna cliente novo/antigo</label>
+        <input id="comCfgColTipo" class="border border-gray-300 rounded-xl px-4 py-3 bg-white uppercase" placeholder="G">
+      </div>
+      <div class="filter-field">
+        <label for="comCfgTextoNovo">Texto que indica cliente novo</label>
+        <input id="comCfgTextoNovo" class="border border-gray-300 rounded-xl px-4 py-3 bg-white" placeholder="Novo" title="Pode informar mais de um, separados por vírgula. Ex.: Novo, Sim">
+      </div>
+      <div class="filter-field">
+        <label for="comCfgPercentualNovo">Comissão cliente novo (%)</label>
+        <input id="comCfgPercentualNovo" inputmode="decimal" class="border border-gray-300 rounded-xl px-4 py-3 bg-white" placeholder="1,5">
+      </div>
+      <div class="filter-field">
+        <label for="comCfgPercentual">Comissão cliente antigo (%)</label>
         <input id="comCfgPercentual" inputmode="decimal" class="border border-gray-300 rounded-xl px-4 py-3 bg-white" placeholder="0,5">
       </div>
       <div class="filter-field md:col-span-2">
@@ -765,8 +781,10 @@
 
     <div class="bg-gray-50 rounded-2xl p-5 mb-5 text-sm text-gray-600 leading-relaxed">
       <b>Como é calculado:</b> o valor do pedido é dividido pelo número de boletos da condição e cada boleto paga o percentual de comissão no mês em que vence.<br>
+      <b>Cliente novo x antigo:</b> se a coluna de tipo do cliente contém o texto de cliente novo (ex.: "Novo"), cada boleto paga o % de cliente novo (ex.: <b>1,5%</b>); caso contrário, o % de cliente antigo (ex.: <b>0,5%</b>).<br>
       Ex.: pedido de <b>R$ 10.000,00</b> em <b>15/09</b> com <b>30/60DDL</b> → 2 boletos de R$ 5.000,00 (venc. 15/10 e 14/11) → <b>R$ 25,00 em outubro</b> e <b>R$ 25,00 em novembro</b>.<br>
-      Condição vazia ou sem prazo em dias é tratada como <b>à vista</b> (1 boleto na data do pedido) e aparece no aviso para conferência.
+      Condição vazia ou sem prazo em dias é tratada como <b>à vista</b> (1 boleto na data do pedido) e aparece no aviso para conferência.<br>
+      Mesmo exemplo para cliente <b>novo</b> (1,5%): <b>R$ 75,00 em outubro</b> e <b>R$ 75,00 em novembro</b>.
     </div>
 
     <div class="flex gap-3 flex-wrap">
@@ -827,6 +845,7 @@
             <tr class="border-b text-left text-gray-500">
               <th class="pb-4">Pedido</th>
               <th class="pb-4">Cliente</th>
+              <th class="pb-4">Tipo</th>
               <th class="pb-4">Data do pedido</th>
               <th class="pb-4">Condição</th>
               <th class="pb-4 text-center">Boleto</th>
@@ -838,7 +857,7 @@
           <tbody id="comTabela"></tbody>
           <tfoot>
             <tr class="border-t-2 font-bold text-gray-800">
-              <td class="pt-4" colspan="6">Total</td>
+              <td class="pt-4" colspan="7">Total</td>
               <td class="pt-4 text-right" id="comTotalBoletos">R$ 0,00</td>
               <td class="pt-4 text-right text-green-600" id="comTotalComissao">R$ 0,00</td>
             </tr>
@@ -5280,7 +5299,7 @@ setTimeout(iniciarAutoRefreshCRM, 500);
 
 /* ===== PATCH v2.0.4 - Fonte Inter, pedidos em ondas, metas editáveis, temas e risco 10+ ===== */
 (function(){
-  const VERSAO_CRM_ATUAL = "v2.0.6";
+  const VERSAO_CRM_ATUAL = "v2.0.7";
   function setTxt(id, value){ const el = document.getElementById(id); if(el) el.textContent = value; }
   document.addEventListener("DOMContentLoaded", function(){
     document.querySelectorAll(".dash-version").forEach(el=>el.textContent = VERSAO_CRM_ATUAL);
@@ -5320,7 +5339,7 @@ setTimeout(iniciarAutoRefreshCRM, 500);
 
 /* ===== PATCH v2.0.4 - Correção definitiva: pedidos em ondas e desempenho após metas ===== */
 (function(){
-  const VERSAO_CRM_ATUAL = "v2.0.6";
+  const VERSAO_CRM_ATUAL = "v2.0.7";
   const MESES_LABELS = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
 
   function el(id){ return document.getElementById(id); }
@@ -5526,7 +5545,8 @@ setTimeout(iniciarAutoRefreshCRM, 500);
    (ou no mês seguinte, conforme a regra salva). */
 (function(){
   const CHAVE_CFG = "jng_crm_comissao_config";
-  const CFG_PADRAO = {colunaCondicao:"", colunaPedido:"", colunaDataBase:"", percentual:0.5, recebimento:"vencimento"};
+  const CFG_PADRAO = {colunaCondicao:"", colunaPedido:"", colunaDataBase:"", percentual:0.5, recebimento:"vencimento",
+    colunaTipoCliente:"G", textoClienteNovo:"Novo", percentualNovo:1.5};
   const MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
   const MESES_CURTOS = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
 
@@ -5546,6 +5566,20 @@ setTimeout(iniciarAutoRefreshCRM, 500);
   function fmtData(d){ return d ? `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}` : "-"; }
   function fmtPct(n){ return Number(n || 0).toLocaleString("pt-BR",{maximumFractionDigits:3}) + "%"; }
   function chaveMes(ano, mes){ return ano * 12 + mes; }
+  /* Cliente novo: a célula é igual a um dos textos configurados ou contém a palavra (ex.: "Novo", "Cliente novo"). */
+  function ehClienteNovo(texto){
+    const celula = normalizar(texto).trim();
+    if(!celula) return false;
+    const palavras = celula.split(/[^a-z0-9]+/).filter(Boolean);
+    return String(cfgComissao.textoClienteNovo || "Novo").split(",")
+      .map(t => normalizar(t).trim()).filter(Boolean)
+      .some(chave => celula === chave || (chave.includes(" ") ? celula.includes(chave) : palavras.includes(chave)));
+  }
+  function badgeTipo(p){
+    return p.novo
+      ? `<span class="bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold text-xs" title="${esc(p.tipoTexto)}">Novo • ${fmtPct(p.percentual)}</span>`
+      : `<span class="bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-bold text-xs" title="${esc(p.tipoTexto || "(vazio)")}">Antigo • ${fmtPct(p.percentual)}</span>`;
+  }
   function valorCompacto(v){
     v = Number(v || 0);
     if(v <= 0) return "—";
@@ -5596,7 +5630,9 @@ setTimeout(iniciarAutoRefreshCRM, 500);
     const chave = JSON.stringify(cfgComissao) + "|" + JSON.stringify(configCRM || {});
     if(cache.dados === linhas && cache.chave === chave && cache.resultado) return cache.resultado;
 
-    const pct = (parseFloat(cfgComissao.percentual) || 0) / 100;
+    const pctAntigo = (parseFloat(cfgComissao.percentual) || 0) / 100;
+    const pctNovo = (parseFloat(cfgComissao.percentualNovo) || 0) / 100;
+    const idxTipo = cfgComissao.colunaTipoCliente ? colunaParaIndice(cfgComissao.colunaTipoCliente) : -1;
     const idxCond = colunaParaIndice(cfgComissao.colunaCondicao);
     const idxPed = cfgComissao.colunaPedido ? colunaParaIndice(cfgComissao.colunaPedido) : -1;
     const pedidos = [];
@@ -5610,11 +5646,15 @@ setTimeout(iniciarAutoRefreshCRM, 500);
       const dataBase = (cfgComissao.colunaDataBase && celulaData(row, cfgComissao.colunaDataBase)) || dataPedido;
       const cond = lerCondicao(getCelula(row, idxCond));
       const qtd = cond.dias.length;
+      const tipoTexto = idxTipo >= 0 ? String(getCelula(row, idxTipo) || "").trim() : "";
+      const novo = ehClienteNovo(tipoTexto);
+      const pct = novo ? pctNovo : pctAntigo;
       const pedido = {
         numero: idxPed >= 0 ? String(getCelula(row, idxPed) || "").trim() : "",
         linha: i + 2,
         cliente: String(getCliente(row) || "").trim() || "-",
         dataPedido, valor, cond,
+        novo, tipoTexto, percentual: pct * 100,
         comissao: valor * pct
       };
       pedidos.push(pedido);
@@ -5770,13 +5810,14 @@ setTimeout(iniciarAutoRefreshCRM, 500);
     setTxt("comTotalBoletos", dinheiro(totalBoletos));
     setTxt("comTotalComissao", dinheiro(totalComissao));
     if(!lista.length){
-      tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-gray-400">Nenhum boleto com comissão neste mês.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="9" class="py-8 text-center text-gray-400">Nenhum boleto com comissão neste mês.</td></tr>`;
       return;
     }
     tbody.innerHTML = lista.map(b => `
       <tr class="border-b table-hover">
         <td class="py-3 font-bold text-blue-600">${esc(b.pedido.numero || "Linha " + b.pedido.linha)}</td>
         <td class="py-3 font-semibold">${esc(b.pedido.cliente)}</td>
+        <td class="py-3">${badgeTipo(b.pedido)}</td>
         <td class="py-3">${fmtData(b.pedido.dataPedido)}</td>
         <td class="py-3"><span class="${b.pedido.cond.ok ? "bg-slate-100 text-slate-700" : "bg-orange-100 text-orange-700"} px-3 py-1 rounded-full font-bold text-xs" title="${esc(b.pedido.cond.original)}">${esc(b.pedido.cond.rotulo)}</span></td>
         <td class="py-3 text-center">${b.numero}/${b.total}</td>
@@ -5828,11 +5869,13 @@ setTimeout(iniciarAutoRefreshCRM, 500);
 
     setTxt("comKpiMesLabel", `A receber em ${nomeMes}`);
     setTxt("comKpiMes", dinheiro(doMes.reduce((s, b) => s + b.comissao, 0)));
-    setTxt("comKpiMesInfo", `${doMes.length} boleto${doMes.length === 1 ? "" : "s"} de ${pedidosNoMes.size} pedido${pedidosNoMes.size === 1 ? "" : "s"}`);
+    const novosNoMes = [...pedidosNoMes].filter(p => p.novo).length;
+    setTxt("comKpiMesInfo", `${doMes.length} boleto${doMes.length === 1 ? "" : "s"} de ${pedidosNoMes.size} pedido${pedidosNoMes.size === 1 ? "" : "s"} • ${novosNoMes} de cliente novo`);
     setTxt("comKpiGeradaLabel", `Gerada em ${nomeMes}`);
     setTxt("comKpiGerada", dinheiro(geradosNoMes.reduce((s, p) => s + p.comissao, 0)));
     const vendidoNoMes = geradosNoMes.reduce((s, p) => s + p.valor, 0);
-    setTxt("comKpiGeradaInfo", `Vendido ${dinheiro(vendidoNoMes)} • ${geradosNoMes.length} pedido${geradosNoMes.length === 1 ? "" : "s"}`);
+    const novosGerados = geradosNoMes.filter(p => p.novo).length;
+    setTxt("comKpiGeradaInfo", `Vendido ${dinheiro(vendidoNoMes)} • ${geradosNoMes.length} pedido${geradosNoMes.length === 1 ? "" : "s"} (${novosGerados} novo${novosGerados === 1 ? "" : "s"})`);
     setTxt("comKpiFuturoLabel", `Previsto após ${nomeMes}`);
     setTxt("comKpiFuturo", dinheiro(futuro));
     setTxt("comKpiAnoLabel", `Total em ${ano}`);
@@ -5858,6 +5901,9 @@ setTimeout(iniciarAutoRefreshCRM, 500);
     el("comCfgPedido").value = cfgComissao.colunaPedido || "";
     el("comCfgDataBase").value = cfgComissao.colunaDataBase || "";
     el("comCfgPercentual").value = String(cfgComissao.percentual ?? 0.5).replace(".", ",");
+    el("comCfgPercentualNovo").value = String(cfgComissao.percentualNovo ?? 1.5).replace(".", ",");
+    el("comCfgColTipo").value = cfgComissao.colunaTipoCliente || "";
+    el("comCfgTextoNovo").value = cfgComissao.textoClienteNovo || "Novo";
     el("comCfgRecebimento").value = cfgComissao.recebimento || "vencimento";
     el("comCfgCancelar").classList.toggle("hidden", !cfgPronta());
     el("comConfigCard").classList.remove("hidden");
@@ -5875,12 +5921,17 @@ setTimeout(iniciarAutoRefreshCRM, 500);
     const colunaCondicao = coluna(el("comCfgCondicao").value);
     const percentual = parseFloat(String(el("comCfgPercentual").value || "").replace(",", "."));
     if(!colunaCondicao){ alert("Informe a coluna da condição de pagamento (ex.: H)."); return; }
-    if(!(percentual > 0) || percentual > 100){ alert("Informe um percentual de comissão válido (ex.: 0,5)."); return; }
+    const percentualNovo = parseFloat(String(el("comCfgPercentualNovo").value || "").replace(",", "."));
+    if(!(percentual > 0) || percentual > 100){ alert("Informe um percentual válido para cliente antigo (ex.: 0,5)."); return; }
+    if(!(percentualNovo > 0) || percentualNovo > 100){ alert("Informe um percentual válido para cliente novo (ex.: 1,5)."); return; }
     cfgComissao = {
       colunaCondicao,
       colunaPedido: coluna(el("comCfgPedido").value),
       colunaDataBase: coluna(el("comCfgDataBase").value),
       percentual,
+      percentualNovo,
+      colunaTipoCliente: coluna(el("comCfgColTipo").value),
+      textoClienteNovo: String(el("comCfgTextoNovo").value || "").trim() || "Novo",
       recebimento: el("comCfgRecebimento").value === "mesSeguinte" ? "mesSeguinte" : "vencimento"
     };
     localStorage.setItem(CHAVE_CFG, JSON.stringify(cfgComissao));
@@ -5896,12 +5947,13 @@ setTimeout(iniciarAutoRefreshCRM, 500);
     const lista = boletosDoMes(res, ano, mes);
     const num = n => Number(n || 0).toFixed(2).replace(".", ",");
     const cel = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
-    const linhas = [["Pedido","Cliente","Data do pedido","Condição","Boleto","Vencimento","Valor do boleto","Comissão"].map(cel).join(";")];
+    const linhas = [["Pedido","Cliente","Tipo","% comissão","Data do pedido","Condição","Boleto","Vencimento","Valor do boleto","Comissão"].map(cel).join(";")];
     lista.forEach(b => linhas.push([
-      b.pedido.numero || "Linha " + b.pedido.linha, b.pedido.cliente, fmtData(b.pedido.dataPedido),
+      b.pedido.numero || "Linha " + b.pedido.linha, b.pedido.cliente, b.pedido.novo ? "Novo" : "Antigo",
+      num(b.pedido.percentual).replace(/,?0+$/, "") + "%", fmtData(b.pedido.dataPedido),
       b.pedido.cond.rotulo, `${b.numero}/${b.total}`, fmtData(b.vencimento), num(b.valor), num(b.comissao)
     ].map(cel).join(";")));
-    linhas.push(["Total","","","","","", num(lista.reduce((s,b)=>s+b.valor,0)), num(lista.reduce((s,b)=>s+b.comissao,0))].map(cel).join(";"));
+    linhas.push(["Total","","","","","","","", num(lista.reduce((s,b)=>s+b.valor,0)), num(lista.reduce((s,b)=>s+b.comissao,0))].map(cel).join(";"));
     const blob = new Blob(["﻿" + linhas.join("\r\n")], {type:"text/csv;charset=utf-8"});
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
@@ -6051,7 +6103,7 @@ setTimeout(iniciarAutoRefreshCRM, 500);
     const versoes=document.querySelectorAll(".version-badge strong, #sidebarUserName + span, .version-box p");
     versoes.forEach(el=>{
       if(el && /v?\d+\.\d+\.\d+|Versão\s+\d+\.\d+\.\d+/i.test(el.textContent||"")){
-        el.textContent=(el.textContent||"").replace(/v?\d+\.\d+\.\d+/i,"v2.0.6").replace(/Versão\s+v/i,"Versão ");
+        el.textContent=(el.textContent||"").replace(/v?\d+\.\d+\.\d+/i,"v2.0.7").replace(/Versão\s+v/i,"Versão ");
       }
     });
   });
